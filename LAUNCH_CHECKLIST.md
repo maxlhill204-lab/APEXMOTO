@@ -7,7 +7,8 @@ Do not accept real payment until every required item has real evidence.
 - [x] Use the supplied APEX MOTO name and logo.
 - [x] Add the supplied email, Instagram, and Facebook links.
 - [x] Set Newport / Melbourne pickup without publishing a private address.
-- [ ] Choose the final domain and set `NEXT_PUBLIC_SITE_URL` to its HTTPS origin.
+- [x] Use `https://apexmoto.vercel.app` as the current canonical HTTPS production origin.
+- [ ] Attach a custom domain later if desired, then update `NEXT_PUBLIC_SITE_URL` and redeploy.
 
 ## Products and stock
 
@@ -53,9 +54,10 @@ Do not accept real payment until every required item has real evidence.
 
 ## Deployment and final customer journey
 
-- [ ] Run `npm run verify` with no failures.
-- [ ] Push to GitHub without `.env.local` or credentials.
-- [ ] Deploy to Vercel, add environment variables, attach the final domain, and redeploy with the final site URL.
+- [x] Run `npm run verify` with no failures.
+- [x] Push to GitHub without `.env.local` or credentials.
+- [x] Deploy GitHub `main` to Vercel production at `https://apexmoto.vercel.app`.
+- [ ] Add the fresh Stripe server credential and webhook secret through protected Vercel environment settings, then redeploy.
 - [ ] Test 320, 375, 390, 430, 768, 1024, and 1440 pixel layouts on the deployed site.
 - [ ] Test on a real iPhone/Safari plus current Chrome, Edge, and Firefox.
 - [ ] Open the black-helmet link from a Marketplace message and confirm price, size L, pickup, goggles, and add-to-cart are obvious.

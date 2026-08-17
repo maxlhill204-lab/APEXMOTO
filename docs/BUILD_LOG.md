@@ -125,3 +125,11 @@ Evidence is added only after a real command or browser check completes. Credenti
 - `npm audit --omit=dev` — PASS; 0 known production dependency vulnerabilities.
 - Browser check at 1280 × 720 — PASS: header logo is constrained to 64 × 64, the hero heading ends before the product visual, the new goggle image is loaded, and the cart uses the “Checkout” label without horizontal overflow.
 - Missing-size interaction — PASS: after hydration, clicking Add to cart with no size leaves the cart count unchanged and displays `Please choose size.` in an `aria-invalid` animated option group.
+
+### GitHub and Vercel production evidence
+
+- Connected the existing local source to the owner-created public GitHub repository `maxlhill204-lab/APEXMOTO`; added the previously omitted `.gitignore` and `.env.example` so generated files and credentials stay out of later uploads.
+- Published the update through GitHub pull request #1. Vercel preview checks passed, the pull request was merged to `main`, and production commit `4c6ca166` received a successful Vercel deployment status.
+- Verified the public production alias `https://apexmoto.vercel.app` returns HTTP 200, includes the updated header markup, and emits `https://apexmoto.vercel.app` as its canonical origin instead of localhost.
+- Sent one bounded production checkout-start request using an in-stock black Large helmet and pickup. The server returned the expected controlled HTTP 503 with no Checkout URL because `STRIPE_SECRET_KEY` is not configured in Vercel. No payment or paid order was created.
+- The exposed credential was not used locally, in GitHub, or in Vercel. Production checkout remains `AUTH_REQUIRED` until the owner rotates that credential and stores a fresh replacement through Vercel’s protected environment settings.
