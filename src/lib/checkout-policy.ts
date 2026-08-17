@@ -52,12 +52,5 @@ export function validateCheckoutRequest(
     return { allowed: false, code: shipping.code, message: shipping.message };
   }
 
-  if (resolved.some((item) => !item.variant.stripePriceId?.trim())) {
-    return {
-      allowed: false,
-      code: "PRICE_NOT_CONFIGURED",
-      message: "Online payment is being connected. Please contact APEX MOTO to order now.",
-    };
-  }
   return { allowed: true, items: resolved, shipping };
 }

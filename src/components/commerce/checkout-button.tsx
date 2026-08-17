@@ -41,7 +41,7 @@ export function CheckoutButton({
   return (
     <div className="checkout-action">
       <button className={className} type="button" onClick={beginCheckout} disabled={!quantity || disabled || status === "loading"}>
-        {status === "loading" ? "Preparing secure checkout…" : "Continue to payment"}
+        {status === "loading" ? "Preparing secure checkout…" : "Checkout"}
       </button>
       {message ? <p className="form-message form-message--error" role="alert">{message}</p> : null}
     </div>

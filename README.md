@@ -41,12 +41,12 @@ This runs lint, TypeScript, tests, the production build, and the production-cont
 ## Important files
 
 - `src/config/site.ts` — APEX MOTO identity, contact links, pickup, shipping regions, goggle shipping, and policy switches
-- `src/data/products.ts` — products, prices, photos, options, exact variants, stock, bundle contents, and optional Stripe Price IDs
+- `src/data/products.ts` — products, server-owned prices, photos, options, exact variants, stock, and bundle contents
 - `src/config/size-guide.ts` — verified product-specific centimetre charts
 - `src/config/navigation.ts` — desktop and mobile navigation
 - `src/lib/products.ts` — catalogue validation and product calculations
 - `src/lib/shipping.ts` — deterministic pickup, goggle-only, helmet-region, and quote-required rules
-- `src/lib/checkout-policy.ts` — origin, business scope, item, stock, delivery, and Price ID checks
+- `src/lib/checkout-policy.ts` — origin, business scope, item, stock, and delivery checks
 - `src/app/api/checkout/route.ts` — server-owned Stripe Checkout creation
 - `src/app/api/stripe/webhook/route.ts` — Stripe signature verification; no inventory mutation in phase one
 - `LAUNCH_CHECKLIST.md` — the remaining real-world launch gates
@@ -98,7 +98,7 @@ In `src/data/products.ts`, change `price` in whole cents and `stock` on the exac
 { id: "black-l", options: { colour: "matte-black", size: "L" }, stock: 1 }
 ```
 
-If Stripe is enabled, update the matching Stripe Price whenever the catalogue price changes. Bundle combinations use the same physical stock and must be reconciled with component stock manually.
+Stripe Checkout derives its line-item amount from the validated server catalogue, so changing this field changes the next Checkout Session after deployment. Bundle combinations use the same physical stock and must be reconciled with component stock manually.
 
 ## Change colours or sizes
 
@@ -130,9 +130,8 @@ The cart chooses one method before checkout. The server recalculates it from cat
 
 Start in Stripe test mode.
 
-1. Create a one-time Stripe Price for every sellable variant strategy.
-2. Copy each `price_...` ID into the matching variant’s `stripePriceId` in `src/data/products.ts`.
-3. Put credentials in `.env.local`, never in source:
+1. Use a Stripe test-mode server credential first. A restricted key with only the required Checkout permissions is preferred where supported.
+2. Put credentials in `.env.local`, never in source:
 
    ```text
    STRIPE_SECRET_KEY=...
@@ -140,16 +139,16 @@ Start in Stripe test mode.
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    ```
 
-4. Forward test webhooks locally:
+3. Forward test webhooks locally:
 
    ```bash
    stripe listen --forward-to localhost:3000/api/stripe/webhook
    ```
 
-5. Put the printed test webhook secret in `.env.local` and restart the development server.
-6. Test pickup, each exact delivery region, a quote-only region, an out-of-stock variant, cancelled checkout, successful payment, invalid signatures, and direct navigation to `/order-success`.
+4. Put the printed test webhook secret in `.env.local` and restart the development server.
+5. Test pickup, each exact delivery region, a quote-only region, an out-of-stock variant, cancelled checkout, successful payment, invalid signatures, and direct navigation to `/order-success`.
 
-Checkout requires same-origin requests, the configured `businessId`, valid catalogue items, available stock, a server-known fulfilment method, server-known delivery price, complete Stripe Price IDs, and an idempotency key. Browser prices are ignored.
+Checkout requires same-origin requests, the configured `businessId`, valid catalogue items, available stock, a server-known fulfilment method, a server-known delivery price, and an idempotency key. Product and shipping amounts are derived on the server; browser prices are ignored.
 
 Stripe redirects do not change stock. A signature-verified webhook is payment evidence, but phase one still requires manual stock reconciliation.
 
@@ -194,7 +193,7 @@ Restrict Vercel’s GitHub access to the intended repository, protect the produc
 
 ## Troubleshooting
 
-- **Online payment is being connected:** add Stripe credentials and a Price ID to each sellable variant.
+- **Online payment is being connected:** rotate any exposed key, then add a fresh Stripe server credential through protected local and Vercel environment settings.
 - **A size or colour is disabled:** its exact variant stock is `0`, or no matching combination exists.
 - **A catalogue edit fails the build:** read the validator error for duplicate IDs/slugs/combinations, invalid prices or stock, or incomplete verified certification.
 - **A regional customer cannot pay:** regional Queensland and Western Australia intentionally require an exact address quote.

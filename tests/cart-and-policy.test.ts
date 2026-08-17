@@ -92,12 +92,16 @@ describe("checkout policy", () => {
     expect(result).toMatchObject({ allowed: false, code: "BUSINESS_SCOPE_DENIED" });
   });
 
-  it("does not accept browser prices and refuses checkout without Stripe Price IDs", () => {
+  it("ignores browser prices and resolves the server-owned catalogue price", () => {
     const result = validateCheckoutRequest(
       { businessId: siteConfig.businessId, items: [{ ...TEST_CART_ITEM, price: 1 }], shippingMethodId: "pickup" },
       "https://store.example",
       "https://store.example",
     );
-    expect(result).toMatchObject({ allowed: false, code: "PRICE_NOT_CONFIGURED" });
+    expect(result).toMatchObject({
+      allowed: true,
+      items: [{ productId: "helmet-matte-black", lineTotal: 12495 }],
+      shipping: { amount: 0, pickup: true },
+    });
   });
 });

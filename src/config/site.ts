@@ -72,7 +72,9 @@ export const getSiteUrl = () => {
       // Fall through to the safe local development origin.
     }
   }
-  return "http://localhost:3000";
+  return process.env.NODE_ENV === "production"
+    ? "https://apexmoto.vercel.app"
+    : "http://localhost:3000";
 };
 
 export const formatPrice = (priceInCents: number) =>

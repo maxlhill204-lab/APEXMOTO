@@ -1,5 +1,6 @@
 import { getSiteUrl, siteConfig } from "@/config/site";
 import { validateCheckoutRequest } from "@/lib/checkout-policy";
+import { getVariantLabel } from "@/lib/products";
 import Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -44,7 +45,19 @@ export async function POST(request: Request) {
       {
         mode: "payment",
         line_items: policy.items.map((item) => ({
-          price: item.variant.stripePriceId!,
+          price_data: {
+            currency: "aud",
+            unit_amount: item.product.price,
+            product_data: {
+              name: item.product.name,
+              description: getVariantLabel(item.product, item.variant),
+              metadata: {
+                businessId: siteConfig.businessId,
+                productId: item.product.id,
+                variantId: item.variant.id,
+              },
+            },
+          },
           quantity: item.quantity,
         })),
         billing_address_collection: "auto",
@@ -63,6 +76,7 @@ export async function POST(request: Request) {
               ],
             }),
         customer_creation: "always",
+        integration_identifier: "apexmoto_kzqtrvpm",
         allow_promotion_codes: true,
         success_url: `${siteUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${siteUrl}/cart?checkout=cancelled`,

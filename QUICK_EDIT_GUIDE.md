@@ -3,7 +3,7 @@
 ## Change a price
 
 File: `src/data/products.ts`  
-Field: `price` in cents. Example: `12495` = $124.95 AUD. Update the matching Stripe Price at the same time.
+Field: `price` in cents. Example: `12495` = $124.95 AUD. Stripe Checkout derives the amount from this validated server catalogue.
 
 ## Change stock
 

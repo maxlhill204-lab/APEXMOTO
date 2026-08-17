@@ -19,7 +19,7 @@ const whiteHelmetStock: Record<string, number> = { S: 0, M: 1, L: 0, XL: 0, XXL:
  * OWNER PRODUCT EDITING AREA
  *
  * Prices use cents. Stock is set on the exact colour/size combination.
- * Stripe Price IDs remain absent until matching Stripe test-mode prices exist.
+ * Checkout prices are derived from this server-owned catalogue.
  */
 export const products: Product[] = [
   {
@@ -38,8 +38,8 @@ export const products: Product[] = [
       {
         src: "/products/orz-rally-helmet-black/side.png",
         alt: "Matte black ORZ rally motocross helmet viewed from the side",
-        width: 458,
-        height: 447,
+        width: 939,
+        height: 831,
         colour: "Matte Black",
       },
       {
@@ -90,8 +90,8 @@ export const products: Product[] = [
       {
         src: "/products/orz-rally-helmet-white/side.png",
         alt: "Gloss white ORZ rally motocross helmet viewed from the side",
-        width: 449,
-        height: 433,
+        width: 931,
+        height: 806,
         colour: "Gloss White",
       },
     ],
@@ -135,22 +135,22 @@ export const products: Product[] = [
       {
         src: "/products/orz-mx-goggles/black-gold.png",
         alt: "ORZ motocross goggles with a black frame and gold mirrored lens",
-        width: 445,
-        height: 313,
+        width: 951,
+        height: 672,
         colour: "Black / Gold",
       },
       {
         src: "/products/orz-mx-goggles/red-gold.png",
         alt: "ORZ motocross goggles with a red frame and gold mirrored lens",
-        width: 439,
-        height: 314,
+        width: 951,
+        height: 677,
         colour: "Red / Gold",
       },
       {
         src: "/products/orz-mx-goggles/grey-ice.png",
         alt: "ORZ motocross goggles with a grey frame and ice mirrored lens",
-        width: 444,
-        height: 321,
+        width: 953,
+        height: 675,
         colour: "Grey / Ice",
       },
     ],
@@ -179,15 +179,15 @@ export const products: Product[] = [
       {
         src: "/products/orz-rally-helmet-black/side.png",
         alt: "Matte black ORZ helmet included in the helmet and goggles bundle",
-        width: 458,
-        height: 447,
+        width: 939,
+        height: 831,
         colour: "Matte Black",
       },
       {
         src: "/products/orz-mx-goggles/black-gold.png",
         alt: "Black and gold ORZ goggles available in the bundle",
-        width: 445,
-        height: 313,
+        width: 951,
+        height: 672,
         colour: "Black / Gold",
       },
       {
