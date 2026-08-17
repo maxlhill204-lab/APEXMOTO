@@ -171,6 +171,11 @@ Copy `.env.example` to `.env.local`. `.env*` is ignored except `.env.example`.
 
 ## Deploy with GitHub and Vercel
 
+Current production:
+
+- GitHub: `https://github.com/maxlhill204-lab/APEXMOTO`
+- Vercel: `https://apexmoto.vercel.app`
+
 1. Finish `LAUNCH_CHECKLIST.md` and run `npm run verify`.
 2. Push the repository to GitHub without `.env.local` or any credential.
 3. In Vercel, choose **Add New → Project**, import the repository, and keep the detected Next.js settings.
