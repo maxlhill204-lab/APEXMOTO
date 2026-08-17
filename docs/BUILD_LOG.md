@@ -1,0 +1,101 @@
+# Build log
+
+Evidence is added only after a real command or browser check completes. Credentials and provider payloads must never be recorded here.
+
+## 2026-08-16 — implementation started
+
+- Confirmed the workspace contained only a disposable starter and no business, customer, order, lead, revenue, or integration data.
+- Confirmed the required repository status documents were absent and created the initial plan/status records.
+- Replaced the temporary starter runtime definition with the requested production Next.js foundation. Verification remains pending.
+
+## 2026-08-16 — implementation completed
+
+### Delivered
+
+- Built the responsive homepage, desktop/mobile navigation, search drawer, category journey, popular products, genuine bundle calculation, trust, sizing, and final conversion sections.
+- Built catalogue validation, exact variant inventory, product metadata, product galleries, explicit option selection, out-of-stock disabling, low-stock evidence, bundle combinations, related-product cross-sells, and neutral certification handling.
+- Built a device-local non-sensitive cart, add confirmation drawer, restored-cart display, stock-bounded quantities, helmet-to-goggles upsell, empty cart, cart page, and checkout fallback.
+- Built deterministic checkout policy checks for origin, `businessId`, item count, products, variants, stock, Stripe Price IDs, and idempotency; browser-supplied prices are ignored.
+- Built Stripe Checkout session creation and signature-verified webhook handling. No provider check was attempted because credentials are absent; status remains `NOT_CONFIGURED` and no inventory mutation is claimed.
+- Built shipping, size guide, returns, helmet information, FAQ, contact, privacy, terms, verified order status, 404, runtime error, robots, sitemap, manifest, structured data, and social metadata.
+- Added an original RIDELINE social preview asset at `public/og.png`; it is a brand graphic, not product photography.
+- Added the owner README, launch checklist, quick-edit guide, product-photo guide, architecture, security, and data-model documentation.
+
+### Automated evidence
+
+- `npm run lint` — PASS.
+- `npm run typecheck` — PASS.
+- `npm run test` — PASS, 2 files and 13 tests.
+- `npm run build` — PASS with Next.js 16.3.1; 24 static/dynamic route entries generated.
+- `npm run audit:fake-data` — PASS; no forbidden fake claims, rating data, test-fixture names in production source, console logging, or key-like patterns.
+- `npm audit` and `npm audit --omit=dev` — PASS after non-breaking dependency updates; 0 known vulnerabilities reported.
+- Production HTTP sweep — PASS for home, shop, five product pages, cart, size guide, shipping, returns, safety, FAQ, contact, privacy, terms, order status, robots, and sitemap; an unknown page returned the expected 404. Security response headers were present on checked 200 routes.
+- API boundary checks — missing-origin checkout returned 400, empty-cart checkout returned 400, and an unconfigured webhook returned 503.
+
+### Browser evidence
+
+- Checked responsive home layout at 320, 375, 390, 430, 768, 1024, and 1440 CSS pixels in the local Chromium-based in-app browser. Fixed narrow-layout overflow.
+- Inspected mobile and desktop hero, product imagery placeholders, navigation, and mobile sticky purchase UI.
+- Verified the accessible mobile drawer opens, is keyboard-contained, and restores the background boundary.
+- Verified a Marketplace-style UTM product URL renders the same product without exposing query parameters in the interface.
+- Verified XXL disabled at zero stock, size L shows `ONLY 1 LEFT`, and quantity cannot exceed the exact variant stock.
+- Verified explicit size choice is required before add-to-cart; mobile sticky UI prompts `CHOOSE SIZE` instead of silently selecting a variant.
+- Verified cart add confirmation, matching-goggles upsell, checkout-not-configured message, local cart restoration after reload, and restored-cart item display.
+- Verified mobile product search/filter behavior, including a zero-result exact category/size combination.
+- Verified white-bundle size L is unavailable while XXL remains selectable.
+- Verified invalid product URL uses the branded 404 and direct order-success navigation displays `ORDER NOT VERIFIED`.
+- Verified the unconfigured contact form returns a visible honest message and does not silently discard the enquiry.
+
+### Honest limitations / owner gates
+
+- Stripe, webhook, analytics, contact delivery, and final domain are not configured. No real provider response has been labelled verified.
+- Product photos are labelled placeholders. Product names, prices, exact physical stock, specifications, and certification evidence require owner confirmation.
+- Manufacturer centimetre sizing charts are intentionally absent pending verification.
+- Shipping price/timing, tracking, returns, sizing exchanges, legal identity, ABN, email, phone, and social links require owner confirmation.
+- Inventory is repository-managed and not transactionally decremented. Reconcile it manually after paid orders or migrate to database-backed inventory before sales volume increases.
+- Browser interaction QA was available in Chromium only. Safari, Firefox, Edge, and real-device checkout remain required launch checks and are not marked verified.
+- Vercel build compatibility is verified locally; an actual Vercel deployment and custom domain are not verified.
+
+## 2026-08-17 — APEX MOTO reconstruction
+
+### Owner data and assets
+
+- Replaced the temporary RIDELINE identity with APEX MOTO across configuration, metadata, navigation, contact details, manifest, favicon, social presentation, documentation, and customer-facing copy.
+- Inspected and used the supplied APEX MOTO logo, black and white ORZ helmet photos, three ORZ goggle photos, helmet specification sheet, and helmet-bag photo.
+- Transcribed the owner-supplied prices: helmets $124.95, goggles $25 alone, and goggles $20 in the $144.95 helmet bundle with the helmet bag included free.
+- Transcribed black helmet stock as one each in S, M, L, and XL. Set black XXL unavailable. Set the explicitly named white sold-out sizes S, L, and XL to zero; conservatively left white XXL unavailable and inferred one white Medium. Set a conservative minimum of one for each photographed goggle colour. The two inferred quantities are called out in the launch checklist and status file.
+- Transcribed the supplied ORZ size chart, ABS material, approximate 1080 g weight, and visible rear DOT FMVSS No. 218 marking. Customer copy states that the marking is visible but does not by itself establish Australian road legality; no separate approval number or document is claimed.
+
+### Design and commerce changes
+
+- Reconstructed the visual system as a near-black, off-white, and metallic-gold APEX MOTO storefront with shorter copy, a product-first mobile hero, real product photography, a compact catalogue, and a custom bundle composition using the supplied helmet, goggles, and bag assets.
+- Consolidated goggles into one product with Black / Gold, Red / Gold, and Grey / Ice variants. Colour selection now switches the gallery to the matching supplied image.
+- Rebuilt the actual bundle combinations across helmet colour, helmet size, and all three goggle colours. The $5 saving is derived from catalogue component prices.
+- Added server-owned shipping rules for $8 goggles-only delivery; exact owner-supplied helmet destination prices; no extra cost for up to three standalone goggles with a helmet; and quote-required gates for regional Queensland, regional Western Australia, and larger goggle quantities.
+- Simplified the cart drawer and added a compact cart delivery selector with derived shipping and total. Stripe receives only the selected server-approved exact method and price.
+- Generated and visually checked one bespoke APEX MOTO social card from the supplied logo, helmet, and goggles. The exact rendered text is “APEX MOTO” and “READY FOR THE DIRT.”
+
+### Automated evidence
+
+- `npm run verify` — PASS: lint, strict TypeScript, 15 tests, Next.js 16.3.1 production build with 23 route entries, and production-content audit.
+- `npm audit` and `npm audit --omit=dev` — PASS; 0 known vulnerabilities.
+- Route sweep — PASS: 18 expected 200 responses plus the expected 404, all with the configured content security policy.
+- API boundary checks — missing origin 400, empty cart 400, regional quote 400, Stripe not configured 503, webhook not configured 503.
+
+### Browser evidence
+
+- Verified homepage width at 320, 375, 390, 430, 768, 1024, and 1440 CSS pixels with no document-width overflow.
+- Found and fixed an oversized mobile hero and a mobile cart intrinsic-width overflow during the review.
+- Verified the 320-pixel first screen shows the real helmet, product identity, price, concise heading, and both primary actions.
+- Verified mobile navigation opens with Shop, Helmets, Goggles, Bundle, Size Guide, Shipping, and Contact, then closes correctly.
+- Verified matte-black size L selects with `Only 1 left`, adds to cart, persists the exact variant, and opens the add confirmation.
+- Verified Red / Gold goggle selection updates the main image to the supplied red-and-gold photo.
+- Verified a Gloss White bundle enables only Medium and disables S, L, XL, and XXL.
+- Verified the cart applies Melbourne helmet shipping at $25.20 and calculates a $150.15 total from a $124.95 helmet.
+
+### Remaining launch gates
+
+- Stripe, webhook delivery, hosted deployment, custom domain, and form-provider delivery remain `NOT_CONFIGURED`.
+- Exact goggle quantities and the inferred white Medium quantity require owner confirmation before real orders.
+- Dispatch timing, tracking practice, returns/exchange terms, legal identity where applicable, and separate helmet certification documentation remain owner decisions.
+- Chromium browser QA is recorded. Current Safari, Firefox, Edge, real-device, and live Stripe checkout checks remain required.

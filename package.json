@@ -1,0 +1,46 @@
+{
+  "name": "apex-moto-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:fake-data": "node scripts/audit-production-content.mjs",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run audit:fake-data",
+    "db:generate": "node -e \"process.stdout.write('No database schema is configured in phase 1.\\n')\"",
+    "worker": "node -e \"process.stdout.write('No background worker is configured in phase 1.\\n')\""
+  },
+  "dependencies": {
+    "lucide-react": "1.31.0",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "stripe": "22.5.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@next/eslint-plugin-next": "16.3.1",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "16.4.0",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.59.3",
+    "vitest": "4.1.10"
+  },
+  "type": "module"
+}
