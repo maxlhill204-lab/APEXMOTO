@@ -23,8 +23,8 @@ export function ProductVisual({
         role="img"
         aria-label="ORZ matte black helmet, black and gold goggles, and included helmet bag"
       >
-        <Image className="bundle-composite__helmet" src="/products/orz-rally-helmet-black/side.png" alt="" width={458} height={447} priority={priority} />
-        <Image className="bundle-composite__goggles" src="/products/orz-mx-goggles/black-gold.png" alt="" width={445} height={313} />
+        <Image className="bundle-composite__helmet" src="/products/orz-rally-helmet-black/side.png" alt="" width={939} height={831} priority={priority} />
+        <Image className="bundle-composite__goggles" src="/products/orz-mx-goggles/black-gold.png" alt="" width={951} height={672} />
         <Image className="bundle-composite__bag" src="/products/orz-helmet-goggles-bundle/helmet-bag.png" alt="" width={436} height={437} />
       </div>
     );

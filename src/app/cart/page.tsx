@@ -73,7 +73,7 @@ export default function CartPage() {
           {shipping.available ? <div className="order-summary__total"><span>Total</span><strong>{formatPrice(subtotal + shippingAmount)}</strong></div> : null}
           {!shipping.available && shippingMethodId ? <p className="form-message form-message--error">{shipping.message} <a href={`mailto:${siteConfig.email}?subject=APEX MOTO shipping quote`}>Email for a quote.</a></p> : null}
           <CheckoutButton shippingMethodId={shippingMethodId} disabled={!shipping.available} />
-          <p>Online payment is being connected. You can email <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a> to order now.</p>
+          <p>Secure checkout opens with Stripe. Need help? Email <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>.</p>
           <Link href="/shop" className="text-link">Continue shopping</Link>
         </aside>
       </div>

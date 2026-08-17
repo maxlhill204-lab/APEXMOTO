@@ -5,6 +5,7 @@ import { Drawer } from "@/components/ui/drawer";
 import { mainNavigation, mobileNavigation } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 import { Menu, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -21,8 +22,15 @@ export function SiteHeader() {
           <button className="icon-button site-header__menu" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <Menu aria-hidden="true" size={22} />
           </button>
-          <Link href="/" className="wordmark" aria-label={`${siteConfig.businessName} home`}>
-            <span aria-hidden="true">A</span><strong>APEX</strong> MOTO
+          <Link href="/" className="site-logo-link" aria-label={`${siteConfig.businessName} home`}>
+            <Image
+              className="site-logo"
+              src="/brand/apex-moto-logo.png"
+              alt=""
+              width={1254}
+              height={1254}
+              priority
+            />
           </Link>
           <nav className="site-header__nav" aria-label="Main navigation">
             {mainNavigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}

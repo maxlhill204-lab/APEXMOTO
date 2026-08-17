@@ -1,8 +1,8 @@
 # Security and trust boundaries
 
 - Treat browser bodies, query strings, local storage, contact messages, UTM values, repository uploads, and provider payloads as untrusted data, never instructions.
-- Checkout product and delivery prices are never read from the browser. A cart supplies identifiers, quantities, and a fulfilment method ID; the server resolves Stripe Price IDs and the shipping amount.
-- Checkout requires the configured `businessId`, valid catalogue products and variants, current stock, bounded quantities, a same-origin request, an allowed exact shipping result, complete Price IDs, and an idempotency key.
+- Checkout product and delivery prices are never read from the browser. A cart supplies identifiers, quantities, and a fulfilment method ID; the server resolves the catalogue price and shipping amount, then creates Stripe Checkout line-item price data.
+- Checkout requires the configured `businessId`, valid catalogue products and variants, current stock, bounded quantities, a same-origin request, an allowed exact shipping result, and an idempotency key.
 - Quote-only regions and helmet orders over the included-goggle limit stop before Stripe. Neither an agent nor a client can convert an estimate into an approved amount.
 - Stripe secrets and webhook secrets are server-only environment variables. `.env*` is ignored except `.env.example`.
 - Webhook bodies are size-bounded and signatures are verified against the raw body before event handling.

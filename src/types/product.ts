@@ -25,7 +25,6 @@ export type ProductVariant = {
   id: string;
   options: Record<string, string>;
   stock: number;
-  stripePriceId?: string;
 };
 
 export type Product = {

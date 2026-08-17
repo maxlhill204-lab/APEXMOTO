@@ -3,7 +3,6 @@ import { ProductVisual } from "@/components/product/product-visual";
 import { formatPrice, siteConfig } from "@/config/site";
 import { bundleIndividualTotal, catalog } from "@/lib/products";
 import { ArrowRight, MapPin, PackageCheck, Ruler, Truck } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -19,14 +18,6 @@ export default function HomePage() {
       <section className="hero apex-hero">
         <div className="container hero__grid">
           <div className="hero__copy">
-            <Image
-              className="hero__brand-logo"
-              src="/brand/apex-moto-logo.png"
-              alt="APEX MOTO"
-              width={1254}
-              height={1254}
-              priority
-            />
             <p className="eyebrow eyebrow--accent">ORZ MOTOCROSS GEAR / MELBOURNE</p>
             <h1><span>Ready for</span><br /><span>the dirt.</span></h1>
             <p className="hero__lead">ORZ helmets and goggles. Local stock, clear prices, no clutter.</p>

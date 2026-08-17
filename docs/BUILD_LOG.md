@@ -99,3 +99,29 @@ Evidence is added only after a real command or browser check completes. Credenti
 - Exact goggle quantities and the inferred white Medium quantity require owner confirmation before real orders.
 - Dispatch timing, tracking practice, returns/exchange terms, legal identity where applicable, and separate helmet certification documentation remain owner decisions.
 - Chromium browser QA is recorded. Current Safari, Firefox, Edge, real-device, and live Stripe checkout checks remain required.
+
+## 2026-08-17 — higher-resolution product and checkout update
+
+### Delivered
+
+- Replaced the matte-black helmet, gloss-white helmet, Black / Gold goggles, Red / Gold goggles, and Grey / Ice goggles with the owner-supplied higher-resolution photos. Three additional photographed colourways remain unpublished because their sale availability and stock were not confirmed.
+- Moved the supplied APEX MOTO image logo from the homepage hero into the sticky site header and reduced the desktop hero heading so “Ready for the dirt.” stays clear of the product visual.
+- Changed incomplete product selection from a disabled dead end into active validation: Add to cart now identifies the first missing option, scrolls it into view, shakes the group, turns it red, and announces the exact required choice. No item is added until the selection resolves to an in-stock variant.
+- Simplified the cart drawer and payment action labels to “Checkout”.
+- Kept product and shipping amounts server-owned. Stripe Checkout line-item price data is derived from the validated catalogue after origin, business, item, variant, stock, quantity, and shipping checks; browser-supplied prices remain ignored.
+- Added the verified production fallback origin `https://apexmoto.vercel.app` while retaining an environment override for a future custom domain.
+
+### Stripe evidence and credential boundary
+
+- Confirmed the connected Stripe plugin is authenticated to the `APEX WEB sandbox` account.
+- Created four real test-mode Stripe products and matching one-time AUD prices for the two helmets, goggles, and bundle. These are provider-side sandbox evidence only; no live-mode capability is claimed.
+- Did not use or store the secret pasted into chat. Because that credential was exposed in conversation, it must be rotated before any replacement is added through protected local or Vercel environment settings.
+- Webhook delivery and a deployed successful Checkout Session remain unverified until a fresh server credential and webhook signing secret are configured.
+
+### Verification evidence
+
+- Workspace-wide key-pattern scan — PASS; no Stripe key-like value is present in source files.
+- `npm run verify` — PASS: lint, strict TypeScript, 15 tests, Next.js 16.3.1 production build with 23 route entries, and production-content audit.
+- `npm audit --omit=dev` — PASS; 0 known production dependency vulnerabilities.
+- Browser check at 1280 × 720 — PASS: header logo is constrained to 64 × 64, the hero heading ends before the product visual, the new goggle image is loaded, and the cart uses the “Checkout” label without horizontal overflow.
+- Missing-size interaction — PASS: after hydration, clicking Add to cart with no size leaves the cart count unchanged and displays `Please choose size.` in an `aria-invalid` animated option group.

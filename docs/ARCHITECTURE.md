@@ -14,7 +14,7 @@ Every product and cart request carries `businessId`. Client storage is sanitised
 
 ## Commerce boundary
 
-Cart storage contains only business, product, variant IDs, and quantities. The server resolves the product, stock, and Stripe Price identity. `POST /api/checkout` runs deterministic origin, scope, input, stock, shipping, and Price ID checks before any external call. A browser-generated UUID becomes the namespaced Stripe idempotency key.
+Cart storage contains only business, product, variant IDs, and quantities. The server resolves the product, stock, and catalogue price. `POST /api/checkout` runs deterministic origin, scope, input, stock, and shipping checks before any external call, then creates Stripe line-item price data from the validated catalogue. A browser-generated UUID becomes the namespaced Stripe idempotency key.
 
 ## Fulfilment boundary
 

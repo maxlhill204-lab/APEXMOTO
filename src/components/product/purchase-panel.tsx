@@ -20,6 +20,8 @@ export function PurchasePanel({ product }: { product: Product }) {
     ),
   );
   const [quantity, setQuantity] = useState(1);
+  const [invalidOptionId, setInvalidOptionId] = useState<string | null>(null);
+  const [validationAttempt, setValidationAttempt] = useState(0);
   const { addItem } = useCart();
   const selectionComplete = product.options.every((option) => selection[option.id]);
   const variant = useMemo(
@@ -49,6 +51,7 @@ export function PurchasePanel({ product }: { product: Product }) {
       next[laterOption.id] = laterOption.values.length === 1 ? laterOption.values[0].value : "";
     }
     setSelection(next);
+    if (invalidOptionId === optionId) setInvalidOptionId(null);
     setQuantity(1);
     window.dispatchEvent(new CustomEvent("apex-moto:product-option", {
       detail: { productId: product.id, optionId, valueLabel: getOptionLabel(product, optionId, value) },
@@ -59,7 +62,21 @@ export function PurchasePanel({ product }: { product: Product }) {
     });
   };
 
+  const showRequiredOption = () => {
+    if (!missingOption) return false;
+    setInvalidOptionId(missingOption.id);
+    setValidationAttempt((attempt) => attempt + 1);
+    window.setTimeout(() => {
+      document.getElementById(`option-${product.id}-${missingOption.id}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 0);
+    return true;
+  };
+
   const addToCart = () => {
+    if (showRequiredOption()) return;
     if (!variant || stock < 1) return;
     addItem({
       businessId: siteConfig.businessId,
@@ -83,8 +100,15 @@ export function PurchasePanel({ product }: { product: Product }) {
       </div>
 
       <div className="option-groups" id="product-options">
-        {product.options.map((option) => (
-          <fieldset className="option-group" key={option.id}>
+        {product.options.map((option) => {
+          const needsAttention = invalidOptionId === option.id;
+          return (
+          <fieldset
+            className={`option-group${needsAttention ? " option-group--attention" : ""}`}
+            id={`option-${product.id}-${option.id}`}
+            key={needsAttention ? `${option.id}-${validationAttempt}` : option.id}
+            aria-invalid={needsAttention || undefined}
+          >
             <legend>{option.label}: <strong>{selection[option.id] ? getOptionLabel(product, option.id, selection[option.id]) : "Choose one"}</strong></legend>
             <div className={option.id.includes("size") ? "size-options" : "swatch-options"}>
               {option.values.map((value) => {
@@ -98,15 +122,17 @@ export function PurchasePanel({ product }: { product: Product }) {
                 );
               })}
             </div>
+            {needsAttention ? <p className="option-required-message" role="alert">Please choose {option.label.toLowerCase()}.</p> : null}
             {option.id.includes("size") ? <Link href="/size-guide" className="size-guide-link" onClick={() => trackEvent("view_size_guide", { product_id: product.id })}><Ruler size={15} aria-hidden="true" /> View size guide</Link> : null}
           </fieldset>
-        ))}
+          );
+        })}
       </div>
 
       <div className="purchase-actions">
         <div className="purchase-actions__quantity"><span>Quantity</span><QuantityControl value={quantity} max={Math.min(stock, 10)} onChange={setQuantity} label={`Quantity for ${product.name}`} /></div>
-        <button type="button" className="button button--primary button--wide purchase-actions__add" onClick={addToCart} disabled={!variant || stock < 1}>
-          {missingOption ? `Choose ${missingOption.label.toLowerCase()}` : stock < 1 ? "Sold out" : `Add to cart — ${formatPrice(product.price * quantity)}`}
+        <button type="button" className="button button--primary button--wide purchase-actions__add" onClick={addToCart} disabled={Boolean(variant && stock < 1)}>
+          {variant && stock < 1 ? "Sold out" : `Add to cart — ${formatPrice(product.price * quantity)}`}
         </button>
       </div>
 
@@ -118,12 +144,8 @@ export function PurchasePanel({ product }: { product: Product }) {
       <div className="mobile-purchase-bar">
         <div><span>{product.shortName ?? product.name}</span><strong>{formatPrice(product.price)}</strong></div>
         <button type="button" className="button button--primary" onClick={() => {
-          if (!variant) {
-            document.getElementById("product-options")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            return;
-          }
           addToCart();
-        }} disabled={Boolean(variant && stock < 1)}>{missingOption ? `Choose ${missingOption.label.toLowerCase()}` : stock > 0 ? "Add to cart" : "Sold out"}</button>
+        }} disabled={Boolean(variant && stock < 1)}>{variant && stock < 1 ? "Sold out" : "Add to cart"}</button>
       </div>
     </div>
   );

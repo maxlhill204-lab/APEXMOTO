@@ -6,7 +6,7 @@ A product belongs to one `businessId` and has a unique `id` and `slug`, category
 
 ## Variant
 
-Every variant has a unique `id`, exactly one value for every product option, a non-negative integer `stock`, and an optional Stripe Price ID. Stock is never inferred from a product-wide boolean.
+Every variant has a unique `id`, exactly one value for every product option, and a non-negative integer `stock`. Stock is never inferred from a product-wide boolean. Checkout resolves the parent product price from the server catalogue after the exact variant is validated.
 
 ## Product image
 

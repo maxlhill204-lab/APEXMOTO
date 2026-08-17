@@ -40,9 +40,10 @@ Do not accept real payment until every required item has real evidence.
 
 ## Stripe test mode
 
-- [ ] Create matching one-time Stripe Prices for every sellable variant.
-- [ ] Add each `price_...` ID to the matching variant in `src/data/products.ts`.
-- [ ] Add `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` locally and in the host; never commit them.
+- [x] Create matching one-time test products and prices in the connected APEX WEB sandbox as provider evidence.
+- [x] Derive Checkout line-item prices from the validated server catalogue so browser amounts are never trusted.
+- [ ] Rotate the Stripe secret that was exposed in chat before using any replacement credential.
+- [ ] Add a fresh restricted or secret server credential and `STRIPE_WEBHOOK_SECRET` locally and in Vercel; never commit them.
 - [ ] Configure the production webhook endpoint.
 - [ ] Test successful, cancelled, and failed checkout paths.
 - [ ] Confirm pickup and every exact delivery rate inside hosted checkout.

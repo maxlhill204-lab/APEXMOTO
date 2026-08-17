@@ -55,7 +55,7 @@ export function CartDrawer() {
             <strong>{formatPrice(subtotal)}</strong>
           </div>
           <p className="fine-print">Choose pickup or your delivery area on the cart page.</p>
-          <Link className="button button--primary button--wide" href="/cart" onClick={closeCart}>View cart and delivery</Link>
+          <Link className="button button--primary button--wide" href="/cart" onClick={closeCart}>Checkout</Link>
         </div>
       ) : (
         <div className="empty-state empty-state--compact">
