@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { CartDrawer } from "@/components/commerce/cart-drawer";
 import { CartProvider } from "@/components/commerce/cart-provider";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <CartDrawer />
         </CartProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organisation).replace(/</g, "\\u003c") }} />
+        <Analytics />
       </body>
     </html>
   );
