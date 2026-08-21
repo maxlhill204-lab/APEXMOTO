@@ -4,10 +4,12 @@ import { ProductCard } from "@/components/product/product-card";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { getSiteUrl, siteConfig } from "@/config/site";
-import { catalog, getProductById, getProductBySlug, totalStock } from "@/lib/products";
+import { catalog, getProductBySlug, totalStock } from "@/lib/products";
+import { getLiveCatalog } from "@/lib/live-catalog";
 import Link from "next/link";
 
 export const dynamicParams = false;
+export const dynamic = "force-dynamic";
 export const generateStaticParams = () => catalog.map((product) => ({ slug: product.slug }));
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -33,9 +35,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const liveCatalog = await getLiveCatalog();
+  const product = liveCatalog.find((item) => item.slug === slug);
   if (!product) notFound();
-  const related = (product.relatedProductIds ?? []).map(getProductById).filter((item) => item !== undefined).slice(0, 3);
+  const related = (product.relatedProductIds ?? []).map((id) => liveCatalog.find((item) => item.id === id)).filter((item) => item !== undefined).slice(0, 3);
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",

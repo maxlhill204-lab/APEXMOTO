@@ -2,12 +2,15 @@ import { getSiteUrl, siteConfig } from "@/config/site";
 import { resolveCartItems, sanitiseCartItems } from "@/lib/cart";
 import { calculateShipping, type ShippingQuote } from "@/lib/shipping";
 import type { CartItemInput } from "@/types/product";
+import { NORMALISED_EMAIL, normaliseCustomerEmail, normaliseCustomerName } from "@/lib/order-domain";
 
 export type CheckoutPolicyResult =
   | {
       allowed: true;
       items: ReturnType<typeof resolveCartItems>;
       shipping: Extract<ShippingQuote, { available: true }>;
+      customerName: string;
+      customerEmail: string;
     }
   | { allowed: false; code: string; message: string };
 
@@ -30,7 +33,7 @@ export function validateCheckoutRequest(
   if (!payload || typeof payload !== "object") {
     return { allowed: false, code: "INVALID_BODY", message: "Your cart could not be read." };
   }
-  const body = payload as { businessId?: unknown; items?: unknown; shippingMethodId?: unknown };
+  const body = payload as { businessId?: unknown; items?: unknown; shippingMethodId?: unknown; customerName?: unknown; customerEmail?: unknown; pickupAcknowledged?: unknown };
   if (body.businessId !== siteConfig.businessId) {
     return { allowed: false, code: "BUSINESS_SCOPE_DENIED", message: "Your cart could not be verified." };
   }
@@ -47,10 +50,17 @@ export function validateCheckoutRequest(
     return { allowed: false, code: "STOCK_EXCEEDED", message: "Requested quantity exceeds current stock." };
   }
 
+  const customerName = normaliseCustomerName(body.customerName);
+  if (customerName.length < 2) return { allowed: false, code: "NAME_REQUIRED", message: "Enter the name for this order." };
+  const customerEmail = normaliseCustomerEmail(body.customerEmail);
+  if (!NORMALISED_EMAIL.test(customerEmail)) return { allowed: false, code: "EMAIL_REQUIRED", message: "Enter a valid email for the order confirmation." };
+
   const shipping = calculateShipping(resolved, body.shippingMethodId);
   if (!shipping.available) {
     return { allowed: false, code: shipping.code, message: shipping.message };
   }
 
-  return { allowed: true, items: resolved, shipping };
+  if (shipping.pickup && body.pickupAcknowledged !== true) return { allowed: false, code: "PICKUP_ACK_REQUIRED", message: "Confirm the pickup date and appointment terms before checkout." };
+
+  return { allowed: true, items: resolved, shipping, customerName, customerEmail };
 }

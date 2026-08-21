@@ -8,17 +8,29 @@ import { formatPrice, helmetShippingRegions, siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 import { getProductById, getVariantLabel } from "@/lib/products";
 import { calculateShipping, cartHasHelmet } from "@/lib/shipping";
-import { ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
+import { formatPickupDate, settingsFallback } from "@/lib/order-domain";
+import type { StoreSettings } from "@/types/order";
+import { ArrowRight, CalendarDays, MailCheck, MapPin, ShoppingBag, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const { resolvedItems, subtotal, updateQuantity, removeItem, hydrated } = useCart();
   const [shippingMethodId, setShippingMethodId] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [pickupAcknowledged, setPickupAcknowledged] = useState(false);
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(() => settingsFallback(siteConfig));
 
   useEffect(() => {
     if (hydrated) trackEvent("view_cart", { item_count: resolvedItems.length });
   }, [hydrated, resolvedItems.length]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/store-settings").then((response) => response.ok ? response.json() as Promise<StoreSettings> : null).then((settings) => { if (active && settings) setStoreSettings(settings); }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   const hasHelmet = cartHasHelmet(resolvedItems);
   const hasStandaloneGoggles = resolvedItems.some((item) => item.product.category === "goggles");
@@ -59,21 +71,33 @@ export default function CartPage() {
 
         <aside className="order-summary">
           <h2>Order summary</h2>
-          <div><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
+          <div className="order-summary__row"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
           <div className="shipping-selector">
             <label htmlFor="shipping-method">Pickup or delivery</label>
             <select id="shipping-method" value={shippingMethodId} onChange={(event) => setShippingMethodId(event.target.value)}>
               <option value="">Choose an option</option>
-              <option value="pickup">Newport pickup — Free</option>
+              {storeSettings.pickupEnabled ? <option value="pickup">{storeSettings.pickupLocationLabel} pickup — Free</option> : null}
               {shippingChoices.map((choice) => <option key={choice.id} value={choice.id}>{choice.label} — {choice.detail}</option>)}
             </select>
-            {shippingMethodId === "pickup" ? <small>Exact pickup details are arranged after ordering.</small> : null}
+            {shippingMethodId === "pickup" ? <div className="pickup-disclosure" role="note">
+              <MapPin aria-hidden="true" size={19} /><span><strong>{storeSettings.pickupLocationLabel}</strong><small>{storeSettings.pickupAddressDisclosure}</small></span>
+              <CalendarDays aria-hidden="true" size={19} /><span><strong>Earliest pickup: {formatPickupDate(storeSettings.pickupNextAvailableDate)}</strong><small>{storeSettings.pickupWindow}. {storeSettings.pickupSameDayAvailable ? "Same-day pickup may be available when confirmed." : "Same-day pickup is not available."}</small></span>
+            </div> : null}
           </div>
-          <div><span>Shipping</span><strong>{shipping.available ? (shipping.amount === 0 ? "Free" : formatPrice(shipping.amount)) : "Choose above"}</strong></div>
+          <div className="checkout-contact">
+            <h3>Confirmation details</h3>
+            <p><MailCheck aria-hidden="true" size={17} /> Your receipt, exact order and next steps are sent here automatically after Stripe confirms payment.</p>
+            <label htmlFor="customer-name">Full name</label>
+            <input id="customer-name" name="name" autoComplete="name" value={customerName} onChange={(event) => setCustomerName(event.target.value)} placeholder="Name for this order" required />
+            <label htmlFor="customer-email">Email</label>
+            <input id="customer-email" name="email" type="email" autoComplete="email" value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} placeholder="you@example.com" required />
+          </div>
+          {shippingMethodId === "pickup" ? <label className="pickup-acknowledgement"><input type="checkbox" checked={pickupAcknowledged} onChange={(event) => setPickupAcknowledged(event.target.checked)} /><span>I understand pickup is in {storeSettings.pickupLocationLabel}{storeSettings.pickupAppointmentRequired ? ", is appointment-only," : ""} and is not available before {formatPickupDate(storeSettings.pickupNextAvailableDate)}. I will wait for the confirmation email before travelling.</span></label> : null}
+          <div className="order-summary__row"><span>Shipping</span><strong>{shipping.available ? (shipping.amount === 0 ? "Free" : formatPrice(shipping.amount)) : "Choose above"}</strong></div>
           {shipping.available ? <div className="order-summary__total"><span>Total</span><strong>{formatPrice(subtotal + shippingAmount)}</strong></div> : null}
           {!shipping.available && shippingMethodId ? <p className="form-message form-message--error">{shipping.message} <a href={`mailto:${siteConfig.email}?subject=APEX MOTO shipping quote`}>Email for a quote.</a></p> : null}
-          <CheckoutButton shippingMethodId={shippingMethodId} disabled={!shipping.available} />
-          <p>Secure checkout opens with Stripe. Need help? Email <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>.</p>
+          <CheckoutButton shippingMethodId={shippingMethodId} customerName={customerName} customerEmail={customerEmail} pickupAcknowledged={shippingMethodId !== "pickup" || pickupAcknowledged} disabled={!shipping.available} />
+          <p>Secure checkout opens with Stripe. Payment is only accepted when our order record, stock allocation and confirmation emails are all available. Need help? Email <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>. Replies are normally within 12–48 hours.</p>
           <Link href="/shop" className="text-link">Continue shopping</Link>
         </aside>
       </div>

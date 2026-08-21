@@ -37,6 +37,9 @@ export function validateProducts(catalogue: Product[]): Product[] {
       if (!Number.isInteger(variant.stock) || variant.stock < 0) {
         throw new Error(`Invalid stock on ${product.id}/${variant.id}.`);
       }
+      if (!variant.inventory.length || variant.inventory.some((requirement) => !requirement.sku.trim() || !Number.isInteger(requirement.quantity) || requirement.quantity < 1)) {
+        throw new Error(`Invalid physical inventory mapping on ${product.id}/${variant.id}.`);
+      }
       const suppliedIds = Object.keys(variant.options);
       if (suppliedIds.some((id) => !optionIds.has(id)) || suppliedIds.length !== optionIds.size) {
         throw new Error(`Variant ${variant.id} does not match options on ${product.id}.`);

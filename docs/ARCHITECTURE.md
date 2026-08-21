@@ -2,19 +2,19 @@
 
 ## Rendering boundary
 
-Next.js App Router server components render pages and metadata by default. Client components are limited to shop filters, image galleries, option selection, drawers, the contact form, analytics events, and the device-local cart.
+Next.js App Router server components render pages, metadata, private order status and the owner desk by default. Client components are limited to shop filters, image galleries, option selection, drawers, the contact form, analytics events, and the device-local cart. Server-only modules own database, Stripe, email and administrative operations.
 
 ## Catalogue boundary
 
-`src/data/products.ts` is the phase-one source of truth. `src/lib/products.ts` validates it during import and build. Product pages, shop filters, metadata, sitemap, related products, bundle calculations, gallery colour matching, and cart resolution derive from that catalogue.
+`src/data/products.ts` is the product and price source of truth. `src/lib/products.ts` validates it during import and build. Every sellable variant maps to physical inventory requirements; bundles and individual listings therefore compete for the same database-backed helmet and goggle SKUs.
 
 ## Business scope
 
-Every product and cart request carries `businessId`. Client storage is sanitised against the configured business and server catalogue. Checkout denies mismatched scope. There is one configured business in phase one; the explicit boundary prevents accidental cross-business reuse if the code is extended.
+Every product and cart request carries `businessId`. Client storage is sanitised against the configured business and server catalogue. Checkout denies mismatched scope. Every order, item, inventory, reservation, event, email, cancellation and administrative query includes `businessId`; private order tokens also bind business, order ID and normalized email.
 
 ## Commerce boundary
 
-Cart storage contains only business, product, variant IDs, and quantities. The server resolves the product, stock, and catalogue price. `POST /api/checkout` runs deterministic origin, scope, input, stock, and shipping checks before any external call, then creates Stripe line-item price data from the validated catalogue. A browser-generated UUID becomes the namespaced Stripe idempotency key.
+Cart storage contains only business/product/variant IDs and quantities. A temporary pending-checkout marker additionally contains an opaque order-access token and purchased cart keys, never payment details. `POST /api/checkout` validates origin, scope, confirmation details and fulfilment, then atomically creates an order and reserves the physical SKUs before opening Stripe. The browser UUID is unique in Postgres and becomes the namespaced Stripe idempotency key.
 
 ## Fulfilment boundary
 
@@ -28,9 +28,15 @@ The browser sends only a fulfilment method ID. `src/lib/shipping.ts` combines it
 
 Stripe receives only the single server-approved method and exact amount.
 
-## Order and inventory boundary
+## Order, inventory and email boundary
 
-Stripe webhook signatures are verified, but phase one has no order database and does not mutate stock. Repository stock must be reconciled manually. Database-backed inventory needs atomic reservations, bounded retries, explicit states, migrations, and audit evidence before automated decrement or higher sales volume.
+Neon Postgres is the durable operational source of truth. A transaction locks each sorted physical SKU and rejects checkout when stock minus active reservations is insufficient. Signed paid events verify the order, amount and currency; consume the reservation and decrement stock exactly once; append order/inventory evidence; and enqueue customer/owner email jobs. Expiration or payment failure releases the reservation.
+
+The Stripe webhook is authoritative. The success page retrieves Stripe server-side and invokes the same idempotent fulfilment transaction as a latency fallback, but never trusts the redirect. Resend jobs have database uniqueness, deterministic provider idempotency keys, a five-attempt bound, signed-webhook retry, a protected daily backstop and an owner retry control.
+
+## Owner boundary
+
+`/admin` uses an HMAC-signed, short-lived, HttpOnly, SameSite=Strict cookie. Password comparison is timing-safe; failed login attempts are business-scoped and rate-limited. Authenticated Server Actions provide explicit fulfilment transitions, audited stock adjustment, failed-email retry, pickup/support settings, and order-number-confirmed full Stripe refunds.
 
 ## Contact boundary
 

@@ -11,10 +11,11 @@ The production catalogue uses the supplied APEX MOTO logo and real product image
 - Tailwind CSS 4 plus a responsive project design system
 - Lucide icons
 - Stripe’s server SDK for hosted checkout and verified webhooks
+- Neon Postgres for durable orders, shared-SKU stock reservations, events and email outbox
+- Resend and React Email for customer and owner transactional messages
 - Vitest for catalogue, stock, cart, business-scope, shipping, bundle, and checkout-policy tests
-- Device-local storage for non-sensitive cart identifiers and quantities
-
-Phase one intentionally has no customer accounts, database, admin dashboard, or automated inventory decrement.
+- Device-local storage only for non-sensitive cart identifiers and pending-order reconciliation
+- Protected `/admin` order desk for fulfilment, stock, email status, pickup settings and guarded refunds
 
 ## Run locally
 
@@ -28,7 +29,7 @@ npm run dev
 
 On macOS or Linux, use `cp .env.example .env.local`. Open [http://localhost:3000](http://localhost:3000).
 
-The catalogue and cart work without credentials. Online payment remains safely unavailable until Stripe configuration is complete.
+The catalogue and cart work without credentials. Online payment fails closed until the database migration, signed Stripe webhook, email provider and application secrets are all configured. Follow `docs/PRODUCTION_SETUP.md`.
 
 Run every project check with:
 
@@ -48,7 +49,10 @@ This runs lint, TypeScript, tests, the production build, and the production-cont
 - `src/lib/shipping.ts` — deterministic pickup, goggle-only, helmet-region, and quote-required rules
 - `src/lib/checkout-policy.ts` — origin, business scope, item, stock, and delivery checks
 - `src/app/api/checkout/route.ts` — server-owned Stripe Checkout creation
-- `src/app/api/stripe/webhook/route.ts` — Stripe signature verification; no inventory mutation in phase one
+- `src/app/api/stripe/webhook/route.ts` — signed, idempotent payment/inventory/email/refund processing
+- `db/migrations/0001_order_system.sql` — operational data model
+- `src/app/admin` — private owner order desk
+- `docs/ORDER_OPERATIONS.md` — daily fulfilment, cancellation, refund, stock and email procedures
 - `LAUNCH_CHECKLIST.md` — the remaining real-world launch gates
 - `QUICK_EDIT_GUIDE.md` — the shortest path for everyday edits
 
@@ -92,13 +96,13 @@ Shop filters, product pages, metadata, sitemap entries, related products, and ca
 
 ## Change price or stock
 
-In `src/data/products.ts`, change `price` in whole cents and `stock` on the exact variant.
+In `src/data/products.ts`, change `price` in whole cents. Catalogue `stock` seeds a new database SKU only once; after production setup, change physical counts in the owner order desk so adjustments are audited.
 
 ```ts
 { id: "black-l", options: { colour: "matte-black", size: "L" }, stock: 1 }
 ```
 
-Stripe Checkout derives its line-item amount from the validated server catalogue, so changing this field changes the next Checkout Session after deployment. Bundle combinations use the same physical stock and must be reconciled with component stock manually.
+Stripe Checkout derives amounts from the validated server catalogue. Bundle combinations map to the same physical helmet and goggle SKUs as the separate listings, so paid orders and open reservations cannot oversell across product pages.
 
 ## Change colours or sizes
 
@@ -126,31 +130,11 @@ Shipping configuration is in `src/config/site.ts`:
 
 The cart chooses one method before checkout. The server recalculates it from catalogue items and configuration; it does not trust a browser-supplied amount. `regional-qld`, `regional-wa`, and helmet orders over the included-goggle limit stop before payment and direct the customer to request an exact quote.
 
-## Configure Stripe
+## Configure orders, email and Stripe
 
-Start in Stripe test mode.
+Follow `docs/PRODUCTION_SETUP.md` in Stripe test mode first. Add Neon `DATABASE_URL`, run `npm run db:migrate`, verify a Resend sender, configure the five listed Stripe webhook events, and generate unrelated order/admin/cron secrets. Checkout refuses payment if any critical value is absent.
 
-1. Use a Stripe test-mode server credential first. A restricted key with only the required Checkout permissions is preferred where supported.
-2. Put credentials in `.env.local`, never in source:
-
-   ```text
-   STRIPE_SECRET_KEY=...
-   STRIPE_WEBHOOK_SECRET=...
-   NEXT_PUBLIC_SITE_URL=http://localhost:3000
-   ```
-
-3. Forward test webhooks locally:
-
-   ```bash
-   stripe listen --forward-to localhost:3000/api/stripe/webhook
-   ```
-
-4. Put the printed test webhook secret in `.env.local` and restart the development server.
-5. Test pickup, each exact delivery region, a quote-only region, an out-of-stock variant, cancelled checkout, successful payment, invalid signatures, and direct navigation to `/order-success`.
-
-Checkout requires same-origin requests, the configured `businessId`, valid catalogue items, available stock, a server-known fulfilment method, a server-known delivery price, and an idempotency key. Product and shipping amounts are derived on the server; browser prices are ignored.
-
-Stripe redirects do not change stock. A signature-verified webhook is payment evidence, but phase one still requires manual stock reconciliation.
+The signed Stripe webhook and the server-retrieved success-page fallback invoke the same transaction. The transaction verifies amount/currency, consumes reserved stock exactly once, records evidence and enqueues customer/owner confirmations. A redirect by itself never changes an order.
 
 ## Contact form
 
@@ -166,6 +150,13 @@ Copy `.env.example` to `.env.local`. `.env*` is ignored except `.env.example`.
 | `STRIPE_SECRET_KEY` | Checkout | Server-only Stripe API credential |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No in current UI | Reserved for future Stripe client features |
 | `STRIPE_WEBHOOK_SECRET` | Webhooks | Verifies Stripe event signatures |
+| `DATABASE_URL` | Checkout | Neon Postgres connection used for orders and inventory |
+| `RESEND_API_KEY` / `ORDER_EMAIL_FROM` | Checkout | Transactional email provider and verified sender |
+| `STORE_ORDER_EMAIL` | Checkout | Owner new-order/cancellation recipient |
+| `ORDER_ACCESS_SECRET` | Checkout | Signs private customer order links |
+| `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` | Owner desk | Protects `/admin` |
+| `CRON_SECRET` | Email recovery | Protects the daily outbox backstop |
+| `PICKUP_ADDRESS_PRIVATE` | Pickup email | Exact private address, never rendered publicly |
 | `NEXT_PUBLIC_ANALYTICS_ENABLED` | No | Reserved opt-in switch; no provider loads by default |
 | `CONTACT_FORM_ENDPOINT` | Form delivery | Optional HTTPS form-provider endpoint |
 
@@ -182,8 +173,8 @@ Current production:
 4. Add production environment variables in **Project Settings → Environment Variables**.
 5. Deploy, add the custom domain in **Project Settings → Domains**, and follow Vercel’s DNS instructions.
 6. Set `NEXT_PUBLIC_SITE_URL` to the canonical `https://` domain and redeploy.
-7. Add `https://YOUR-DOMAIN/api/stripe/webhook` in Stripe and store its signing secret in Vercel.
-8. Complete one deployed Stripe test-mode order before enabling live mode.
+7. Complete every database, email and Stripe step in `docs/PRODUCTION_SETUP.md`.
+8. Complete deployed test pickup/delivery/cancellation/refund journeys before enabling live mode.
 
 Restrict Vercel’s GitHub access to the intended repository, protect the production branch, and review every change to stock, prices, safety wording, checkout policy, and environment handling.
 
@@ -194,18 +185,19 @@ Restrict Vercel’s GitHub access to the intended repository, protect the produc
 3. Run `npm run verify`.
 4. Commit and push.
 5. Check the deployed product page and cart on a phone.
-6. After a paid order, update repository stock immediately until database-backed inventory is added.
+6. After a paid order, open `/admin`, verify email/fulfilment evidence, and move the order through the correct status.
 
 ## Troubleshooting
 
-- **Online payment is being connected:** rotate any exposed key, then add a fresh Stripe server credential through protected local and Vercel environment settings.
+- **Checkout says temporarily unavailable:** at least one required database, webhook, email or signing value is absent; follow `docs/PRODUCTION_SETUP.md` rather than bypassing the gate.
 - **A size or colour is disabled:** its exact variant stock is `0`, or no matching combination exists.
 - **A catalogue edit fails the build:** read the validator error for duplicate IDs/slugs/combinations, invalid prices or stock, or incomplete verified certification.
 - **A regional customer cannot pay:** regional Queensland and Western Australia intentionally require an exact address quote.
 - **A goggle-heavy helmet cart needs a quote:** more than three standalone pairs with a helmet intentionally stops before payment.
 - **The form will not send:** configure a valid HTTPS `CONTACT_FORM_ENDPOINT`; direct email and social links remain available.
-- **The success page says unverified:** only a valid paid Stripe Checkout session for the APEX MOTO `businessId` is accepted.
+- **The success page says unverified:** use the complete private return/status link. A Stripe session must map to the durable APEX MOTO order and exact amount.
+- **A confirmation email failed:** inspect the job in `/admin`, correct the Resend sender/domain, then retry. Five attempts are the hard bound.
 
 ## Before taking real orders
 
-Complete `LAUNCH_CHECKLIST.md`. In particular, confirm inferred inventory, final policies, tracking and dispatch wording, legal identity where required, every safety claim, Stripe test evidence, webhook evidence, final-domain configuration, real-device QA, and the manual stock-reconciliation routine.
+Complete `LAUNCH_CHECKLIST.md`. In particular, confirm inferred physical counts, final policies, tracking and dispatch wording, legal identity where required, every safety claim, migrated database evidence, Stripe/webhook/email evidence, final-domain configuration, and real-device QA.

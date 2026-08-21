@@ -25,6 +25,17 @@ export type ProductVariant = {
   id: string;
   options: Record<string, string>;
   stock: number;
+  /**
+   * Physical stock consumed by this sellable variant. Bundles can consume more
+   * than one SKU so the same helmet or goggles cannot be sold twice through
+   * different catalogue entries.
+   */
+  inventory: InventoryRequirement[];
+};
+
+export type InventoryRequirement = {
+  sku: string;
+  quantity: number;
 };
 
 export type Product = {

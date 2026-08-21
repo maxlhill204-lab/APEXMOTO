@@ -94,7 +94,7 @@ describe("checkout policy", () => {
 
   it("ignores browser prices and resolves the server-owned catalogue price", () => {
     const result = validateCheckoutRequest(
-      { businessId: siteConfig.businessId, items: [{ ...TEST_CART_ITEM, price: 1 }], shippingMethodId: "pickup" },
+      { businessId: siteConfig.businessId, items: [{ ...TEST_CART_ITEM, price: 1 }], shippingMethodId: "pickup", customerName: "TEST CUSTOMER", customerEmail: "customer@TEST.invalid", pickupAcknowledged: true },
       "https://store.example",
       "https://store.example",
     );
@@ -103,5 +103,11 @@ describe("checkout policy", () => {
       items: [{ productId: "helmet-matte-black", lineTotal: 12495 }],
       shipping: { amount: 0, pickup: true },
     });
+  });
+
+  it("requires a confirmation email and explicit pickup acknowledgement", () => {
+    const base = { businessId: siteConfig.businessId, items: [TEST_CART_ITEM], shippingMethodId: "pickup", customerName: "TEST CUSTOMER" };
+    expect(validateCheckoutRequest({ ...base, customerEmail: "invalid", pickupAcknowledged: true }, "https://store.example", "https://store.example")).toMatchObject({ allowed: false, code: "EMAIL_REQUIRED" });
+    expect(validateCheckoutRequest({ ...base, customerEmail: "customer@TEST.invalid", pickupAcknowledged: false }, "https://store.example", "https://store.example")).toMatchObject({ allowed: false, code: "PICKUP_ACK_REQUIRED" });
   });
 });

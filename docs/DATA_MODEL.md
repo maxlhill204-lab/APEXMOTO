@@ -6,7 +6,7 @@ A product belongs to one `businessId` and has a unique `id` and `slug`, category
 
 ## Variant
 
-Every variant has a unique `id`, exactly one value for every product option, and a non-negative integer `stock`. Stock is never inferred from a product-wide boolean. Checkout resolves the parent product price from the server catalogue after the exact variant is validated.
+Every variant has a unique `id`, exactly one value for every product option, a non-negative catalogue stock seed, and one or more `{ sku, quantity }` physical inventory requirements. Bundles consume their helmet and goggle SKUs instead of maintaining duplicate stock.
 
 ## Product image
 
@@ -18,7 +18,7 @@ Certification contains an optional standard, approval number, verification state
 
 ## Cart item
 
-`{ businessId, productId, variantId, quantity }`. No browser price, shipping price, product copy, personal information, or secret is stored. Resolution against the server catalogue produces display data and line totals.
+`{ businessId, productId, variantId, quantity }`. No browser price or shipping price is stored. Resolution against the server catalogue produces display data and line totals. Personal information is collected only at final review and sent to the durable order record.
 
 ## Fulfilment selection
 
@@ -28,6 +28,19 @@ Certification contains an optional standard, approval number, verification state
 
 Product-specific chart with manufacturer, verification flag, and centimetre rows. The ORZ Rally chart is transcribed from the owner-supplied product sheet and applies to the listed colour variants of that helmet.
 
-## Future migration
+## Operational tables
 
-When inventory moves to a database, add migrations for businesses, products, variants, inventory movements and reservations, orders, shipping quotes, and idempotency records. Scope every query by `businessId`, use atomic stock changes, keep append-only audit evidence, and add cross-business authorisation tests.
+- `store_settings`: public pickup availability/location disclosure/date/window and support expectation.
+- `inventory`: physical stock on hand by business/SKU.
+- `inventory_reservations`: `ACTIVE`, `CONSUMED` or `RELEASED` quantities tied to an order.
+- `inventory_events`: append-only paid decrements and owner adjustments.
+- `orders`: customer, fulfilment, amounts, explicit order/payment states, Stripe IDs and reservation deadline.
+- `order_items`: immutable product/variant/name/price/quantity/cart-key snapshot.
+- `order_events`: append-only checkout/payment/status/cancellation/refund evidence.
+- `webhook_events`: unique provider event and processing state.
+- `email_outbox`: unique order/kind/recipient, bounded attempts and provider evidence.
+- `cancellation_requests`: one open request per order and its outcome.
+- `admin_login_attempts`: business-scoped hashed network identifier, result and time.
+- `schema_migrations`: applied SQL migration versions.
+
+All monetary values are integer cents, operational queries are scoped by `businessId`, and reviewed migrations live in `db/migrations`.
