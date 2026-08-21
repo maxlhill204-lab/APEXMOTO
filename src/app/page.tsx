@@ -1,14 +1,18 @@
 import { ProductCard } from "@/components/product/product-card";
 import { ProductVisual } from "@/components/product/product-visual";
 import { formatPrice, siteConfig } from "@/config/site";
-import { bundleIndividualTotal, catalog } from "@/lib/products";
+import { bundleIndividualTotal } from "@/lib/products";
+import { getLiveCatalog } from "@/lib/live-catalog";
 import { ArrowRight, MapPin, PackageCheck, Ruler, Truck } from "lucide-react";
 import Link from "next/link";
 
-export default function HomePage() {
-  const heroProduct = catalog.find((product) => product.id === "helmet-matte-black")!;
-  const goggles = catalog.find((product) => product.id === "goggles-orz")!;
-  const bundle = catalog.find((product) => product.id === "bundle-helmet-goggles")!;
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const liveCatalog = await getLiveCatalog();
+  const heroProduct = liveCatalog.find((product) => product.id === "helmet-matte-black")!;
+  const goggles = liveCatalog.find((product) => product.id === "goggles-orz")!;
+  const bundle = liveCatalog.find((product) => product.id === "bundle-helmet-goggles")!;
   const individualTotal = bundleIndividualTotal(bundle) ?? bundle.price;
   const savings = individualTotal - bundle.price;
   const bundledGogglesPrice = bundle.price - heroProduct.price;
@@ -56,7 +60,7 @@ export default function HomePage() {
             <div><p className="eyebrow eyebrow--accent">THE RANGE</p><h2>Pick your setup.</h2></div>
             <Link href="/shop" className="text-link">Shop all <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
-          <div className="product-grid">{catalog.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+          <div className="product-grid">{liveCatalog.map((product) => <ProductCard key={product.id} product={product} />)}</div>
         </div>
       </section>
 

@@ -10,4 +10,5 @@ export const mobileNavigation = [
   ...mainNavigation,
   { label: "Shipping", href: "/shipping" },
   { label: "Contact", href: "/contact" },
+  { label: "Order help", href: "/order-help" },
 ] as const;

@@ -1,22 +1,23 @@
-# APEX MOTO implementation plan
+# APEX MOTO checkout reliability plan
 
 ## Objective
 
-Deliver a launch-ready, mobile-first APEX MOTO storefront for the supplied ORZ helmets and goggles. Keep the buying journey short, show current variant stock clearly, apply the owner-supplied delivery rules, and remain honest when payment or business-policy configuration is incomplete.
+Ensure APEX MOTO cannot accept payment without a durable, owner-visible order, allocated stock, recorded fulfilment details and retryable customer/owner confirmation emails.
 
-## Completed product scope
+## Implemented scope
 
-1. Production Next.js foundation, central APEX MOTO configuration, validated catalogue, and repository evidence records.
-2. Black-and-gold responsive design using the supplied logo, helmet, goggles, product-sheet, and helmet-bag imagery.
-3. Shop filters, product galleries, image-matched colour selection, exact size stock, persistent cart, bundle variants, and destination shipping selection.
-4. Deterministic checkout controls for origin, `businessId`, product/variant stock, server-owned catalogue prices, delivery method, destination rate, goggle-with-helmet limit, and idempotency.
-5. Size, shipping, returns, helmet information, FAQ, contact, privacy, terms, order-state, sitemap, robots, and error experiences.
-6. Lint, typecheck, automated tests, production build, content audit, route sweep, and responsive browser QA.
+1. Neon Postgres schema/migrations for orders, immutable items, shared physical SKU inventory, checkout reservations, Stripe events, order/inventory audit events, email outbox, cancellation requests, store settings and owner login rate limiting.
+2. Fail-closed checkout that collects name/email and explicit pickup acknowledgement, creates the order/reservation first, then opens server-priced Stripe Checkout with database and provider idempotency.
+3. Signed Stripe payment/expiration/failure/refund handlers with exact order/amount/currency verification and exactly-once stock/email effects.
+4. Detailed order-confirmation and private status/help journeys, confirmed-cart reconciliation, explicit cancellation acknowledgement, pickup availability and support-response expectations.
+5. Resend React Email templates for customer confirmation/status/refund and owner new-order/cancellation notifications, with durable five-attempt recovery and a protected daily backstop.
+6. Protected owner order desk for customer/items/quantities/address/pickup, payment/order/email status, fulfilment actions, inventory adjustment, pickup settings, email retry and confirmed full refunds.
+7. Security, operating, email and production-setup documentation plus unit/business-scope tests.
 
-## Release boundary
+## Provider release boundary
 
-The initial release uses repository-managed inventory. Stripe Checkout is available only after a protected server credential is configured. Stripe line-item prices are created from the validated server catalogue, never from browser input. There is no customer account, order database, or transactional inventory decrement in phase one.
+Code completion does not prove production readiness. Production checkout stays disabled until Neon is provisioned and migrated; Resend has a verified sender; the live Stripe endpoint and signing secret are installed; and independent order/admin/cron secrets exist in Vercel. A deployed test-mode pickup, delivery, duplicate-webhook, expiration, cancellation and refund journey must pass before live payments resume.
 
-## Owner launch gate
+## Remaining verification
 
-Before taking real orders, complete `LAUNCH_CHECKLIST.md`. The remaining important decisions are exact goggle quantities, the inferred white Medium quantity, final returns/exchange terms, tracking and processing expectations, legal identity where applicable, Stripe test evidence, final-domain configuration, and real-device/cross-browser checks.
+Run the full repository checks and local browser story, deploy a preview, configure providers, run provider-backed test-mode evidence, then promote and repeat one bounded production verification. Record provider status honestly in `SYSTEM_STATUS.json`.

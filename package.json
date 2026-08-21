@@ -15,15 +15,20 @@
     "test:watch": "vitest",
     "audit:fake-data": "node scripts/audit-production-content.mjs",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run audit:fake-data",
-    "db:generate": "node -e \"process.stdout.write('No database schema is configured in phase 1.\\n')\"",
-    "worker": "node -e \"process.stdout.write('No background worker is configured in phase 1.\\n')\""
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "db:generate": "node -e \"process.stdout.write('Schema is managed by reviewed SQL migrations in db/migrations.\\n')\"",
+    "worker": "node -e \"process.stdout.write('Email delivery is driven by the durable outbox and webhook/admin retry paths.\\n')\""
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "lucide-react": "1.31.0",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "stripe": "22.5.0"
+    "react-email": "^6.9.2",
+    "resend": "^6.21.0",
+    "stripe": "22.5.0",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@eslint/js": "9.39.4",
@@ -32,6 +37,7 @@
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@types/ws": "^8.18.1",
     "eslint": "9.39.4",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.5",

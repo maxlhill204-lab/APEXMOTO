@@ -15,6 +15,10 @@ const goggleColours = [
 const blackHelmetStock: Record<string, number> = { S: 1, M: 1, L: 1, XL: 1, XXL: 0 };
 const whiteHelmetStock: Record<string, number> = { S: 0, M: 1, L: 0, XL: 0, XXL: 0 };
 
+const helmetSku = (colour: "black" | "white", size: string) =>
+  `orz-helmet-${colour}-${size.toLowerCase()}`;
+const gogglesSku = (colour: string) => `orz-goggles-${colour}`;
+
 /**
  * OWNER PRODUCT EDITING AREA
  *
@@ -62,6 +66,7 @@ export const products: Product[] = [
       id: `black-${value.toLowerCase()}`,
       options: { colour: "matte-black", size: value },
       stock: blackHelmetStock[value],
+      inventory: [{ sku: helmetSku("black", value), quantity: 1 }],
     })),
     features: ["ABS shell", "Approx. 1080 g", "Extended off-road peak", "Rear ventilation"],
     specifications: [
@@ -107,6 +112,7 @@ export const products: Product[] = [
       id: `white-${value.toLowerCase()}`,
       options: { colour: "gloss-white", size: value },
       stock: whiteHelmetStock[value],
+      inventory: [{ sku: helmetSku("white", value), quantity: 1 }],
     })),
     features: ["ABS shell", "Approx. 1080 g", "Extended off-road peak", "Rear ventilation"],
     specifications: [
@@ -159,6 +165,7 @@ export const products: Product[] = [
       id: `goggles-${value}`,
       options: { colour: value },
       stock: 1,
+      inventory: [{ sku: gogglesSku(value), quantity: 1 }],
     })),
     featured: true,
     bestSeller: true,
@@ -215,6 +222,10 @@ export const products: Product[] = [
           id: `bundle-black-${size.toLowerCase()}-${goggles}`,
           options: { "helmet-colour": "matte-black", "helmet-size": size, goggles },
           stock: Math.min(blackHelmetStock[size], 1),
+          inventory: [
+            { sku: helmetSku("black", size), quantity: 1 },
+            { sku: gogglesSku(goggles), quantity: 1 },
+          ],
         })),
       ),
       ...helmetSizes.flatMap(({ value: size }) =>
@@ -222,6 +233,10 @@ export const products: Product[] = [
           id: `bundle-white-${size.toLowerCase()}-${goggles}`,
           options: { "helmet-colour": "gloss-white", "helmet-size": size, goggles },
           stock: Math.min(whiteHelmetStock[size], 1),
+          inventory: [
+            { sku: helmetSku("white", size), quantity: 1 },
+            { sku: gogglesSku(goggles), quantity: 1 },
+          ],
         })),
       ),
     ],

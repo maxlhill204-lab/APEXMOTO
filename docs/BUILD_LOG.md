@@ -133,3 +133,21 @@ Evidence is added only after a real command or browser check completes. Credenti
 - Verified the public production alias `https://apexmoto.vercel.app` returns HTTP 200, includes the updated header markup, and emits `https://apexmoto.vercel.app` as its canonical origin instead of localhost.
 - Sent one bounded production checkout-start request using an in-stock black Large helmet and pickup. The server returned the expected controlled HTTP 503 with no Checkout URL because `STRIPE_SECRET_KEY` is not configured in Vercel. No payment or paid order was created.
 - The exposed credential was not used locally, in GitHub, or in Vercel. Production checkout remains `AUTH_REQUIRED` until the owner rotates that credential and stores a fresh replacement through Vercel’s protected environment settings.
+
+## 2026-08-21 — checkout reliability reconstruction in progress
+
+- Reproduced the production risk boundary: an unsigned probe to the live webhook returned `NOT_CONFIGURED`, and the deployed handler contained no order, inventory or email mutation. Runtime logs contained no recoverable order evidence.
+- Implemented the reviewed Postgres migration for durable orders/items, shared physical SKU stock and reservations, append-only order/inventory/webhook evidence, bounded email outbox, cancellations, public pickup settings and rate-limited owner access.
+- Rebuilt checkout to fail closed unless database, signed webhook, order access and transactional email configuration are all present. It now creates/reserves the order before Stripe and verifies exact amount/currency exactly once after payment.
+- Implemented detailed success/status/help journeys, purchased-cart reconciliation, automatic customer/owner emails, cancellation acknowledgement, refund confirmation, owner order desk, inventory adjustment, pickup settings and email retry.
+- Added current operating, email and provider-setup documentation. No database, Resend sender, Stripe endpoint, customer order, refund, provider write or production deployment has been created or represented as verified during this revision.
+- Intermediate strict TypeScript passed and the expanded unit suite passed 20 of 20. Final lint/build/audit/browser/deployment evidence remains pending and will be appended only after completion.
+
+### Local completion evidence
+
+- `npm run verify` — PASS after the final application changes: ESLint, strict TypeScript, 20 tests, Next.js 16.3.1 production build with 24 routes, and production-content/key audit.
+- `npm audit` and `npm audit --omit=dev` — PASS; zero known vulnerabilities.
+- React quality review — PASS after stabilising purchased-cart reconciliation callbacks, authenticating every owner Server Action, fixing redirect/error control flow, adding required admin state selection, and parallelising independent owner reads.
+- Local browser — PASS: revised cart displayed the exact item/variant/quantity/total, Newport pickup disclosure, 26 August date, appointment/private-address wording, confirmation name/email, mandatory acknowledgement and one Checkout button. Clicking without acknowledgement produced a specific accessible error; completing the review produced the expected fail-closed configuration message without creating payment.
+- Local browser — PASS: `/admin/login` rendered as a separate private order-desk experience and truthfully reported that provider/owner access setup remains incomplete. The development server recorded the expected 200 page/API responses and controlled 503 checkout gate with no runtime exception.
+- Production provider flow, migrated database, email delivery, owner authenticated dashboard data, responsive screenshot automation and deployment remain unverified; none is labelled complete.

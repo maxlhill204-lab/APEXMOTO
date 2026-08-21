@@ -42,6 +42,13 @@ export const siteConfig = {
   instagramUrl: "https://www.instagram.com/apexmotostore.au/",
   facebookUrl: "https://www.facebook.com/share/19NopJFaeu/",
   pickupSuburb: "Newport",
+  pickupLocationLabel: "Newport, VIC",
+  pickupExactAddressDisclosure:
+    "The exact private pickup address is sent after your order and collection time are confirmed.",
+  pickupAppointmentRequired: true,
+  pickupSameDayAvailable: false,
+  pickupNextAvailableDate: "2026-08-26",
+  pickupWindow: "By appointment — your collection time is confirmed by email",
   city: "Melbourne",
   state: "Victoria",
   country: "Australia",
@@ -49,8 +56,10 @@ export const siteConfig = {
   gogglesShippingPrice: 800,
   maxIncludedGogglesWithHelmet: 3,
   announcementBarText:
-    "NEWPORT PICKUP  /  AUSTRALIA-WIDE DELIVERY",
-  supportHours: "Replies by email or Instagram",
+    "NEWPORT PICKUP BY APPOINTMENT  /  AUSTRALIA-WIDE DELIVERY",
+  supportHours: "Customer support replies within 12–48 hours",
+  supportResponseHoursMin: 12,
+  supportResponseHoursMax: 48,
   shippingProcessingText:
     "Dispatch timing is confirmed with the order while the store is operating with limited local stock.",
   trackingOffered: false,
