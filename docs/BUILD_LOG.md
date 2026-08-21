@@ -151,3 +151,11 @@ Evidence is added only after a real command or browser check completes. Credenti
 - Local browser — PASS: revised cart displayed the exact item/variant/quantity/total, Newport pickup disclosure, 26 August date, appointment/private-address wording, confirmation name/email, mandatory acknowledgement and one Checkout button. Clicking without acknowledgement produced a specific accessible error; completing the review produced the expected fail-closed configuration message without creating payment.
 - Local browser — PASS: `/admin/login` rendered as a separate private order-desk experience and truthfully reported that provider/owner access setup remains incomplete. The development server recorded the expected 200 page/API responses and controlled 503 checkout gate with no runtime exception.
 - Production provider flow, migrated database, email delivery, owner authenticated dashboard data, responsive screenshot automation and deployment remain unverified; none is labelled complete.
+
+### Preview and production release evidence
+
+- GitHub pull request #5 passed both Vercel checks and was squash-merged to `main` as verified commit `deeaa410`.
+- The final Vercel preview was `READY`. Browser QA exercised an in-stock helmet through the pickup cart review and confirmed the checkout endpoint returned the intended customer-facing setup message without opening Stripe or taking payment.
+- The Vercel production deployment for commit `deeaa410` reached `READY`. The public homepage and separate `/admin/login` order-desk boundary rendered successfully at `https://apexmoto.vercel.app`.
+- A bounded same-origin production checkout probe used the store's public contact identity and returned HTTP 503 with `CHECKOUT_NOT_READY`; no Checkout URL or payment was created. An unsigned webhook probe returned HTTP 503 with `NOT_CONFIGURED`.
+- Production is therefore intentionally fail-closed. Neon migration, Resend sender/delivery, signed Stripe webhook delivery, owner dashboard data and test/live payment journeys remain launch gates and are not represented as complete.
