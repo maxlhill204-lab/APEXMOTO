@@ -15,7 +15,10 @@ export async function POST(request: Request) {
   if (Number(request.headers.get("content-length") ?? 0) > 32_000) return jsonError("Checkout request is too large.", 413);
   let payload: unknown;
   try { payload = await request.json(); } catch { return jsonError("Your cart could not be read.", 400); }
-  const policy = validateCheckoutRequest(payload, request.headers.get("origin"), getSiteUrl());
+  // Validate against the origin that actually served this request. This keeps
+  // production same-origin only while still allowing Vercel preview deployments
+  // and local development to exercise the real checkout path.
+  const policy = validateCheckoutRequest(payload, request.headers.get("origin"), new URL(request.url).origin);
   if (!policy.allowed) return jsonError(policy.message, 400, policy.code);
 
   const requestKey = request.headers.get("x-checkout-idempotency-key")?.trim();

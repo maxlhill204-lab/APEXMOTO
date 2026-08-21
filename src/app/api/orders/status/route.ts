@@ -1,4 +1,3 @@
-import { getSiteUrl } from "@/config/site";
 import { getAccessibleOrder } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -6,7 +5,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   try {
-    if (!origin || new URL(origin).origin !== new URL(getSiteUrl()).origin) return Response.json({ message: "Request not accepted." }, { status: 403 });
+    if (!origin || new URL(origin).origin !== new URL(request.url).origin) return Response.json({ message: "Request not accepted." }, { status: 403 });
   } catch { return Response.json({ message: "Request not accepted." }, { status: 403 }); }
   if (!request.headers.get("content-type")?.startsWith("application/json")) return Response.json({ message: "JSON required." }, { status: 415 });
   let body: { orderNumber?: unknown; token?: unknown };
