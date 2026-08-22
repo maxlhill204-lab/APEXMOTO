@@ -21,12 +21,13 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "@react-email/render": "^2.1.0",
     "lucide-react": "1.31.0",
     "next": "16.3.1",
+    "postmark": "^5.1.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-email": "^6.9.2",
-    "resend": "^6.21.0",
     "stripe": "22.5.0",
     "ws": "^8.21.3"
   },

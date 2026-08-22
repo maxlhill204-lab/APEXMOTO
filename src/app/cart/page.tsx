@@ -97,7 +97,7 @@ export default function CartPage() {
           {shipping.available ? <div className="order-summary__total"><span>Total</span><strong>{formatPrice(subtotal + shippingAmount)}</strong></div> : null}
           {!shipping.available && shippingMethodId ? <p className="form-message form-message--error">{shipping.message} <a href={`mailto:${siteConfig.email}?subject=APEX MOTO shipping quote`}>Email for a quote.</a></p> : null}
           <CheckoutButton shippingMethodId={shippingMethodId} customerName={customerName} customerEmail={customerEmail} pickupAcknowledged={shippingMethodId !== "pickup" || pickupAcknowledged} disabled={!shipping.available} />
-          <p>Secure checkout opens with Stripe. Payment is only accepted when our order record, stock allocation and confirmation emails are all available. Need help? Email <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>. Replies are normally within 12–48 hours.</p>
+          <p>Secure checkout opens with Stripe. Have a discount code? Enter it on the Stripe payment screen. Payment is only accepted when our order record, stock allocation and confirmation emails are all available. Need help? Email <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>. Replies are normally within 12–48 hours.</p>
           <Link href="/shop" className="text-link">Continue shopping</Link>
         </aside>
       </div>

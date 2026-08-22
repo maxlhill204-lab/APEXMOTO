@@ -2,7 +2,7 @@ import { siteConfig } from "@/config/site";
 import { deliverPendingEmails } from "@/lib/email";
 import { operationalLog } from "@/lib/operational-log";
 import { processPaidCheckout, processRefundEvent, processTerminalCheckout, recordIgnoredWebhook } from "@/lib/orders";
-import { getStripe, stripeObjectId } from "@/lib/stripe";
+import { checkoutDiscountDetails, checkoutPaymentMethodLabel, getStripe, retrieveCheckoutSessionForFulfilment, stripeObjectId } from "@/lib/stripe";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -25,7 +25,12 @@ export async function POST(request: Request) {
 
   try {
     if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
-      const session = event.data.object;
+      const eventSession = event.data.object;
+      if (eventSession.metadata?.businessId !== siteConfig.businessId) {
+        await recordIgnoredWebhook(event.id, event.type);
+        return Response.json({ state: "VERIFIED_IGNORED" });
+      }
+      const session = await retrieveCheckoutSessionForFulfilment(eventSession.id);
       if (session.metadata?.businessId !== siteConfig.businessId) {
         await recordIgnoredWebhook(event.id, event.type);
         return Response.json({ state: "VERIFIED_IGNORED" });
@@ -34,6 +39,7 @@ export async function POST(request: Request) {
         await recordIgnoredWebhook(event.id, event.type);
         return Response.json({ state: "VERIFIED_AWAITING_PAYMENT" });
       }
+      const discount = checkoutDiscountDetails(session);
       const result = await processPaidCheckout({
         eventId: event.id,
         eventType: event.type,
@@ -41,6 +47,10 @@ export async function POST(request: Request) {
         clientReferenceId: session.client_reference_id,
         paymentStatus: session.payment_status,
         amountTotal: session.amount_total,
+        discountAmount: discount.discountAmount,
+        promotionCode: discount.promotionCode,
+        stripePromotionCodeId: discount.stripePromotionCodeId,
+        paymentMethodLabel: checkoutPaymentMethodLabel(session),
         currency: session.currency,
         paymentIntentId: stripeObjectId(session.payment_intent),
         customerId: stripeObjectId(session.customer),

@@ -10,7 +10,7 @@
 - Contact input is length-bounded and control characters are removed. The forwarding endpoint must use HTTPS, cannot target localhost, cannot redirect, and is time-bounded.
 - No raw user or provider HTML is rendered. JSON-LD is serialised from repository-owned data and escapes `<`.
 - The cart contains no personal/payment data. A pending marker contains an opaque order token and cart keys and is removed after confirmed payment or a terminal checkout.
-- Checkout fails closed unless database, Stripe key, webhook secret, order-access secret, Resend key and sender configuration are present.
+- Checkout fails closed unless database, Stripe key, webhook secret, order-access secret, a configured transactional provider, and the verified sender configuration are present. Production keeps both Postmark primary and Resend fallback credentials.
 - Webhook IDs, checkout keys, inventory consumption, email jobs and provider sends have independent idempotency boundaries. Append-only events preserve audit evidence.
 - `/admin` uses a short-lived signed HttpOnly cookie, timing-safe password checking, SameSite=Strict, database rate limiting, authenticated Server Actions and business-scoped queries. Refunds require exact order-number confirmation and remain unconfirmed until Stripe reports success.
 - Operational logs exclude names, emails, addresses, access tokens and secrets. Raw provider payloads are not persisted.

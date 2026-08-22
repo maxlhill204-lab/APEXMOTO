@@ -47,6 +47,23 @@ export function snapshotOrderItems(items: ResolvedCartItem[]): OrderItemSnapshot
   }));
 }
 
+export function reconcileStripeCheckoutTotal(input: {
+  subtotalAmount: number;
+  shippingAmount: number;
+  discountAmount: number;
+  amountTotal: number | null;
+}) {
+  const values = [input.subtotalAmount, input.shippingAmount, input.discountAmount, input.amountTotal];
+  if (values.some((value) => value === null || !Number.isSafeInteger(value) || Number(value) < 0)) {
+    throw new Error("Stripe checkout totals are missing or invalid.");
+  }
+  const grossAmount = input.subtotalAmount + input.shippingAmount;
+  if (input.discountAmount > grossAmount || input.amountTotal !== grossAmount - input.discountAmount) {
+    throw new Error("Stripe amount does not match the reserved order after discount.");
+  }
+  return { grossAmount, discountAmount: input.discountAmount, totalAmount: input.amountTotal };
+}
+
 export const orderStatusLabel = (status: OrderStatus) => ({
   PENDING_PAYMENT: "Awaiting payment",
   PAID: "Paid — order received",

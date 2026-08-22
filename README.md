@@ -12,7 +12,7 @@ The production catalogue uses the supplied APEX MOTO logo and real product image
 - Lucide icons
 - Stripe’s server SDK for hosted checkout and verified webhooks
 - Neon Postgres for durable orders, shared-SKU stock reservations, events and email outbox
-- Resend and React Email for customer and owner transactional messages
+- Postmark-first transactional email with a verified Resend fallback and React Email templates
 - Vitest for catalogue, stock, cart, business-scope, shipping, bundle, and checkout-policy tests
 - Device-local storage only for non-sensitive cart identifiers and pending-order reconciliation
 - Protected `/admin` order desk for fulfilment, stock, email status, pickup settings and guarded refunds
@@ -116,7 +116,7 @@ Edit `src/config/site.ts`. Business name, tagline, email, phone, social URLs, pi
 
 The current direct links are:
 
-- Email: `apexmotostore.au@gmail.com`
+- Email: `max@apexmoto.com.au` (forwarded to the store Gmail inbox)
 - Instagram: `https://www.instagram.com/apexmotostore.au/`
 - Facebook: `https://www.facebook.com/share/19NopJFaeu/`
 
@@ -132,7 +132,7 @@ The cart chooses one method before checkout. The server recalculates it from cat
 
 ## Configure orders, email and Stripe
 
-Follow `docs/PRODUCTION_SETUP.md` in Stripe test mode first. Add Neon `DATABASE_URL`, run `npm run db:migrate`, verify a Resend sender, configure the five listed Stripe webhook events, and generate unrelated order/admin/cron secrets. Checkout refuses payment if any critical value is absent.
+Follow `docs/PRODUCTION_SETUP.md` in Stripe test mode first. Add Neon `DATABASE_URL`, run `npm run db:migrate`, verify the Postmark and Resend sending configuration, configure the five listed Stripe webhook events, and generate unrelated order/admin/cron secrets. Checkout refuses payment if any critical value is absent.
 
 The signed Stripe webhook and the server-retrieved success-page fallback invoke the same transaction. The transaction verifies amount/currency, consumes reserved stock exactly once, records evidence and enqueues customer/owner confirmations. A redirect by itself never changes an order.
 
@@ -151,7 +151,9 @@ Copy `.env.example` to `.env.local`. `.env*` is ignored except `.env.example`.
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No in current UI | Reserved for future Stripe client features |
 | `STRIPE_WEBHOOK_SECRET` | Webhooks | Verifies Stripe event signatures |
 | `DATABASE_URL` | Checkout | Neon Postgres connection used for orders and inventory |
-| `RESEND_API_KEY` / `ORDER_EMAIL_FROM` | Checkout | Transactional email provider and verified sender |
+| `POSTMARK_SERVER_TOKEN` | Email | Primary Postmark transactional credential |
+| `RESEND_API_KEY` | Email | Verified automatic fallback when Postmark rejects or cannot accept a send |
+| `ORDER_EMAIL_FROM` | Checkout | Shared verified sender used by both providers |
 | `STORE_ORDER_EMAIL` | Checkout | Owner new-order/cancellation recipient |
 | `ORDER_ACCESS_SECRET` | Checkout | Signs private customer order links |
 | `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` | Owner desk | Protects `/admin` |
@@ -165,7 +167,8 @@ Copy `.env.example` to `.env.local`. `.env*` is ignored except `.env.example`.
 Current production:
 
 - GitHub: `https://github.com/maxlhill204-lab/APEXMOTO`
-- Vercel: `https://apexmoto.vercel.app`
+- Storefront: `https://www.apexmoto.com.au`
+- Vercel project: `https://vercel.com/maxlhill204-labs-projects/apexmoto`
 
 1. Finish `LAUNCH_CHECKLIST.md` and run `npm run verify`.
 2. Push the repository to GitHub without `.env.local` or any credential.
@@ -196,7 +199,7 @@ Restrict Vercel’s GitHub access to the intended repository, protect the produc
 - **A goggle-heavy helmet cart needs a quote:** more than three standalone pairs with a helmet intentionally stops before payment.
 - **The form will not send:** configure a valid HTTPS `CONTACT_FORM_ENDPOINT`; direct email and social links remain available.
 - **The success page says unverified:** use the complete private return/status link. A Stripe session must map to the durable APEX MOTO order and exact amount.
-- **A confirmation email failed:** inspect the job in `/admin`, correct the Resend sender/domain, then retry. Five attempts are the hard bound.
+- **A confirmation email failed:** inspect the bounded provider error in `/admin`, correct the Postmark/Resend configuration, then choose `Retry failed emails`. Automatic attempts use backoff and stop after eight; an explicit owner retry resets that job safely.
 
 ## Before taking real orders
 

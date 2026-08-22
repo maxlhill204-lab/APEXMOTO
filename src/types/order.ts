@@ -52,7 +52,11 @@ export type PublicOrder = {
   paymentStatus: PaymentStatus;
   subtotalAmount: number;
   shippingAmount: number;
+  discountAmount: number;
   totalAmount: number;
+  promotionCode: string | null;
+  stripePromotionCodeId: string | null;
+  paymentMethodLabel: string | null;
   customerName: string;
   customerEmail: string;
   fulfilmentMethodId: string;
@@ -62,6 +66,7 @@ export type PublicOrder = {
   shippingDetails: Record<string, string> | null;
   createdAt: string;
   paidAt: string | null;
+  refundedAt: string | null;
   items: OrderItemSnapshot[];
 };
 
