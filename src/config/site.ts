@@ -37,7 +37,7 @@ export const siteConfig = {
   tagline: "Ride at the apex.",
   description:
     "ORZ motocross helmets and goggles from APEX MOTO, with Melbourne pickup and Australia-wide delivery.",
-  email: "apexmotostore.au@gmail.com",
+  email: "max@apexmoto.com.au",
   phone: "",
   instagramUrl: "https://www.instagram.com/apexmotostore.au/",
   facebookUrl: "https://www.facebook.com/share/19NopJFaeu/",

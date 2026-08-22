@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { siteConfig } from "@/config/site";
+import { MAX_EMAIL_ATTEMPTS } from "@/lib/email-policy";
 import { getSql, withDbTransaction } from "@/lib/db";
 import { createOrderAccessToken, verifyOrderAccessToken } from "@/lib/order-access";
 import {
@@ -521,13 +522,13 @@ export async function updateStoreSettings(input: Pick<StoreSettings, "pickupEnab
 
 export async function resetFailedEmails(orderId: string) {
   const sql = getSql();
-  await sql`UPDATE email_outbox SET status='PENDING',next_attempt_at=now(),last_error=null WHERE business_id=${siteConfig.businessId} AND order_id=${orderId} AND status='FAILED' AND attempts < 5`;
+  await sql`UPDATE email_outbox SET status='PENDING',attempts=0,next_attempt_at=now(),last_error=null WHERE business_id=${siteConfig.businessId} AND order_id=${orderId} AND status='FAILED'`;
   return getOrderById(orderId);
 }
 
 export async function listDueEmailOrderIds(limit = 25) {
   const sql = getSql();
-  const rows = await sql`SELECT DISTINCT order_id FROM email_outbox WHERE business_id=${siteConfig.businessId} AND status IN ('PENDING','FAILED') AND attempts < 5 AND next_attempt_at <= now() ORDER BY order_id LIMIT ${Math.min(Math.max(limit, 1), 25)}`;
+  const rows = await sql`SELECT DISTINCT order_id FROM email_outbox WHERE business_id=${siteConfig.businessId} AND status IN ('PENDING','FAILED') AND attempts < ${MAX_EMAIL_ATTEMPTS} AND next_attempt_at <= now() ORDER BY order_id LIMIT ${Math.min(Math.max(limit, 1), 25)}`;
   return rows.map((row) => String(row.order_id));
 }
 

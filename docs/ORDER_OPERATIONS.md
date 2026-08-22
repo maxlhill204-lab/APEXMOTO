@@ -13,7 +13,7 @@ Do not fulfil from a Stripe payment row alone. The order desk is the fulfilment 
 3. Stripe Checkout receives immutable order metadata and expires with the stock reservation.
 4. A signed paid event locks the order, verifies amount/currency, consumes the reservation exactly once, decrements physical inventory, records audit evidence, and enqueues the two confirmations.
 5. The order return page invokes the same idempotent fulfilment logic as a latency fallback; it never trusts the redirect itself.
-6. Customer and owner email jobs use deterministic provider idempotency keys. A provider failure causes Stripe to retry the safely idempotent webhook, and the daily protected outbox job is a backstop. The owner can also retry failed jobs.
+6. Customer and owner email jobs are unique in the database. Postmark is attempted first; Resend is the verified automatic fallback and receives a deterministic idempotency key. The daily protected outbox job is a recovery backstop, and the owner can explicitly reset and retry a failed job after correcting a provider issue.
 7. Checkout expiration or asynchronous payment failure releases the reservation without decrementing stock.
 
 ## Fulfilment
@@ -31,7 +31,7 @@ The full-refund control requires the order number to be typed. It calls Stripe w
 
 ## Failed email
 
-The order desk lists kind, recipient, state, attempts, and the bounded provider error. Correct the Resend/domain configuration first, then select `Retry failed emails`. Jobs stop automatically after five attempts so failures cannot loop forever.
+The order desk lists kind, recipient, state, attempts, and the bounded provider error. Correct the Postmark/Resend or recipient issue first, then select `Retry failed emails`. Automatic retries obey `next_attempt_at`, back off from five minutes to multiple days, and stop after eight attempts. The authenticated owner control resets only failed jobs and makes one new bounded retry cycle possible.
 
 ## Stock adjustments
 

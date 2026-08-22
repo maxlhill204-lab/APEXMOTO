@@ -11,17 +11,18 @@ export function getStripe() {
 }
 
 export function checkoutReadiness() {
+  const hasEmailProvider = Boolean(process.env.POSTMARK_SERVER_TOKEN?.trim() || process.env.RESEND_API_KEY?.trim());
   const missing = [
     ["DATABASE_URL", process.env.DATABASE_URL],
     ["STRIPE_SECRET_KEY", process.env.STRIPE_SECRET_KEY],
     ["STRIPE_WEBHOOK_SECRET", process.env.STRIPE_WEBHOOK_SECRET],
     ["ORDER_ACCESS_SECRET", process.env.ORDER_ACCESS_SECRET],
-    ["POSTMARK_SERVER_TOKEN", process.env.POSTMARK_SERVER_TOKEN],
     ["ORDER_EMAIL_FROM", process.env.ORDER_EMAIL_FROM],
     ["ADMIN_PASSWORD", process.env.ADMIN_PASSWORD],
     ["ADMIN_SESSION_SECRET", process.env.ADMIN_SESSION_SECRET],
     ["CRON_SECRET", process.env.CRON_SECRET],
   ].filter(([, value]) => !value?.trim()).map(([name]) => name);
+  if (!hasEmailProvider) missing.push("TRANSACTIONAL_EMAIL_PROVIDER");
   if ((process.env.ORDER_ACCESS_SECRET?.trim().length ?? 0) < 32) missing.push("ORDER_ACCESS_SECRET_LENGTH");
   if ((process.env.ADMIN_SESSION_SECRET?.trim().length ?? 0) < 32) missing.push("ADMIN_SESSION_SECRET_LENGTH");
   if (!isValidAdminPasscode(process.env.ADMIN_PASSWORD)) missing.push("ADMIN_PASSWORD_FORMAT");

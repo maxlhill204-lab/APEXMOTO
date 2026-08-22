@@ -7,8 +7,8 @@ Do not accept real payment until every required item has real evidence.
 - [x] Use the supplied APEX MOTO name and logo.
 - [x] Add the supplied email, Instagram, and Facebook links.
 - [x] Set Newport / Melbourne pickup without publishing a private address.
-- [x] Use `https://apexmoto.vercel.app` as the current canonical HTTPS production origin.
-- [ ] Attach a custom domain later if desired, then update `NEXT_PUBLIC_SITE_URL` and redeploy.
+- [x] Use `https://www.apexmoto.com.au` as the canonical HTTPS production origin.
+- [x] Attach and verify the root and `www` custom domains, then set `NEXT_PUBLIC_SITE_URL` in Vercel.
 
 ## Products and stock
 
@@ -20,7 +20,8 @@ Do not accept real payment until every required item has real evidence.
 - [ ] Count each goggle colour; the catalogue currently uses the conservative minimum of one each because exact quantities were not supplied.
 - [ ] Recount physical stock immediately before online payment opens.
 - [x] Map bundle variants to the same physical helmet and goggle SKUs as individual products.
-- [ ] Provision/migrate Neon and verify the owner dashboard physical counts against a real recount.
+- [x] Provision/migrate Neon and initialize the owner dashboard with the supplied physical counts.
+- [ ] Verify those dashboard counts against a fresh physical recount before restocking or changing availability.
 
 ## Product information and safety
 
@@ -45,11 +46,11 @@ Do not accept real payment until every required item has real evidence.
 - [x] Create matching one-time test products and prices in the connected APEX WEB sandbox as provider evidence.
 - [x] Derive Checkout line-item prices from the validated server catalogue so browser amounts are never trusted.
 - [ ] Rotate the Stripe secret that was exposed in chat before using any replacement credential.
-- [ ] Add Neon `DATABASE_URL`, run `npm run db:migrate`, and verify `/admin` can read the empty/real order state.
-- [ ] Verify an owned sender domain in Resend and configure `RESEND_API_KEY`, `ORDER_EMAIL_FROM`, and `STORE_ORDER_EMAIL`.
-- [ ] Configure independent `ORDER_ACCESS_SECRET`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `CRON_SECRET`, and private pickup address as documented.
-- [ ] Add a fresh restricted or secret server credential and the endpoint-specific `STRIPE_WEBHOOK_SECRET` locally and in Vercel; never commit them.
-- [ ] Configure the five events listed in `docs/PRODUCTION_SETUP.md` on the correct test/live endpoint.
+- [x] Add Neon `DATABASE_URL`, run both migrations, and verify `/admin` can read the initialized production state.
+- [x] Verify the Postmark and Resend sender DNS, configure both provider credentials, and verify a real fallback message reaches Gmail with DKIM/SPF/DMARC passing.
+- [x] Configure independent `ORDER_ACCESS_SECRET`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `CRON_SECRET`, and the private pickup address in Vercel.
+- [x] Add the live Stripe server credential and endpoint-specific `STRIPE_WEBHOOK_SECRET` in Vercel without committing them.
+- [x] Configure the five events listed in `docs/PRODUCTION_SETUP.md` on the APEXMOTO live endpoint.
 - [ ] Test successful, cancelled, and failed checkout paths.
 - [ ] Confirm pickup and every exact delivery rate inside hosted checkout.
 - [ ] Confirm regional quote-only options cannot proceed to payment.
@@ -62,7 +63,7 @@ Do not accept real payment until every required item has real evidence.
 - [x] Run `npm run verify` with no failures.
 - [x] Push to GitHub without `.env.local` or credentials.
 - [x] Deploy GitHub `main` to Vercel production at `https://apexmoto.vercel.app`.
-- [ ] Complete every environment/provider gate in `docs/PRODUCTION_SETUP.md`, then redeploy.
+- [x] Complete the database, DNS, Stripe, owner-access, inbound-mail, and verified fallback-email provider gates in `docs/PRODUCTION_SETUP.md`.
 - [ ] Test 320, 375, 390, 430, 768, 1024, and 1440 pixel layouts on the deployed site.
 - [ ] Test on a real iPhone/Safari plus current Chrome, Edge, and Firefox.
 - [ ] Open the black-helmet link from a Marketplace message and confirm price, size L, pickup, goggles, and add-to-cart are obvious.

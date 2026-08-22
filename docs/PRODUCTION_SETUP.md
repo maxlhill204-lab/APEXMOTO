@@ -11,10 +11,12 @@ Checkout intentionally returns `CHECKOUT_NOT_READY` until all order, webhook and
 
 ## 2. Transactional email
 
-1. Create an APEX MOTO Postmark server and verify `apexmoto.com.au` using its DKIM TXT and custom Return-Path CNAME records.
-2. Set `POSTMARK_SERVER_TOKEN`, `ORDER_EMAIL_FROM`, and `STORE_ORDER_EMAIL` in Vercel. A Gmail address cannot be used as an unverified `from` identity.
-3. Keep Postmark's transactional message stream named `outbound`; this application disables open and link tracking.
-4. Send a test-mode paid order and confirm both the customer and store copies show `SENT` in `/admin`.
+1. Create an APEX MOTO Postmark server and verify `apexmoto.com.au` using its DKIM TXT and custom Return-Path CNAME records. Keep the transactional stream named `outbound`; the application disables open and link tracking.
+2. Verify the same sender domain in Resend and publish its DKIM, `send` MX/SPF, and DMARC records. Resend is the automatic fallback when Postmark rejects or cannot accept a message.
+3. Set `POSTMARK_SERVER_TOKEN`, `RESEND_API_KEY`, `ORDER_EMAIL_FROM`, and `STORE_ORDER_EMAIL` in Vercel. `ORDER_EMAIL_FROM` must use the verified domain; a Gmail address cannot be used as the sender identity.
+4. Complete Postmark's manual account approval before relying on it for unrestricted recipients. Checkout can remain operational during review because the verified Resend fallback and Stripe's independent `receipt_email` are both configured.
+5. Receive `max@apexmoto.com.au` through ImprovMX: root MX priorities 10/20 point to `mx1.improvmx.com` and `mx2.improvmx.com`, root SPF includes `spf.improvmx.com`, and the alias forwards to the store Gmail inbox.
+6. Send provider-only tests, then complete a test-mode paid order and confirm both customer and store copies show `SENT` in `/admin`. Provider acceptance is not proof that a recipient opened the message.
 
 ## 3. Stripe
 
