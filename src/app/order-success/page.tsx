@@ -3,7 +3,7 @@ import { formatPrice, siteConfig } from "@/config/site";
 import { deliverPendingEmails } from "@/lib/email";
 import { formatPickupDate, orderStatusLabel } from "@/lib/order-domain";
 import { getAccessibleOrder, processPaidCheckout } from "@/lib/orders";
-import { getStripe, stripeObjectId } from "@/lib/stripe";
+import { checkoutDiscountDetails, checkoutPaymentMethodLabel, retrieveCheckoutSessionForFulfilment, stripeObjectId } from "@/lib/stripe";
 import type { PublicOrder } from "@/types/order";
 import { CheckCircle2, CircleAlert, MailCheck, MapPin, PackageCheck } from "lucide-react";
 import type { Metadata } from "next";
@@ -19,9 +19,10 @@ async function loadConfirmedOrder(orderNumber?: string, token?: string, sessionI
   if (order.paymentStatus === "PAID" || order.paymentStatus === "REFUNDED") return order;
   if (!sessionId || !/^cs_(?:test_|live_)?[A-Za-z0-9]+$/.test(sessionId)) return order;
   try {
-    const session = await getStripe().checkout.sessions.retrieve(sessionId);
+    const session = await retrieveCheckoutSessionForFulfilment(sessionId);
     if (session.metadata?.businessId !== siteConfig.businessId || session.metadata.orderId !== order.id) return order;
     if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") return order;
+    const discount = checkoutDiscountDetails(session);
     const confirmed = await processPaidCheckout({
       eventId: `checkout-return:${session.id}`,
       eventType: "checkout.return",
@@ -29,6 +30,10 @@ async function loadConfirmedOrder(orderNumber?: string, token?: string, sessionI
       clientReferenceId: session.client_reference_id,
       paymentStatus: session.payment_status,
       amountTotal: session.amount_total,
+      discountAmount: discount.discountAmount,
+      promotionCode: discount.promotionCode,
+      stripePromotionCodeId: discount.stripePromotionCodeId,
+      paymentMethodLabel: checkoutPaymentMethodLabel(session),
       currency: session.currency,
       paymentIntentId: stripeObjectId(session.payment_intent),
       customerId: stripeObjectId(session.customer),
@@ -54,7 +59,7 @@ export default async function OrderSuccessPage({ searchParams }: { searchParams:
     <div className="container order-confirmation__layout">
       <section className="confirmation-panel"><div className="confirmation-panel__heading"><div><small>ORDER NUMBER</small><strong>{order.orderNumber}</strong></div><span>{orderStatusLabel(order.status)}</span></div>
         <div className="confirmation-lines">{order.items.map((item) => <div key={item.cartItemKey}><span><strong>{item.quantity} × {item.productName}</strong><small>{item.variantLabel}</small></span><strong>{formatPrice(item.lineTotal)}</strong></div>)}</div>
-        <div className="confirmation-totals"><div><span>Subtotal</span><strong>{formatPrice(order.subtotalAmount)}</strong></div><div><span>{order.fulfilmentLabel}</span><strong>{order.shippingAmount ? formatPrice(order.shippingAmount) : "Free"}</strong></div><div><span>Total paid</span><strong>{formatPrice(order.totalAmount)}</strong></div></div>
+        <div className="confirmation-totals"><div><span>Subtotal</span><strong>{formatPrice(order.subtotalAmount)}</strong></div><div><span>{order.fulfilmentLabel}</span><strong>{order.shippingAmount ? formatPrice(order.shippingAmount) : "Free"}</strong></div>{order.discountAmount > 0 ? <div><span>Discount{order.promotionCode ? ` (${order.promotionCode})` : ""}</span><strong>−{formatPrice(order.discountAmount)}</strong></div> : null}<div><span>Total paid</span><strong>{formatPrice(order.totalAmount)}</strong></div></div>
       </section>
       <aside className="next-steps-panel"><h2>What happens next</h2>
         <div><MailCheck aria-hidden="true" /><span><strong>Confirmation email</strong><small>Sent automatically after payment confirmation. Check spam or promotions, then contact us if it has not arrived.</small></span></div>

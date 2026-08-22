@@ -47,6 +47,7 @@ export async function POST(request: Request) {
     stripeRequestAttempted = true;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      allow_promotion_codes: true,
       client_reference_id: reserved.orderId,
       line_items: policy.items.map((item) => ({
         price_data: { currency: "aud", unit_amount: item.product.price, product_data: { name: item.product.name, description: getVariantLabel(item.product, item.variant), metadata: { businessId: siteConfig.businessId, productId: item.product.id, variantId: item.variant.id } } },
@@ -63,7 +64,10 @@ export async function POST(request: Request) {
       custom_text: { submit: { message: policy.shipping.pickup
         ? `Pickup is in ${settings.pickupLocationLabel}, no earlier than ${formatPickupDate(settings.pickupNextAvailableDate)}, and only at a time confirmed by email. ${settings.pickupAddressDisclosure}`
         : `Delivery method: ${shipping.label}. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
-      payment_intent_data: { metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber } },
+      payment_intent_data: {
+        receipt_email: policy.customerEmail,
+        metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber },
+      },
       integration_identifier: "apexmoto_kzqtrvpm",
       expires_at: Math.floor(new Date(reserved.reservationExpiresAt).getTime() / 1000),
       success_url: `${siteUrl}/order-success?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(reserved.orderNumber)}&token=${encodeURIComponent(reserved.accessToken)}`,

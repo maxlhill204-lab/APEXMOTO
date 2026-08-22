@@ -37,6 +37,7 @@ function copyFor(kind: EmailKind, order: PublicOrder) {
 export function OrderEmail({ kind, order, accessToken, privatePickupAddress }: { kind: EmailKind; order: PublicOrder; accessToken: string; privatePickupAddress?: string }) {
   const copy = copyFor(kind, order);
   const isOwner = kind.startsWith("OWNER_");
+  const isRefund = kind === "CUSTOMER_REFUNDED";
   const pickup = order.fulfilmentMethodId === "pickup";
   return (
     <Html><Head /><Preview>{copy.preview}</Preview><Body style={styles.body}><Container style={styles.card}>
@@ -48,7 +49,13 @@ export function OrderEmail({ kind, order, accessToken, privatePickupAddress }: {
         <Text style={styles.line}><strong>Order:</strong> {order.orderNumber}</Text>
         <Text style={styles.line}><strong>Status:</strong> {orderStatusLabel(order.status)}</Text>
         {order.items.map((item) => <Text key={`${item.productId}:${item.variantId}`} style={styles.line}>{item.quantity} × {item.productName} — {item.variantLabel} ({formatPrice(item.lineTotal)})</Text>)}
+        <Text style={styles.line}><strong>Subtotal:</strong> {formatPrice(order.subtotalAmount)}</Text>
+        <Text style={styles.line}><strong>{order.fulfilmentLabel}:</strong> {order.shippingAmount ? formatPrice(order.shippingAmount) : "Free"}</Text>
+        {order.discountAmount > 0 ? <Text style={styles.line}><strong>Discount{order.promotionCode ? ` (${order.promotionCode})` : ""}:</strong> −{formatPrice(order.discountAmount)}</Text> : null}
         <Text style={styles.line}><strong>Total paid:</strong> {formatPrice(order.totalAmount)}</Text>
+        {isRefund ? <Text style={styles.line}><strong>Refund amount:</strong> {formatPrice(order.totalAmount)}</Text> : null}
+        {isRefund ? <Text style={styles.line}><strong>Returned to:</strong> {order.paymentMethodLabel ?? "Your original payment method"}</Text> : null}
+        {isRefund && order.refundedAt ? <Text style={styles.line}><strong>Processed:</strong> {new Intl.DateTimeFormat("en-AU", { dateStyle: "long", timeZone: "Australia/Melbourne" }).format(new Date(order.refundedAt))}</Text> : null}
         <Text style={styles.line}><strong>Fulfilment:</strong> {order.fulfilmentLabel}</Text>
         {pickup ? <>
           <Text style={styles.line}><strong>Earliest pickup:</strong> {formatPickupDate(order.pickupDate)}</Text>

@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getSql, StoreConfigurationError } from "@/lib/db";
+import { isValidAdminPasscode } from "@/lib/admin-passcode";
 import { siteConfig } from "@/config/site";
 import { cookies, headers } from "next/headers";
 
@@ -36,7 +37,7 @@ export async function requireAdmin() {
 
 function passwordMatches(supplied: string) {
   const configured = process.env.ADMIN_PASSWORD?.trim();
-  if (!configured || configured.length < 12) throw new StoreConfigurationError("ADMIN_PASSWORD must contain at least 12 characters.");
+  if (!configured || !isValidAdminPasscode(configured)) throw new StoreConfigurationError("ADMIN_PASSWORD must contain exactly six digits.");
   const expected = createHmac("sha256", secret()).update(configured).digest("hex");
   const actual = createHmac("sha256", secret()).update(supplied).digest("hex");
   return safeEqual(expected, actual);

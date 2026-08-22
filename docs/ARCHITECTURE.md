@@ -30,9 +30,9 @@ Stripe receives only the single server-approved method and exact amount.
 
 ## Order, inventory and email boundary
 
-Neon Postgres is the durable operational source of truth. A transaction locks each sorted physical SKU and rejects checkout when stock minus active reservations is insufficient. Signed paid events verify the order, amount and currency; consume the reservation and decrement stock exactly once; append order/inventory evidence; and enqueue customer/owner email jobs. Expiration or payment failure releases the reservation.
+Neon Postgres is the durable operational source of truth. A transaction locks each sorted physical SKU and rejects checkout when stock minus active reservations is insufficient. Signed paid events re-retrieve the Checkout Session, verify the order, currency, and `subtotal + shipping − Stripe discount = amount paid`; record promotion evidence; consume the reservation and decrement stock exactly once; append order/inventory evidence; and enqueue customer/owner email jobs. Expiration or payment failure releases the reservation.
 
-The Stripe webhook is authoritative. The success page retrieves Stripe server-side and invokes the same idempotent fulfilment transaction as a latency fallback, but never trusts the redirect. Resend jobs have database uniqueness, deterministic provider idempotency keys, a five-attempt bound, signed-webhook retry, a protected daily backstop and an owner retry control.
+The Stripe webhook is authoritative. The success page retrieves Stripe server-side and invokes the same idempotent fulfilment transaction as a latency fallback, but never trusts the redirect. Stripe is also given the confirmed customer email as `receipt_email` so live payments receive a provider receipt independently of the custom order email. Resend jobs have database uniqueness, deterministic provider idempotency keys, a five-attempt bound, signed-webhook retry, a protected daily backstop and an owner retry control.
 
 ## Owner boundary
 

@@ -5,6 +5,7 @@ import { createOrderAccessToken, verifyOrderAccessToken } from "@/lib/order-acce
 import {
   catalogueInventorySeed,
   inventoryRequirements,
+  reconcileStripeCheckoutTotal,
   RESERVATION_MINUTES,
   settingsFallback,
   snapshotOrderItems,
@@ -22,6 +23,10 @@ type PaidCheckout = {
   clientReferenceId: string | null;
   paymentStatus: string;
   amountTotal: number | null;
+  discountAmount: number;
+  promotionCode: string | null;
+  stripePromotionCodeId: string | null;
+  paymentMethodLabel: string | null;
   currency: string | null;
   paymentIntentId: string | null;
   customerId: string | null;
@@ -252,7 +257,11 @@ function mapOrder(row: Row, items: OrderItemSnapshot[]): PublicOrder {
     paymentStatus: String(row.payment_status) as PaymentStatus,
     subtotalAmount: Number(row.subtotal_amount),
     shippingAmount: Number(row.shipping_amount),
+    discountAmount: Number(row.discount_amount ?? 0),
     totalAmount: Number(row.total_amount),
+    promotionCode: row.promotion_code ? String(row.promotion_code) : null,
+    stripePromotionCodeId: row.stripe_promotion_code_id ? String(row.stripe_promotion_code_id) : null,
+    paymentMethodLabel: row.payment_method_label ? String(row.payment_method_label) : null,
     customerName: String(row.customer_name),
     customerEmail: String(row.customer_email),
     fulfilmentMethodId: String(row.fulfilment_method_id),
@@ -262,6 +271,7 @@ function mapOrder(row: Row, items: OrderItemSnapshot[]): PublicOrder {
     shippingDetails: toShippingDetails(row.shipping_details),
     createdAt: String(isoDateTime(row.created_at)),
     paidAt: isoDateTime(row.paid_at),
+    refundedAt: isoDateTime(row.refunded_at),
     items,
   };
 }
@@ -320,9 +330,13 @@ export async function processPaidCheckout(input: PaidCheckout): Promise<{ order:
     if (!order) throw new Error("Paid Stripe session does not map to an APEX MOTO order.");
     const orderId = String(order.id);
     if (input.paymentStatus !== "paid" && input.paymentStatus !== "no_payment_required") throw new Error("Stripe session is not paid.");
-    if (input.amountTotal !== Number(order.total_amount) || input.currency?.toLowerCase() !== String(order.currency).toLowerCase()) {
-      throw new Error("Stripe amount or currency does not match the reserved order.");
-    }
+    const reconciled = reconcileStripeCheckoutTotal({
+      subtotalAmount: Number(order.subtotal_amount),
+      shippingAmount: Number(order.shipping_amount),
+      discountAmount: input.discountAmount,
+      amountTotal: input.amountTotal,
+    });
+    if (input.currency?.toLowerCase() !== String(order.currency).toLowerCase()) throw new Error("Stripe currency does not match the reserved order.");
     const alreadyPaid = order.payment_status === "PAID";
     if (!alreadyPaid) {
       const reservations = await client.query(
@@ -343,12 +357,21 @@ export async function processPaidCheckout(input: PaidCheckout): Promise<{ order:
       await client.query("UPDATE inventory_reservations SET status='CONSUMED',updated_at=now() WHERE business_id=$1 AND order_id=$2 AND status='ACTIVE'", [siteConfig.businessId, orderId]);
       await client.query(
         `UPDATE orders SET status='PAID',payment_status='PAID',paid_at=now(),updated_at=now(),stripe_session_id=$3,
-         stripe_payment_intent_id=$4,stripe_customer_id=$5,shipping_details=$6::jsonb WHERE business_id=$1 AND id=$2`,
-        [siteConfig.businessId, orderId, input.sessionId, input.paymentIntentId, input.customerId, JSON.stringify(input.shippingDetails)],
+         stripe_payment_intent_id=$4,stripe_customer_id=$5,shipping_details=$6::jsonb,discount_amount=$7,total_amount=$8,
+         promotion_code=$9,stripe_promotion_code_id=$10,payment_method_label=$11 WHERE business_id=$1 AND id=$2`,
+        [siteConfig.businessId, orderId, input.sessionId, input.paymentIntentId, input.customerId, JSON.stringify(input.shippingDetails),
+          reconciled.discountAmount, reconciled.totalAmount, input.promotionCode, input.stripePromotionCodeId, input.paymentMethodLabel],
       );
       await client.query(
         "INSERT INTO order_events (id,business_id,order_id,event_type,provider_event_id,actor,details) VALUES ($1,$2,$3,'PAYMENT_CONFIRMED',$4,'stripe',$5::jsonb)",
-        [randomUUID(), siteConfig.businessId, orderId, input.eventId, JSON.stringify({ sessionId: input.sessionId })],
+        [randomUUID(), siteConfig.businessId, orderId, input.eventId, JSON.stringify({
+          sessionId: input.sessionId,
+          grossAmount: reconciled.grossAmount,
+          discountAmount: reconciled.discountAmount,
+          totalAmount: reconciled.totalAmount,
+          promotionCode: input.promotionCode,
+          stripePromotionCodeId: input.stripePromotionCodeId,
+        })],
       );
     }
     await enqueueEmail(client, orderId, "CUSTOMER_ORDER_CONFIRMATION", String(order.customer_email));

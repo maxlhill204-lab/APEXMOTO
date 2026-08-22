@@ -34,7 +34,7 @@ Product-specific chart with manufacturer, verification flag, and centimetre rows
 - `inventory`: physical stock on hand by business/SKU.
 - `inventory_reservations`: `ACTIVE`, `CONSUMED` or `RELEASED` quantities tied to an order.
 - `inventory_events`: append-only paid decrements and owner adjustments.
-- `orders`: customer, fulfilment, amounts, explicit order/payment states, Stripe IDs and reservation deadline.
+- `orders`: customer, fulfilment, subtotal/shipping/discount/paid totals, promotion-code and payment-method display evidence, explicit order/payment states, Stripe IDs and reservation deadline.
 - `order_items`: immutable product/variant/name/price/quantity/cart-key snapshot.
 - `order_events`: append-only checkout/payment/status/cancellation/refund evidence.
 - `webhook_events`: unique provider event and processing state.

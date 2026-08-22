@@ -4,11 +4,15 @@ import { operationalLog } from "@/lib/operational-log";
 import { OrderEmail } from "@/emails/order-email";
 import type { EmailKind, PublicOrder } from "@/types/order";
 import { siteConfig } from "@/config/site";
-import { Resend } from "resend";
+import { render } from "@react-email/render";
+import { Models, ServerClient } from "postmark";
 
-export const isEmailConfigured = () => Boolean(
-  process.env.RESEND_API_KEY?.trim() && process.env.ORDER_EMAIL_FROM?.trim(),
-);
+export function configuredEmailFrom() {
+  const explicit = process.env.ORDER_EMAIL_FROM?.trim();
+  return explicit || null;
+}
+
+export const isEmailConfigured = () => Boolean(process.env.POSTMARK_SERVER_TOKEN?.trim() && configuredEmailFrom());
 
 function emailSubject(kind: EmailKind, orderNumber: string) {
   const subjects: Record<EmailKind, string> = {
@@ -24,8 +28,8 @@ function emailSubject(kind: EmailKind, orderNumber: string) {
 }
 
 export async function deliverPendingEmails(order: PublicOrder, businessId = siteConfig.businessId) {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.ORDER_EMAIL_FROM?.trim();
+  const apiKey = process.env.POSTMARK_SERVER_TOKEN?.trim();
+  const from = configuredEmailFrom();
   if (!apiKey || !from) return { sent: 0, failed: 0, configured: false };
   const sql = getSql();
   const pending = await sql`
@@ -35,7 +39,7 @@ export async function deliverPendingEmails(order: PublicOrder, businessId = site
       AND status IN ('PENDING', 'FAILED') AND attempts < 5
     ORDER BY created_at
   `;
-  const resend = new Resend(apiKey);
+  const postmark = new ServerClient(apiKey);
   let sent = 0;
   let failed = 0;
   for (const row of pending) {
@@ -47,20 +51,34 @@ export async function deliverPendingEmails(order: PublicOrder, businessId = site
     if (!claimed.length) continue;
     const kind = String(row.email_kind) as EmailKind;
     try {
-      const response = await resend.emails.send({
-        from,
-        to: String(row.recipient),
-        replyTo: siteConfig.email,
-        subject: emailSubject(kind, order.orderNumber),
-        react: <OrderEmail
+      const email = <OrderEmail
           kind={kind}
           order={order}
           accessToken={createOrderAccessToken(businessId, order.id, order.customerEmail)}
           privatePickupAddress={process.env.PICKUP_ADDRESS_PRIVATE?.trim()}
-        />,
-      }, { idempotencyKey: `${businessId}/${order.id}/${kind}` });
-      if (response.error) throw new Error(response.error.message);
-      await sql`UPDATE email_outbox SET status = 'SENT', provider_message_id = ${response.data?.id ?? null}, sent_at = now(), last_error = null WHERE business_id = ${businessId} AND id = ${String(row.id)}`;
+        />;
+      const [htmlBody, textBody] = await Promise.all([
+        render(email),
+        render(email, { plainText: true }),
+      ]);
+      const response = await postmark.sendEmail({
+        From: from,
+        To: String(row.recipient),
+        ReplyTo: siteConfig.email,
+        Subject: emailSubject(kind, order.orderNumber),
+        HtmlBody: htmlBody,
+        TextBody: textBody,
+        MessageStream: "outbound",
+        TrackOpens: false,
+        TrackLinks: Models.LinkTrackingOptions.None,
+        Metadata: {
+          business_id: businessId,
+          order_id: order.id,
+          email_kind: kind,
+          outbox_id: String(row.id),
+        },
+      });
+      await sql`UPDATE email_outbox SET status = 'SENT', provider_message_id = ${response.MessageID}, sent_at = now(), last_error = null WHERE business_id = ${businessId} AND id = ${String(row.id)}`;
       sent += 1;
     } catch (error) {
       const message = error instanceof Error ? error.message.slice(0, 500) : "Email provider error";
