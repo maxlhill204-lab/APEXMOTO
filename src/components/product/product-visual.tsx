@@ -11,12 +11,14 @@ type ProductVisualProps = {
 
 export function ProductVisual({
   product,
-  image = product.images[0],
+  image,
   priority = false,
   className = "",
   sizes = "(max-width: 768px) 100vw, 50vw",
 }: ProductVisualProps) {
-  if (product.category === "bundle" && image.src === product.images[0]?.src) {
+  const selectedImage = image ?? product.images[0];
+
+  if (product.category === "bundle" && image === undefined) {
     return (
       <div
         className={`product-visual product-visual--bundle-composite ${className}`}
@@ -30,12 +32,12 @@ export function ProductVisual({
     );
   }
 
-  if (image.placeholder) {
+  if (selectedImage.placeholder) {
     return (
       <div
         className={`product-visual product-visual--placeholder product-visual--${product.category} ${className}`}
         role="img"
-        aria-label={image.alt}
+        aria-label={selectedImage.alt}
       >
         <div className="product-visual__grain" aria-hidden="true" />
         <div className="product-visual__shape" aria-hidden="true">
@@ -52,8 +54,8 @@ export function ProductVisual({
   return (
     <div className={`product-visual ${className}`}>
       <Image
-        src={image.src}
-        alt={image.alt}
+        src={selectedImage.src}
+        alt={selectedImage.alt}
         fill
         priority={priority}
         loading={priority ? "eager" : undefined}

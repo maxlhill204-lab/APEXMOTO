@@ -39,6 +39,7 @@ export const products: Product[] = [
     shortDescription:
       "Matte black ORZ helmet available in S, M, L and XL.",
     price: 12495,
+    compareAtPrice: 14000,
     images: [
       {
         src: "/products/orz-rally-helmet-black/side.png",
@@ -92,6 +93,7 @@ export const products: Product[] = [
       "The same ORZ off-road helmet in a white and blue finish. Current availability is limited to Medium and Large.",
     shortDescription: "White and blue ORZ helmet available in M and L.",
     price: 12495,
+    compareAtPrice: 14000,
     images: [
       {
         src: "/products/orz-rally-helmet-white/side.png",
@@ -139,6 +141,7 @@ export const products: Product[] = [
       "ORZ motocross goggles in four frame and lens combinations. Buy them on their own for $25, or add a pair to a helmet bundle for $20.",
     shortDescription: "Four colours. $25 alone or $20 with a helmet.",
     price: 2500,
+    compareAtPrice: 2800,
     images: [
       {
         src: "/products/orz-mx-goggles/black-gold.png",
@@ -160,6 +163,13 @@ export const products: Product[] = [
         width: 953,
         height: 675,
         colour: "Grey / Teal",
+      },
+      {
+        src: "/products/orz-mx-goggles/blue-black.png",
+        alt: "ORZ motocross goggles in the blue and black colourway",
+        width: 951,
+        height: 677,
+        colour: "Blue / Black",
       },
     ],
     options: [{ id: "colour", label: "Colour", values: goggleColours }],
@@ -184,6 +194,7 @@ export const products: Product[] = [
       "Choose an available helmet colour and size, add any ORZ goggle colour for $20, and receive the helmet storage bag at no extra cost.",
     shortDescription: "Helmet, your choice of goggles, and a free helmet bag.",
     price: 14495,
+    compareAtPrice: 16200,
     images: [
       {
         src: "/products/orz-rally-helmet-black/side.png",
@@ -193,11 +204,39 @@ export const products: Product[] = [
         colour: "Matte Black",
       },
       {
+        src: "/products/orz-rally-helmet-white/side.png",
+        alt: "White and blue ORZ helmet available in the bundle",
+        width: 931,
+        height: 806,
+        colour: "White / Blue",
+      },
+      {
         src: "/products/orz-mx-goggles/black-gold.png",
         alt: "Black and yellow-gold ORZ goggles available in the bundle",
         width: 951,
         height: 672,
         colour: "Black / Yellow-Gold",
+      },
+      {
+        src: "/products/orz-mx-goggles/red-gold.png",
+        alt: "Pink and red ORZ goggles available in the bundle",
+        width: 951,
+        height: 677,
+        colour: "Pink / Red",
+      },
+      {
+        src: "/products/orz-mx-goggles/grey-ice.png",
+        alt: "Grey and teal ORZ goggles available in the bundle",
+        width: 953,
+        height: 675,
+        colour: "Grey / Teal",
+      },
+      {
+        src: "/products/orz-mx-goggles/blue-black.png",
+        alt: "Blue and black ORZ goggles available in the bundle",
+        width: 951,
+        height: 677,
+        colour: "Blue / Black",
       },
       {
         src: "/products/orz-helmet-goggles-bundle/helmet-bag.png",

@@ -56,7 +56,7 @@ export const siteConfig = {
   currency: "AUD",
   gogglesShippingPrice: 800,
   maxIncludedGogglesWithHelmet: 3,
-  announcementBarText: "LIMITED STOCK · ORDER WHILE AVAILABLE",
+  announcementBarText: "48 HOUR SALE · 10% OFF",
   supportHours: "Customer support replies within 12–48 hours",
   supportResponseHoursMin: 12,
   supportResponseHoursMax: 48,

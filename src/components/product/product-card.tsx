@@ -25,6 +25,7 @@ export function ProductCard({ product }: { product: Product }) {
           {formatPrice(product.price)}
           {product.compareAtPrice ? <del>{formatPrice(product.compareAtPrice)}</del> : null}
         </p>
+        {product.compareAtPrice ? <p className="sale-note">10% off · 48-hour offer</p> : null}
         {sizes ? (
           <div className="product-card__sizes" aria-label={`Available sizes for ${product.name}`}>
             {sizes.values.map((size) => {

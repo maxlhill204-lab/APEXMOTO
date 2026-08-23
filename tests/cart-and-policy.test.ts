@@ -35,6 +35,21 @@ describe("cart workflow", () => {
     expect(bundleIndividualTotal(bundle)! - bundle.price).toBe(500);
   });
 
+  it("uses genuine higher comparison prices for the 48-hour offer", () => {
+    expect(getProductById("helmet-matte-black")).toMatchObject({ price: 12495, compareAtPrice: 14000 });
+    expect(getProductById("goggles-orz")).toMatchObject({ price: 2500, compareAtPrice: 2800 });
+    expect(getProductById("bundle-helmet-goggles")).toMatchObject({ price: 14495, compareAtPrice: 16200 });
+  });
+
+  it("has a matching bundle gallery image for every selectable colour", () => {
+    const bundle = getProductById("bundle-helmet-goggles")!;
+    const imageColours = new Set(bundle.images.map((image) => image.colour).filter(Boolean));
+    const selectableColours = bundle.options
+      .filter((option) => option.id === "helmet-colour" || option.id === "goggles")
+      .flatMap((option) => option.values.map((value) => value.label));
+    expect(selectableColours.every((colour) => imageColours.has(colour))).toBe(true);
+  });
+
   it("uses owner-supplied helmet stock by exact size and colour", () => {
     const black = getProductById("helmet-matte-black")!;
     const white = getProductById("helmet-gloss-white")!;
