@@ -1,7 +1,7 @@
 import { getSiteUrl, siteConfig } from "@/config/site";
 import { validateCheckoutRequest } from "@/lib/checkout-policy";
 import { attachStripeSession, checkoutFingerprint, CheckoutConflictError, getStoreSettings, releaseCheckoutOrder, reserveCheckoutOrder, StockUnavailableError } from "@/lib/orders";
-import { formatPickupDate } from "@/lib/order-domain";
+import { formatPickupDate, pickupAvailableDate } from "@/lib/order-domain";
 import { operationalLog } from "@/lib/operational-log";
 import { getVariantLabel } from "@/lib/products";
 import { checkoutReadiness, getStripe } from "@/lib/stripe";
@@ -40,7 +40,10 @@ export async function POST(request: Request) {
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
     if (policy.shipping.pickup && (!settings.pickupNextAvailableDate || settings.pickupNextAvailableDate < today)) return jsonError("Pickup checkout is temporarily unavailable until the next collection date is confirmed. Choose delivery or contact APEX MOTO.", 503, "PICKUP_SCHEDULE_REQUIRED");
     const shipping = policy.shipping.pickup ? { ...policy.shipping, label: `${settings.pickupLocationLabel} pickup` } : policy.shipping;
-    reserved = await reserveCheckoutOrder({ checkoutKey: requestKey, requestFingerprint: fingerprint, customerName: policy.customerName, customerEmail: policy.customerEmail, items: policy.items, shipping });
+    const orderPickupDate = policy.shipping.pickup
+      ? pickupAvailableDate(policy.items, settings.pickupNextAvailableDate ?? "")
+      : null;
+    reserved = await reserveCheckoutOrder({ checkoutKey: requestKey, requestFingerprint: fingerprint, customerName: policy.customerName, customerEmail: policy.customerEmail, items: policy.items, shipping, pickupAvailableDate: orderPickupDate });
     const stripe = getStripe();
     if (reserved.existingSessionId) {
       stripeRequestAttempted = true;
@@ -68,8 +71,8 @@ export async function POST(request: Request) {
         shipping_options: [{ shipping_rate_data: { type: "fixed_amount" as const, fixed_amount: { amount: policy.shipping.amount, currency: "aud" }, display_name: policy.shipping.label } }],
       }),
       custom_text: { submit: { message: policy.shipping.pickup
-        ? `Pickup is in ${settings.pickupLocationLabel}, no earlier than ${formatPickupDate(settings.pickupNextAvailableDate)}, and only at a time confirmed by email. ${settings.pickupAddressDisclosure}`
-        : `Delivery method: ${shipping.label}. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
+        ? `Pickup is in ${settings.pickupLocationLabel}, no earlier than ${formatPickupDate(orderPickupDate)}, and only at a time confirmed by email. ${settings.pickupAddressDisclosure}`
+        : `Delivery method: ${shipping.label}. Dispatch begins no earlier than ${formatPickupDate(siteConfig.shippingNextAvailableDate)}. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
       payment_intent_data: {
         receipt_email: policy.customerEmail,
         metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber },

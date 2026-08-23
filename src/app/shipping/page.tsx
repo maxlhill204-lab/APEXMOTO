@@ -24,12 +24,12 @@ export default function ShippingPage() {
               <div key={region.id}><span>{region.label}</span><strong>{region.price === null ? `${region.estimate} estimate` : formatPrice(region.price)}</strong></div>
             ))}
           </div>
-          <p className="fine-print">Regional Queensland and Western Australia require an exact address quote before payment.</p>
+          <p className="fine-print">Orders begin dispatching from 2 September 2026. Regional Queensland and Western Australia require an exact address quote before payment.</p>
         </section>
         <aside className="shipping-notes">
           <article><p className="eyebrow eyebrow--accent">GOGGLES ONLY</p><h2>{formatPrice(siteConfig.gogglesShippingPrice)}</h2><p>Flat Australia-wide shipping when goggles are ordered without a helmet.</p></article>
           <article><p className="eyebrow eyebrow--accent">WITH A HELMET</p><h2>No extra cost</h2><p>Up to three standalone goggles can travel with a helmet at the helmet delivery price. Larger goggle quantities need a quote.</p></article>
-          <article><MapPin aria-hidden="true" /><p className="eyebrow eyebrow--accent">LOCAL</p><h2>Free pickup</h2><p>Collect from {siteConfig.pickupSuburb}. Exact pickup details are arranged directly.</p></article>
+          <article><MapPin aria-hidden="true" /><p className="eyebrow eyebrow--accent">LOCAL</p><h2>Free pickup</h2><p>Pickup begins 2 September 2026 in {siteConfig.pickupSuburb}. Exact pickup details are arranged directly.</p></article>
         </aside>
       </div>
     </div>

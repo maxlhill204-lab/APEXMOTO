@@ -25,6 +25,8 @@ export type ProductVariant = {
   id: string;
   options: Record<string, string>;
   stock: number;
+  /** Earliest local pickup date when this variant is later than the store default. */
+  pickupAvailableFrom?: string;
   /**
    * Physical stock consumed by this sellable variant. Bundles can consume more
    * than one SKU so the same helmet or goggles cannot be sold twice through

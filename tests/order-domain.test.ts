@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { siteConfig } from "@/config/site";
 import { resolveCartItems } from "@/lib/cart";
-import { catalogueInventorySeed, inventoryRequirements, orderStatusLabel, reconcileStripeCheckoutTotal } from "@/lib/order-domain";
+import { catalogueInventorySeed, inventoryRequirements, orderStatusLabel, pickupAvailableDate, reconcileStripeCheckoutTotal } from "@/lib/order-domain";
 import { createOrderAccessToken, verifyOrderAccessToken } from "@/lib/order-access";
 import { isValidAdminPasscode } from "@/lib/admin-passcode";
 import { checkoutDiscountDetails, checkoutPaymentMethodLabel } from "@/lib/stripe";
@@ -20,8 +20,16 @@ describe("order and inventory rules", () => {
 
   it("seeds physical inventory from standalone products without double-counting bundles", () => {
     const seed = catalogueInventorySeed();
-    expect(seed.find((item) => item.sku === "orz-helmet-black-m")).toEqual({ sku: "orz-helmet-black-m", stockOnHand: 1 });
+    expect(seed.find((item) => item.sku === "orz-helmet-black-m")).toEqual({ sku: "orz-helmet-black-m", stockOnHand: 2 });
     expect(seed.find((item) => item.sku === "orz-helmet-white-s")).toEqual({ sku: "orz-helmet-white-s", stockOnHand: 0 });
+    expect(seed.find((item) => item.sku === "orz-helmet-white-l")).toEqual({ sku: "orz-helmet-white-l", stockOnHand: 1 });
+    expect(seed.find((item) => item.sku === "orz-goggles-blue-black")).toEqual({ sku: "orz-goggles-blue-black", stockOnHand: 1 });
+  });
+
+  it("uses the later variant pickup date for White / Blue Large", () => {
+    const items = resolveCartItems([{ businessId: siteConfig.businessId, productId: "helmet-gloss-white", variantId: "white-l", quantity: 1 }]);
+    expect(pickupAvailableDate(items, "2026-09-02")).toBe("2026-09-07");
+    expect(pickupAvailableDate(resolveCartItems([{ businessId: siteConfig.businessId, productId: "helmet-matte-black", variantId: "black-s", quantity: 1 }]), "2026-09-02")).toBe("2026-09-02");
   });
 
   it("scopes private order tokens to the business and customer email", () => {

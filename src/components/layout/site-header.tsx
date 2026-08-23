@@ -16,7 +16,16 @@ export function SiteHeader() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <div className="announcement-bar">{siteConfig.announcementBarText}</div>
+      <div className="announcement-bar">
+        <span className="sr-only">{siteConfig.announcementBarText}</span>
+        <div className="announcement-bar__track" aria-hidden="true">
+          {[0, 1].map((group) => (
+            <div className="announcement-bar__group" key={group}>
+              {Array.from({ length: 6 }, (_, index) => <span key={index}>{siteConfig.announcementBarText}</span>)}
+            </div>
+          ))}
+        </div>
+      </div>
       <header className="site-header">
         <div className="site-header__inner container">
           <button className="icon-button site-header__menu" onClick={() => setMenuOpen(true)} aria-label="Open menu">

@@ -21,7 +21,7 @@ export function ProductVisual({
       <div
         className={`product-visual product-visual--bundle-composite ${className}`}
         role="img"
-        aria-label="ORZ matte black helmet, black and gold goggles, and included helmet bag"
+        aria-label="ORZ matte black helmet, black and yellow-gold goggles, and included helmet bag"
       >
         <Image className="bundle-composite__helmet" src="/products/orz-rally-helmet-black/side.png" alt="" width={939} height={831} priority={priority} />
         <Image className="bundle-composite__goggles" src="/products/orz-mx-goggles/black-gold.png" alt="" width={951} height={672} />

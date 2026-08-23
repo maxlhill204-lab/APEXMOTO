@@ -21,6 +21,15 @@ export function inventoryRequirements(items: ResolvedCartItem[]) {
   return [...totals].map(([sku, quantity]) => ({ sku, quantity })).sort((a, b) => a.sku.localeCompare(b.sku));
 }
 
+export function pickupAvailableDate(items: ResolvedCartItem[], storeDefault: string) {
+  return items.reduce(
+    (latest, item) => item.variant.pickupAvailableFrom && item.variant.pickupAvailableFrom > latest
+      ? item.variant.pickupAvailableFrom
+      : latest,
+    storeDefault,
+  );
+}
+
 export function catalogueInventorySeed() {
   const stock = new Map<string, number>();
   for (const product of catalog.filter((item) => item.category !== "bundle")) {

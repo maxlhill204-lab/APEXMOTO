@@ -153,6 +153,7 @@ export async function reserveCheckoutOrder(input: {
   customerEmail: string;
   items: ResolvedCartItem[];
   shipping: Extract<ShippingQuote, { available: true }>;
+  pickupAvailableDate?: string | null;
 }): Promise<{ orderId: string; orderNumber: string; accessToken: string; reservationExpiresAt: string; existingSessionId: string | null }> {
   return withDbTransaction(async (client) => {
     await ensureStoreData(client);
@@ -205,7 +206,7 @@ export async function reserveCheckoutOrder(input: {
         orderId, siteConfig.businessId, orderNumber, input.checkoutKey, input.requestFingerprint,
         subtotal, input.shipping.amount, subtotal + input.shipping.amount, input.customerName, input.customerEmail,
         input.shipping.methodId, input.shipping.label,
-        input.shipping.pickup ? settings.pickupNextAvailableDate : null,
+        input.shipping.pickup ? (input.pickupAvailableDate ?? settings.pickupNextAvailableDate) : null,
         input.shipping.pickup ? settings.pickupWindow : null,
         expiresAt,
       ],

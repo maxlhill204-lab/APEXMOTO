@@ -7,13 +7,14 @@ const helmetSizes = ["S", "M", "L", "XL", "XXL"].map((size) => ({
 }));
 
 const goggleColours = [
-  { value: "black-gold", label: "Black / Gold", swatch: "#171717" },
-  { value: "red-gold", label: "Red / Gold", swatch: "#b8222b" },
-  { value: "grey-ice", label: "Grey / Ice", swatch: "#8da7ae" },
+  { value: "black-gold", label: "Black / Yellow-Gold", swatch: "#171717" },
+  { value: "red-gold", label: "Pink / Red", swatch: "#d82f52" },
+  { value: "grey-ice", label: "Grey / Teal", swatch: "#718d91" },
+  { value: "blue-black", label: "Blue / Black", swatch: "#2159a8" },
 ];
 
-const blackHelmetStock: Record<string, number> = { S: 1, M: 1, L: 1, XL: 1, XXL: 0 };
-const whiteHelmetStock: Record<string, number> = { S: 0, M: 1, L: 0, XL: 0, XXL: 0 };
+const blackHelmetStock: Record<string, number> = { S: 1, M: 2, L: 2, XL: 2, XXL: 0 };
+const whiteHelmetStock: Record<string, number> = { S: 0, M: 1, L: 1, XL: 0, XXL: 0 };
 
 const helmetSku = (colour: "black" | "white", size: string) =>
   `orz-helmet-${colour}-${size.toLowerCase()}`;
@@ -36,7 +37,7 @@ export const products: Product[] = [
     description:
       "A lightweight ORZ off-road helmet in matte black. The supplied product sheet lists an ABS shell, an approximate weight of 1080 g, and a rear DOT FMVSS No. 218 marking.",
     shortDescription:
-      "Matte black ORZ helmet with one each in S, M, L and XL.",
+      "Matte black ORZ helmet available in S, M, L and XL.",
     price: 12495,
     images: [
       {
@@ -84,27 +85,27 @@ export const products: Product[] = [
     businessId: siteConfig.businessId,
     id: "helmet-gloss-white",
     slug: "orz-rally-helmet-gloss-white",
-    name: "ORZ Rally Helmet — Gloss White",
-    shortName: "Gloss White Helmet",
+    name: "ORZ Rally Helmet — White / Blue",
+    shortName: "White / Blue Helmet",
     category: "helmet",
     description:
-      "The same ORZ off-road helmet in a clean gloss white finish. Current availability is limited to Medium; S, L and XL are sold out.",
-    shortDescription: "Gloss white ORZ helmet. Medium currently available.",
+      "The same ORZ off-road helmet in a white and blue finish. Current availability is limited to Medium and Large.",
+    shortDescription: "White and blue ORZ helmet available in M and L.",
     price: 12495,
     images: [
       {
         src: "/products/orz-rally-helmet-white/side.png",
-        alt: "Gloss white ORZ rally motocross helmet viewed from the side",
+        alt: "White and blue ORZ rally motocross helmet viewed from the side",
         width: 931,
         height: 806,
-        colour: "Gloss White",
+        colour: "White / Blue",
       },
     ],
     options: [
       {
         id: "colour",
         label: "Colour",
-        values: [{ value: "gloss-white", label: "Gloss White", swatch: "#f1f1ed" }],
+        values: [{ value: "gloss-white", label: "White / Blue", swatch: "#f1f1ed" }],
       },
       { id: "size", label: "Size", values: helmetSizes },
     ],
@@ -112,6 +113,7 @@ export const products: Product[] = [
       id: `white-${value.toLowerCase()}`,
       options: { colour: "gloss-white", size: value },
       stock: whiteHelmetStock[value],
+      ...(value === "L" ? { pickupAvailableFrom: "2026-09-07" } : {}),
       inventory: [{ sku: helmetSku("white", value), quantity: 1 }],
     })),
     features: ["ABS shell", "Approx. 1080 g", "Extended off-road peak", "Rear ventilation"],
@@ -134,30 +136,30 @@ export const products: Product[] = [
     shortName: "ORZ Goggles",
     category: "goggles",
     description:
-      "ORZ motocross goggles in three frame and lens combinations. Buy them on their own for $25, or add a pair to a helmet bundle for $20.",
-    shortDescription: "Three colours. $25 alone or $20 with a helmet.",
+      "ORZ motocross goggles in four frame and lens combinations. Buy them on their own for $25, or add a pair to a helmet bundle for $20.",
+    shortDescription: "Four colours. $25 alone or $20 with a helmet.",
     price: 2500,
     images: [
       {
         src: "/products/orz-mx-goggles/black-gold.png",
-        alt: "ORZ motocross goggles with a black frame and gold mirrored lens",
+        alt: "ORZ motocross goggles with a black frame and yellow-gold mirrored lens",
         width: 951,
         height: 672,
-        colour: "Black / Gold",
+        colour: "Black / Yellow-Gold",
       },
       {
         src: "/products/orz-mx-goggles/red-gold.png",
-        alt: "ORZ motocross goggles with a red frame and gold mirrored lens",
+        alt: "ORZ motocross goggles in the pink and red colourway",
         width: 951,
         height: 677,
-        colour: "Red / Gold",
+        colour: "Pink / Red",
       },
       {
         src: "/products/orz-mx-goggles/grey-ice.png",
-        alt: "ORZ motocross goggles with a grey frame and ice mirrored lens",
+        alt: "ORZ motocross goggles with a grey frame and teal mirrored lens",
         width: 953,
         height: 675,
-        colour: "Grey / Ice",
+        colour: "Grey / Teal",
       },
     ],
     options: [{ id: "colour", label: "Colour", values: goggleColours }],
@@ -192,10 +194,10 @@ export const products: Product[] = [
       },
       {
         src: "/products/orz-mx-goggles/black-gold.png",
-        alt: "Black and gold ORZ goggles available in the bundle",
+        alt: "Black and yellow-gold ORZ goggles available in the bundle",
         width: 951,
         height: 672,
-        colour: "Black / Gold",
+        colour: "Black / Yellow-Gold",
       },
       {
         src: "/products/orz-helmet-goggles-bundle/helmet-bag.png",
@@ -210,7 +212,7 @@ export const products: Product[] = [
         label: "Helmet colour",
         values: [
           { value: "matte-black", label: "Matte Black", swatch: "#171717" },
-          { value: "gloss-white", label: "Gloss White", swatch: "#f1f1ed" },
+          { value: "gloss-white", label: "White / Blue", swatch: "#f1f1ed" },
         ],
       },
       { id: "helmet-size", label: "Helmet size", values: helmetSizes },
@@ -233,6 +235,7 @@ export const products: Product[] = [
           id: `bundle-white-${size.toLowerCase()}-${goggles}`,
           options: { "helmet-colour": "gloss-white", "helmet-size": size, goggles },
           stock: Math.min(whiteHelmetStock[size], 1),
+          ...(size === "L" ? { pickupAvailableFrom: "2026-09-07" } : {}),
           inventory: [
             { sku: helmetSku("white", size), quantity: 1 },
             { sku: gogglesSku(goggles), quantity: 1 },

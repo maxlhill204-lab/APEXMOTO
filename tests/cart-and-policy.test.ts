@@ -8,7 +8,7 @@ import { calculateShipping } from "@/lib/shipping";
 const TEST_CART_ITEM = {
   businessId: siteConfig.businessId,
   productId: "helmet-matte-black",
-  variantId: "black-l",
+  variantId: "black-s",
   quantity: 1,
 };
 
@@ -20,7 +20,7 @@ describe("cart workflow", () => {
   });
 
   it("never allows cart quantity above exact variant stock", () => {
-    const cart = setCartItemQuantity([TEST_CART_ITEM], "helmet-matte-black:black-l", 9);
+    const cart = setCartItemQuantity([TEST_CART_ITEM], "helmet-matte-black:black-s", 9);
     expect(cart[0].quantity).toBe(1);
   });
 
@@ -39,10 +39,11 @@ describe("cart workflow", () => {
     const black = getProductById("helmet-matte-black")!;
     const white = getProductById("helmet-gloss-white")!;
     expect(black.variants.map(({ id, stock }) => [id, stock])).toEqual([
-      ["black-s", 1], ["black-m", 1], ["black-l", 1], ["black-xl", 1], ["black-xxl", 0],
+      ["black-s", 1], ["black-m", 2], ["black-l", 2], ["black-xl", 2], ["black-xxl", 0],
     ]);
     expect(white.variants.find((variant) => variant.id === "white-m")?.stock).toBe(1);
-    expect(white.variants.filter((variant) => ["white-s", "white-l", "white-xl"].includes(variant.id)).every((variant) => variant.stock === 0)).toBe(true);
+    expect(white.variants.find((variant) => variant.id === "white-l")).toMatchObject({ stock: 1, pickupAvailableFrom: "2026-09-07" });
+    expect(white.variants.filter((variant) => ["white-s", "white-xl", "white-xxl"].includes(variant.id)).every((variant) => variant.stock === 0)).toBe(true);
   });
 
   it("applies the supplied goggle and helmet shipping rules", () => {
