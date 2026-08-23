@@ -299,6 +299,29 @@ export async function getAccessibleOrder(orderNumber: string, token: string) {
   return getOrderById(orderId);
 }
 
+export async function getResumableCheckout(orderNumber: string, token: string): Promise<{
+  orderId: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  stripeSessionId: string | null;
+} | null> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, customer_email, status, payment_status, stripe_session_id
+    FROM orders
+    WHERE business_id=${siteConfig.businessId} AND order_number=${orderNumber}
+  `;
+  if (!rows[0]) return null;
+  const orderId = String(rows[0].id);
+  if (!verifyOrderAccessToken(siteConfig.businessId, orderId, String(rows[0].customer_email), token)) return null;
+  return {
+    orderId,
+    status: String(rows[0].status) as OrderStatus,
+    paymentStatus: String(rows[0].payment_status) as PaymentStatus,
+    stripeSessionId: rows[0].stripe_session_id ? String(rows[0].stripe_session_id) : null,
+  };
+}
+
 async function enqueueEmail(client: PoolClient, orderId: string, kind: EmailKind, recipient: string) {
   await client.query(
     `INSERT INTO email_outbox (id,business_id,order_id,email_kind,recipient,status)

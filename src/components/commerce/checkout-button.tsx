@@ -48,14 +48,41 @@ export function CheckoutButton({
     setMessage("");
     trackEvent("begin_checkout", { item_count: quantity });
     try {
+      const pendingRaw = window.localStorage.getItem(PENDING_CHECKOUT_KEY);
+      if (pendingRaw) {
+        try {
+          const pending = JSON.parse(pendingRaw) as { orderNumber?: unknown; accessToken?: unknown };
+          if (typeof pending.orderNumber === "string" && typeof pending.accessToken === "string") {
+            const resumeResponse = await fetch("/api/checkout/resume", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderNumber: pending.orderNumber, token: pending.accessToken }),
+            });
+            const resumed = await resumeResponse.json() as { url?: string; terminal?: boolean; message?: string };
+            if (resumeResponse.ok && resumed.url) {
+              window.location.assign(resumed.url);
+              return;
+            }
+            if (resumed.terminal) window.localStorage.removeItem(PENDING_CHECKOUT_KEY);
+            else throw new Error(resumed.message || "Your existing checkout could not be resumed. Please try again.");
+          } else {
+            window.localStorage.removeItem(PENDING_CHECKOUT_KEY);
+          }
+        } catch (error) {
+          if (error instanceof SyntaxError) window.localStorage.removeItem(PENDING_CHECKOUT_KEY);
+          else throw error;
+        }
+      }
+
+      const checkoutKey = crypto.randomUUID();
       const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Checkout-Idempotency-Key": crypto.randomUUID() },
+        headers: { "Content-Type": "application/json", "X-Checkout-Idempotency-Key": checkoutKey },
         body: JSON.stringify({ businessId: siteConfig.businessId, items, shippingMethodId, customerName, customerEmail, pickupAcknowledged }),
       });
       const data = (await response.json()) as { url?: string; message?: string; orderNumber?: string; accessToken?: string; purchasedKeys?: string[] };
       if (!response.ok || !data.url) throw new Error(data.message || "Checkout is unavailable.");
-      if (data.orderNumber && data.accessToken && data.purchasedKeys) window.localStorage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify({ orderNumber: data.orderNumber, accessToken: data.accessToken, purchasedKeys: data.purchasedKeys }));
+      if (data.orderNumber && data.accessToken && data.purchasedKeys) window.localStorage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify({ orderNumber: data.orderNumber, accessToken: data.accessToken, purchasedKeys: data.purchasedKeys, checkoutKey }));
       window.location.assign(data.url);
     } catch (error) {
       setStatus("error");

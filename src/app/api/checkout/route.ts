@@ -52,6 +52,7 @@ export async function POST(request: Request) {
     stripeRequestAttempted = true;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      payment_method_types: ["card"],
       allow_promotion_codes: true,
       client_reference_id: reserved.orderId,
       line_items: policy.items.map((item) => ({
@@ -61,9 +62,9 @@ export async function POST(request: Request) {
       customer_email: policy.customerEmail,
       customer_creation: "always",
       name_collection: { individual: { enabled: true, optional: false } },
-      billing_address_collection: "auto",
+      billing_address_collection: "required",
+      shipping_address_collection: { allowed_countries: ["AU"] as ["AU"] },
       ...(policy.shipping.pickup ? {} : {
-        shipping_address_collection: { allowed_countries: ["AU"] as ["AU"] },
         shipping_options: [{ shipping_rate_data: { type: "fixed_amount" as const, fixed_amount: { amount: policy.shipping.amount, currency: "aud" }, display_name: policy.shipping.label } }],
       }),
       custom_text: { submit: { message: policy.shipping.pickup
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
       expires_at: Math.floor(new Date(reserved.reservationExpiresAt).getTime() / 1000),
       success_url: `${siteUrl}/order-success?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(reserved.orderNumber)}&token=${encodeURIComponent(reserved.accessToken)}`,
       cancel_url: `${siteUrl}/cart?checkout=cancelled`,
-      metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber, fulfilmentMethod: policy.shipping.methodId },
+      metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber, fulfilmentMethod: policy.shipping.methodId, checkoutFlowVersion: "card-address-v2" },
     }, { idempotencyKey: `${siteConfig.businessId}:${requestKey}` });
     if (!session.url) throw new Error("Stripe did not provide a checkout link.");
     await attachStripeSession(reserved.orderId, session.id).catch(() => undefined);
