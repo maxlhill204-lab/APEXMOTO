@@ -51,6 +51,7 @@ img { max-width: 100%; }
 .announcement-bar__track { width: max-content; height: 100%; display: flex; animation: sale-marquee 24s linear infinite; }
 .announcement-bar__group { display: flex; align-items: center; flex-shrink: 0; }
 .announcement-bar__group span { display: inline-flex; align-items: center; white-space: nowrap; }
+.announcement-bar__group b { min-width: 12ch; margin-left: .65em; font-variant-numeric: tabular-nums; }
 .announcement-bar__group span::after { content: "◆"; margin-inline: 2.5rem; font-size: .55em; }
 .site-header { position: sticky; top: 34px; z-index: 80; height: var(--header-height); background: rgb(13 13 13 / 0.92); border-bottom: 1px solid rgb(255 255 255 / 0.09); backdrop-filter: blur(18px); }
 .site-header__inner { height: 100%; display: grid; grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr); align-items: center; gap: 2rem; }

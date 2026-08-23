@@ -4,24 +4,33 @@ import { useCart } from "@/components/commerce/cart-provider";
 import { Drawer } from "@/components/ui/drawer";
 import { mainNavigation, mobileNavigation } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
+import { formatPromotionCountdown } from "@/lib/promotion";
 import { Menu, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [countdown, setCountdown] = useState("--H --M --S");
   const { quantity, openCart } = useCart();
+
+  useEffect(() => {
+    const updateCountdown = () => setCountdown(formatPromotionCountdown(siteConfig.promotionEndsAt, Date.now()));
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
       <div className="announcement-bar">
-        <span className="sr-only">{siteConfig.announcementBarText}</span>
+        <span className="sr-only">10% off sale ends {siteConfig.promotionEndsLabel}.</span>
         <div className="announcement-bar__track" aria-hidden="true">
           {[0, 1].map((group) => (
             <div className="announcement-bar__group" key={group}>
-              {Array.from({ length: 6 }, (_, index) => <span key={index}>{siteConfig.announcementBarText}</span>)}
+              {Array.from({ length: 6 }, (_, index) => <span key={index}>{siteConfig.announcementBarText} <b>{countdown}</b></span>)}
             </div>
           ))}
         </div>
