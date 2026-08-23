@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isEmailConfigured } from "@/lib/email";
-import { checkoutReadiness } from "@/lib/stripe";
+import { checkoutReadiness, ownerOperationsReadiness } from "@/lib/stripe";
 
 const managedKeys = [
   "DATABASE_URL",
@@ -54,5 +54,22 @@ describe("transactional email readiness", () => {
   it("fails closed when neither transactional provider is configured", () => {
     expect(isEmailConfigured()).toBe(false);
     expect(checkoutReadiness()).toEqual({ ready: false, missing: ["TRANSACTIONAL_EMAIL_PROVIDER"] });
+  });
+
+  it("does not take customer checkout offline for an owner-only configuration issue", () => {
+    process.env.RESEND_API_KEY = "resend-test-token";
+    delete process.env.ADMIN_PASSWORD;
+    delete process.env.ADMIN_SESSION_SECRET;
+    delete process.env.CRON_SECRET;
+
+    expect(checkoutReadiness()).toEqual({ ready: true, missing: [] });
+    expect(ownerOperationsReadiness().ready).toBe(false);
+  });
+
+  it("still fails closed when the customer order-access secret is too short", () => {
+    process.env.RESEND_API_KEY = "resend-test-token";
+    process.env.ORDER_ACCESS_SECRET = "too-short";
+
+    expect(checkoutReadiness()).toEqual({ ready: false, missing: ["ORDER_ACCESS_SECRET_LENGTH"] });
   });
 });

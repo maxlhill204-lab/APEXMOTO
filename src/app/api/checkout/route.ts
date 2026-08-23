@@ -2,6 +2,7 @@ import { getSiteUrl, siteConfig } from "@/config/site";
 import { validateCheckoutRequest } from "@/lib/checkout-policy";
 import { attachStripeSession, checkoutFingerprint, CheckoutConflictError, getStoreSettings, releaseCheckoutOrder, reserveCheckoutOrder, StockUnavailableError } from "@/lib/orders";
 import { formatPickupDate } from "@/lib/order-domain";
+import { operationalLog } from "@/lib/operational-log";
 import { getVariantLabel } from "@/lib/products";
 import { checkoutReadiness, getStripe } from "@/lib/stripe";
 
@@ -23,7 +24,11 @@ export async function POST(request: Request) {
 
   const requestKey = request.headers.get("x-checkout-idempotency-key")?.trim();
   if (!requestKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey)) return jsonError("Checkout request needs a valid retry key.", 400);
-  if (!checkoutReadiness().ready) return jsonError("Online checkout is temporarily unavailable while order notifications are being configured. Please contact APEX MOTO to order.", 503, "CHECKOUT_NOT_READY");
+  const readiness = checkoutReadiness();
+  if (!readiness.ready) {
+    operationalLog("error", "checkout.not_ready", { missing: readiness.missing });
+    return jsonError("Online checkout is temporarily unavailable while order notifications are being configured. Please contact APEX MOTO to order.", 503, "CHECKOUT_NOT_READY");
+  }
 
   const fingerprint = checkoutFingerprint({ customerName: policy.customerName, customerEmail: policy.customerEmail, shippingMethodId: policy.shipping.methodId, items: policy.items });
   let reserved: Awaited<ReturnType<typeof reserveCheckoutOrder>> | null = null;

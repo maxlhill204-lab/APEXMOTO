@@ -18,12 +18,18 @@ export function checkoutReadiness() {
     ["STRIPE_WEBHOOK_SECRET", process.env.STRIPE_WEBHOOK_SECRET],
     ["ORDER_ACCESS_SECRET", process.env.ORDER_ACCESS_SECRET],
     ["ORDER_EMAIL_FROM", process.env.ORDER_EMAIL_FROM],
+  ].filter(([, value]) => !value?.trim()).map(([name]) => name);
+  if (!hasEmailProvider) missing.push("TRANSACTIONAL_EMAIL_PROVIDER");
+  if ((process.env.ORDER_ACCESS_SECRET?.trim().length ?? 0) < 32) missing.push("ORDER_ACCESS_SECRET_LENGTH");
+  return { ready: missing.length === 0, missing };
+}
+
+export function ownerOperationsReadiness() {
+  const missing = [
     ["ADMIN_PASSWORD", process.env.ADMIN_PASSWORD],
     ["ADMIN_SESSION_SECRET", process.env.ADMIN_SESSION_SECRET],
     ["CRON_SECRET", process.env.CRON_SECRET],
   ].filter(([, value]) => !value?.trim()).map(([name]) => name);
-  if (!hasEmailProvider) missing.push("TRANSACTIONAL_EMAIL_PROVIDER");
-  if ((process.env.ORDER_ACCESS_SECRET?.trim().length ?? 0) < 32) missing.push("ORDER_ACCESS_SECRET_LENGTH");
   if ((process.env.ADMIN_SESSION_SECRET?.trim().length ?? 0) < 32) missing.push("ADMIN_SESSION_SECRET_LENGTH");
   if (!isValidAdminPasscode(process.env.ADMIN_PASSWORD)) missing.push("ADMIN_PASSWORD_FORMAT");
   if ((process.env.CRON_SECRET?.trim().length ?? 0) < 16) missing.push("CRON_SECRET_LENGTH");
