@@ -137,7 +137,7 @@ export function PurchasePanel({ product }: { product: Product }) {
       </div>
 
       <div className="purchase-fulfilment">
-        <div><MapPin aria-hidden="true" /><span><strong>{siteConfig.pickupLocationLabel} pickup by appointment</strong><small>Earliest pickup is 2 September 2026. White / Blue Large pickup begins 7 September. Your exact date is shown at checkout.</small></span></div>
+        <div><MapPin aria-hidden="true" /><span><strong>{siteConfig.pickupLocationLabel} pickup by appointment</strong><small>Earliest pickup is 2 September 2026. Your exact pickup date is shown at checkout.</small></span></div>
         <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>Dispatch begins 2 September 2026. {product.category === "goggles" ? "$8 for goggles ordered on their own." : "Helmet delivery is calculated by destination."}</small></span></div>
       </div>
 
