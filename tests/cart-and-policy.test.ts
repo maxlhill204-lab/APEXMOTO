@@ -16,7 +16,7 @@ describe("cart workflow", () => {
   it("adds a valid variant and derives price from server catalogue data", () => {
     const cart = addCartItem([], TEST_CART_ITEM);
     expect(cart).toEqual([TEST_CART_ITEM]);
-    expect(cartSubtotal(cart)).toBe(12495);
+    expect(cartSubtotal(cart)).toBe(12000);
   });
 
   it("never allows cart quantity above exact variant stock", () => {
@@ -31,14 +31,14 @@ describe("cart workflow", () => {
 
   it("calculates genuine bundle savings from component catalogue prices", () => {
     const bundle = getProductById("bundle-helmet-goggles")!;
-    expect(bundleIndividualTotal(bundle)).toBe(14995);
+    expect(bundleIndividualTotal(bundle)).toBe(14500);
     expect(bundleIndividualTotal(bundle)! - bundle.price).toBe(500);
   });
 
   it("uses genuine higher comparison prices for the 48-hour offer", () => {
-    expect(getProductById("helmet-matte-black")).toMatchObject({ price: 12495, compareAtPrice: 14000 });
+    expect(getProductById("helmet-matte-black")).toMatchObject({ price: 12000, compareAtPrice: 14000 });
     expect(getProductById("goggles-orz")).toMatchObject({ price: 2500, compareAtPrice: 2800 });
-    expect(getProductById("bundle-helmet-goggles")).toMatchObject({ price: 14495, compareAtPrice: 16200 });
+    expect(getProductById("bundle-helmet-goggles")).toMatchObject({ price: 14000, compareAtPrice: 16200 });
   });
 
   it("has a matching bundle gallery image for every selectable colour", () => {
@@ -116,7 +116,7 @@ describe("checkout policy", () => {
     );
     expect(result).toMatchObject({
       allowed: true,
-      items: [{ productId: "helmet-matte-black", lineTotal: 12495 }],
+      items: [{ productId: "helmet-matte-black", lineTotal: 12000 }],
       shipping: { amount: 0, pickup: true },
     });
   });

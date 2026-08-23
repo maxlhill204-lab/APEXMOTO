@@ -11,6 +11,7 @@ const goggleColours = [
   { value: "red-gold", label: "Pink / Red", swatch: "#d82f52" },
   { value: "grey-ice", label: "Grey / Teal", swatch: "#718d91" },
   { value: "blue-black", label: "Blue / Black", swatch: "#2159a8" },
+  { value: "black-silver", label: "Black / Silver", swatch: "#34383d" },
 ];
 
 const blackHelmetStock: Record<string, number> = { S: 1, M: 2, L: 2, XL: 2, XXL: 0 };
@@ -38,7 +39,7 @@ export const products: Product[] = [
       "A lightweight ORZ off-road helmet in matte black. The supplied product sheet lists an ABS shell, an approximate weight of 1080 g, and a rear DOT FMVSS No. 218 marking.",
     shortDescription:
       "Matte black ORZ helmet available in S, M, L and XL.",
-    price: 12495,
+    price: 12000,
     compareAtPrice: 14000,
     images: [
       {
@@ -92,7 +93,7 @@ export const products: Product[] = [
     description:
       "The same ORZ off-road helmet in a white and blue finish. Current availability is limited to Medium and Large.",
     shortDescription: "White and blue ORZ helmet available in M and L.",
-    price: 12495,
+    price: 12000,
     compareAtPrice: 14000,
     images: [
       {
@@ -138,8 +139,8 @@ export const products: Product[] = [
     shortName: "ORZ Goggles",
     category: "goggles",
     description:
-      "ORZ motocross goggles in four frame and lens combinations. Buy them on their own for $25, or add a pair to a helmet bundle for $20.",
-    shortDescription: "Four colours. $25 alone or $20 with a helmet.",
+      "Motocross goggles in five frame and lens combinations. Buy them on their own for $25, or add a pair to a helmet bundle for $20.",
+    shortDescription: "Five colours. $25 alone or $20 with a helmet.",
     price: 2500,
     compareAtPrice: 2800,
     images: [
@@ -171,6 +172,13 @@ export const products: Product[] = [
         height: 677,
         colour: "Blue / Black",
       },
+      {
+        src: "/products/orz-mx-goggles/black-silver.png",
+        alt: "Motocross goggles with a black frame, black strap and silver mirrored lens",
+        width: 1402,
+        height: 1122,
+        colour: "Black / Silver",
+      },
     ],
     options: [{ id: "colour", label: "Colour", values: goggleColours }],
     variants: goggleColours.map(({ value }) => ({
@@ -193,7 +201,7 @@ export const products: Product[] = [
     description:
       "Choose an available helmet colour and size, add any ORZ goggle colour for $20, and receive the helmet storage bag at no extra cost.",
     shortDescription: "Helmet, your choice of goggles, and a free helmet bag.",
-    price: 14495,
+    price: 14000,
     compareAtPrice: 16200,
     images: [
       {
@@ -237,6 +245,13 @@ export const products: Product[] = [
         width: 951,
         height: 677,
         colour: "Blue / Black",
+      },
+      {
+        src: "/products/orz-mx-goggles/black-silver.png",
+        alt: "Black and silver mirrored goggles available in the bundle",
+        width: 1402,
+        height: 1122,
+        colour: "Black / Silver",
       },
       {
         src: "/products/orz-helmet-goggles-bundle/helmet-bag.png",

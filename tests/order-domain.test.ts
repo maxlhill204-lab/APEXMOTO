@@ -24,6 +24,7 @@ describe("order and inventory rules", () => {
     expect(seed.find((item) => item.sku === "orz-helmet-white-s")).toEqual({ sku: "orz-helmet-white-s", stockOnHand: 0 });
     expect(seed.find((item) => item.sku === "orz-helmet-white-l")).toEqual({ sku: "orz-helmet-white-l", stockOnHand: 1 });
     expect(seed.find((item) => item.sku === "orz-goggles-blue-black")).toEqual({ sku: "orz-goggles-blue-black", stockOnHand: 1 });
+    expect(seed.find((item) => item.sku === "orz-goggles-black-silver")).toEqual({ sku: "orz-goggles-black-silver", stockOnHand: 1 });
   });
 
   it("uses the later variant pickup date for White / Blue Large", () => {
