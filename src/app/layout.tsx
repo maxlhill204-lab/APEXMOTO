@@ -4,6 +4,8 @@ import { CartProvider } from "@/components/commerce/cart-provider";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getSiteUrl, siteConfig } from "@/config/site";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,6 +54,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <CartDrawer />
         </CartProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organisation).replace(/</g, "\\u003c") }} />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
