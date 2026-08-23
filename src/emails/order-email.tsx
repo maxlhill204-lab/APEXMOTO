@@ -10,6 +10,9 @@ const styles = {
   heading: { color: "#ffffff", fontSize: "30px", lineHeight: "1.15", margin: "0 0 18px" },
   text: { color: "#d0d0d0", fontSize: "15px", lineHeight: "1.6" },
   panel: { backgroundColor: "#202020", borderRadius: "8px", margin: "22px 0", padding: "18px" },
+  notice: { backgroundColor: "#e7ff39", borderRadius: "8px", color: "#050505", margin: "22px 0", padding: "18px" },
+  noticeHeading: { color: "#050505", fontSize: "16px", fontWeight: "700", lineHeight: "1.4", margin: "0 0 8px" },
+  noticeText: { color: "#171717", fontSize: "14px", lineHeight: "1.6", margin: 0 },
   line: { color: "#f2f2f2", fontSize: "14px", lineHeight: "1.5", margin: "6px 0" },
   button: { backgroundColor: "#e7ff39", borderRadius: "6px", color: "#050505", display: "inline-block", fontSize: "14px", fontWeight: "700", padding: "13px 20px", textDecoration: "none" },
   fine: { color: "#888888", fontSize: "12px", lineHeight: "1.5", marginTop: "28px" },
@@ -39,6 +42,8 @@ export function OrderEmail({ kind, order, accessToken, privatePickupAddress }: {
   const isOwner = kind.startsWith("OWNER_");
   const isRefund = kind === "CUSTOMER_REFUNDED";
   const pickup = order.fulfilmentMethodId === "pickup";
+  const awaitingPickupConfirmation = pickup && kind === "CUSTOMER_ORDER_CONFIRMATION";
+  const disclosePrivatePickupAddress = isOwner || kind === "CUSTOMER_READY_FOR_PICKUP";
   return (
     <Html><Head /><Preview>{copy.preview}</Preview><Body style={styles.body}><Container style={styles.card}>
       <Text style={styles.accent}>{siteConfig.businessName} / {copy.eyebrow}</Text>
@@ -60,12 +65,16 @@ export function OrderEmail({ kind, order, accessToken, privatePickupAddress }: {
         {pickup ? <>
           <Text style={styles.line}><strong>Earliest pickup:</strong> {formatPickupDate(order.pickupDate)}</Text>
           <Text style={styles.line}><strong>Collection:</strong> {order.pickupWindow ?? "By confirmed appointment"}</Text>
-          <Text style={styles.line}><strong>Location:</strong> {privatePickupAddress || `${siteConfig.pickupLocationLabel}. The exact address is supplied when your collection time is confirmed.`}</Text>
+          <Text style={styles.line}><strong>Location:</strong> {disclosePrivatePickupAddress && privatePickupAddress ? privatePickupAddress : siteConfig.pickupLocationLabel}</Text>
         </> : null}
         {isOwner ? <><Text style={styles.line}><strong>Customer:</strong> {order.customerName}</Text><Text style={styles.line}><strong>Email:</strong> {order.customerEmail}</Text></> : null}
       </Section>
+      {awaitingPickupConfirmation ? <Section style={styles.notice}>
+        <Text style={styles.noticeHeading}>Your pickup details will be confirmed within 24 hours.</Text>
+        <Text style={styles.noticeText}>We will email you to confirm the exact pickup address and available collection times. If you have not received those details within 24 hours, reply to this email or contact {siteConfig.email}.</Text>
+      </Section> : null}
       <Button href={`${getSiteUrl()}/order-status/${encodeURIComponent(order.orderNumber)}?token=${encodeURIComponent(accessToken)}`} style={styles.button}>View order status</Button>
-      <Text style={styles.fine}>Questions? Reply to this email or contact {siteConfig.email}. Typical response time is {siteConfig.supportResponseHoursMin}–{siteConfig.supportResponseHoursMax} hours.</Text>
+      <Text style={styles.fine}>{awaitingPickupConfirmation ? `Pickup details should arrive within 24 hours. If they do not, reply to this email or contact ${siteConfig.email}.` : `Questions? Reply to this email or contact ${siteConfig.email}. Typical response time is ${siteConfig.supportResponseHoursMin}–${siteConfig.supportResponseHoursMax} hours.`}</Text>
     </Container></Body></Html>
   );
 }

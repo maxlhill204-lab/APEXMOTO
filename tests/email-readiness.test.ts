@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isEmailConfigured } from "@/lib/email";
 import { checkoutReadiness, ownerOperationsReadiness } from "@/lib/stripe";
+import { OrderEmail } from "@/emails/order-email";
+import { render } from "@react-email/render";
+import type { PublicOrder } from "@/types/order";
 
 const managedKeys = [
   "DATABASE_URL",
@@ -16,6 +19,40 @@ const managedKeys = [
 ] as const;
 
 const originalEnvironment = Object.fromEntries(managedKeys.map((key) => [key, process.env[key]]));
+
+const pickupOrder: PublicOrder = {
+  id: "TEST_ORDER_ID",
+  orderNumber: "APX-TEST-100",
+  status: "PAID",
+  paymentStatus: "PAID",
+  subtotalAmount: 2500,
+  shippingAmount: 0,
+  discountAmount: 2500,
+  totalAmount: 0,
+  promotionCode: "TEST100",
+  stripePromotionCodeId: "promo_TEST100",
+  paymentMethodLabel: null,
+  customerName: "Test Rider",
+  customerEmail: "rider@example.invalid",
+  fulfilmentMethodId: "pickup",
+  fulfilmentLabel: "Newport pickup",
+  pickupDate: "2026-09-02",
+  pickupWindow: "By confirmed appointment",
+  shippingDetails: null,
+  createdAt: "2026-08-24T09:21:12+10:00",
+  paidAt: "2026-08-24T09:21:12+10:00",
+  refundedAt: null,
+  items: [{
+    productId: "goggles-orz",
+    variantId: "goggles-black-silver",
+    productName: "ORZ MX Goggles",
+    variantLabel: "Black / Silver",
+    unitAmount: 2500,
+    quantity: 1,
+    lineTotal: 2500,
+    cartItemKey: "goggles-orz:goggles-black-silver",
+  }],
+};
 
 describe("transactional email readiness", () => {
   beforeEach(() => {
@@ -71,5 +108,32 @@ describe("transactional email readiness", () => {
     process.env.ORDER_ACCESS_SECRET = "too-short";
 
     expect(checkoutReadiness()).toEqual({ ready: false, missing: ["ORDER_ACCESS_SECRET_LENGTH"] });
+  });
+
+  it("tells pickup customers when the address and available times will be confirmed", async () => {
+    const text = await render(OrderEmail({
+      kind: "CUSTOMER_ORDER_CONFIRMATION",
+      order: pickupOrder,
+      accessToken: "TEST_ACCESS_TOKEN",
+      privatePickupAddress: "191 Mason Street, Newport VIC 3015",
+    }), { plainText: true });
+
+    expect(text).toContain("Your pickup details will be confirmed within 24 hours.");
+    expect(text).toContain("exact pickup address and available collection times");
+    expect(text).toContain("If you have not received those details within 24 hours");
+    expect(text).toContain("max@apexmoto.com.au");
+    expect(text).not.toContain("191 Mason Street");
+  });
+
+  it("includes the private address only after the order is marked ready for pickup", async () => {
+    const text = await render(OrderEmail({
+      kind: "CUSTOMER_READY_FOR_PICKUP",
+      order: { ...pickupOrder, status: "READY_FOR_PICKUP" },
+      accessToken: "TEST_ACCESS_TOKEN",
+      privatePickupAddress: "191 Mason Street, Newport VIC 3015",
+    }), { plainText: true });
+
+    expect(text).toContain("191 Mason Street, Newport VIC 3015");
+    expect(text).not.toContain("Your pickup details will be confirmed within 24 hours.");
   });
 });
