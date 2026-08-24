@@ -1,9 +1,10 @@
 import { siteConfig } from "@/config/site";
 import { getSql } from "@/lib/db";
-import { catalog } from "@/lib/products";
+import { getCatalog } from "@/lib/products";
 import type { Product } from "@/types/product";
 
 export async function getLiveCatalog(): Promise<Product[]> {
+  const catalog = getCatalog();
   if (!process.env.DATABASE_URL?.trim()) return catalog;
   try {
     const sql = getSql();

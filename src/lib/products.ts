@@ -1,4 +1,5 @@
 import { products } from "@/data/products";
+import { applyPromotion } from "@/lib/promotion";
 import type { Product, ProductVariant, StockStatus } from "@/types/product";
 
 export function validateProducts(catalogue: Product[]): Product[] {
@@ -59,9 +60,15 @@ export function validateProducts(catalogue: Product[]): Product[] {
 
 export const catalog = validateProducts(products);
 
-export const getProductById = (id: string) => catalog.find((product) => product.id === id);
-export const getProductBySlug = (slug: string) =>
-  catalog.find((product) => product.slug === slug);
+export const getCatalog = (now = Date.now()) => catalog.map((product) => applyPromotion(product, now));
+export const getProductById = (id: string, now = Date.now()) => {
+  const product = catalog.find((item) => item.id === id);
+  return product ? applyPromotion(product, now) : undefined;
+};
+export const getProductBySlug = (slug: string, now = Date.now()) => {
+  const product = catalog.find((item) => item.slug === slug);
+  return product ? applyPromotion(product, now) : undefined;
+};
 export const getVariantById = (product: Product, variantId: string) =>
   product.variants.find((variant) => variant.id === variantId);
 
@@ -103,7 +110,7 @@ export const getVariantLabel = (product: Product, variant: ProductVariant) =>
 
 export const bundleIndividualTotal = (bundle: Product) => {
   if (!bundle.bundleComponentIds?.length) return null;
-  const components = bundle.bundleComponentIds.map(getProductById);
+  const components = bundle.bundleComponentIds.map((id) => getProductById(id));
   if (components.some((component) => !component)) return null;
   return components.reduce((sum, component) => sum + (component?.price ?? 0), 0);
 };

@@ -73,7 +73,7 @@ export default async function HomePage() {
           <div className="bundle-feature__copy">
             <p className="eyebrow eyebrow--accent">THE COMPLETE SETUP</p>
             <h2>Helmet. Goggles. Bag.</h2>
-            <p>Choose your available helmet size and any of the five goggle colours. The goggles are $20 in the bundle and the helmet bag is included free.</p>
+            <p>Choose your available helmet size and any of the five goggle colours. Goggles are {formatPrice(bundledGogglesPrice)} in the bundle during the sale, and the helmet bag is included free.</p>
             <dl className="price-breakdown">
               <div><dt>Helmet</dt><dd>{formatPrice(heroProduct.price)}</dd></div>
               <div><dt>Goggles in bundle</dt><dd>{formatPrice(bundledGogglesPrice)}</dd></div>

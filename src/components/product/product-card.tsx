@@ -1,4 +1,4 @@
-import { formatPrice } from "@/config/site";
+import { formatPrice, siteConfig } from "@/config/site";
 import { getStockLabel, totalStock } from "@/lib/products";
 import type { Product } from "@/types/product";
 import { ArrowUpRight } from "lucide-react";
@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: Product }) {
           {formatPrice(product.price)}
           {product.compareAtPrice ? <del>{formatPrice(product.compareAtPrice)}</del> : null}
         </p>
-        {product.compareAtPrice ? <p className="sale-note">10% off · 48-hour offer</p> : null}
+        {product.compareAtPrice ? <p className="sale-note">{siteConfig.promotionShortLabel}</p> : null}
         {sizes ? (
           <div className="product-card__sizes" aria-label={`Available sizes for ${product.name}`}>
             {sizes.values.map((size) => {

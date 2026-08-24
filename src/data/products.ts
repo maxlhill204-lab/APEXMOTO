@@ -40,7 +40,6 @@ export const products: Product[] = [
     shortDescription:
       "Matte black ORZ helmet available in S, M, L and XL.",
     price: 12000,
-    compareAtPrice: 14000,
     images: [
       {
         src: "/products/orz-rally-helmet-black/side.png",
@@ -94,7 +93,6 @@ export const products: Product[] = [
       "The same ORZ off-road helmet in a white and blue finish. Current availability is limited to Medium and Large.",
     shortDescription: "White and blue ORZ helmet available in M and L.",
     price: 12000,
-    compareAtPrice: 14000,
     images: [
       {
         src: "/products/orz-rally-helmet-white/side.png",
@@ -139,10 +137,9 @@ export const products: Product[] = [
     shortName: "ORZ Goggles",
     category: "goggles",
     description:
-      "Motocross goggles in five frame and lens combinations. Buy them on their own for $25, or add a pair to a helmet bundle for $20.",
-    shortDescription: "Five colours. $25 alone or $20 with a helmet.",
+      "Motocross goggles in five frame and lens combinations. Choose a standalone pair or add your preferred colour to the helmet bundle.",
+    shortDescription: "Five colours, mirrored lenses, and a one-size adjustable strap.",
     price: 2500,
-    compareAtPrice: 2800,
     images: [
       {
         src: "/products/orz-mx-goggles/black-gold.png",
@@ -199,10 +196,9 @@ export const products: Product[] = [
     shortName: "Helmet + Goggles Bundle",
     category: "bundle",
     description:
-      "Choose an available helmet colour and size, add any ORZ goggle colour for $20, and receive the helmet storage bag at no extra cost.",
+      "Choose an available helmet colour and size, add any ORZ goggle colour, and receive the helmet storage bag at no extra cost.",
     shortDescription: "Helmet, your choice of goggles, and a free helmet bag.",
     price: 14000,
-    compareAtPrice: 16200,
     images: [
       {
         src: "/products/orz-rally-helmet-black/side.png",

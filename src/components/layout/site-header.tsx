@@ -14,6 +14,7 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [countdown, setCountdown] = useState("--H --M --S");
   const { quantity, openCart } = useCart();
+  const saleEnded = countdown === "SALE ENDED";
 
   useEffect(() => {
     const updateCountdown = () => setCountdown(formatPromotionCountdown(siteConfig.promotionEndsAt, Date.now()));
@@ -26,11 +27,11 @@ export function SiteHeader() {
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
       <div className="announcement-bar">
-        <span className="sr-only">10% off sale ends {siteConfig.promotionEndsLabel}.</span>
+        <span className="sr-only">{saleEnded ? siteConfig.announcementBarEndedText : `${siteConfig.promotionPercent}% off sale ends ${siteConfig.promotionEndsLabel}.`}</span>
         <div className="announcement-bar__track" aria-hidden="true">
           {[0, 1].map((group) => (
             <div className="announcement-bar__group" key={group}>
-              {Array.from({ length: 6 }, (_, index) => <span key={index}>{siteConfig.announcementBarText} <b>{countdown}</b></span>)}
+              {Array.from({ length: 6 }, (_, index) => <span key={index}>{saleEnded ? siteConfig.announcementBarEndedText : <>{siteConfig.announcementBarText} <b>{countdown}</b></>}</span>)}
             </div>
           ))}
         </div>

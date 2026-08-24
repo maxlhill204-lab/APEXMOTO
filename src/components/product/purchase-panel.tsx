@@ -93,7 +93,7 @@ export function PurchasePanel({ product }: { product: Product }) {
         <p className="eyebrow">{product.category}</p>
         <h1>{product.name}</h1>
         <div className="purchase-panel__price"><strong>{formatPrice(product.price)}</strong>{product.compareAtPrice ? <del>{formatPrice(product.compareAtPrice)}</del> : null}</div>
-        {product.compareAtPrice ? <p className="sale-note">10% off · 48-hour offer</p> : null}
+        {product.compareAtPrice ? <p className="sale-note">{siteConfig.promotionShortLabel}</p> : null}
       </div>
       <p className="purchase-panel__description">{product.shortDescription}</p>
       <div className={`variant-stock variant-stock--${!variant ? "pending" : stock === 0 ? "out" : stock <= 3 ? "low" : "in"}`} aria-live="polite">
