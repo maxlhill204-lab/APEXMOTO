@@ -27,5 +27,5 @@
     "**/*.mts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "build", "worker", "examples"]
+  "exclude": ["node_modules", "build", "worker", "examples", "campaigns", "tools"]
 }
