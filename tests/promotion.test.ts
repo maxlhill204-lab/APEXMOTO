@@ -5,14 +5,14 @@ import { products } from "@/data/products";
 describe("promotion countdown", () => {
   const deadline = "2026-08-31T00:00:00+10:00";
 
-  it("counts down to midnight at the end of Sunday 30 August in Melbourne", () => {
+  it("shows days separately instead of accumulating them into the hours", () => {
     expect(formatPromotionCountdown(deadline, new Date("2026-08-24T00:00:00+10:00").getTime()))
-      .toBe("168H 00M 00S");
+      .toBe("07D 00H 00M 00S");
   });
 
-  it("uses a fixed-width hours, minutes and seconds display", () => {
+  it("uses a fixed-width days, hours, minutes and seconds display", () => {
     expect(formatPromotionCountdown(deadline, new Date("2026-08-30T23:59:01+10:00").getTime()))
-      .toBe("00H 00M 59S");
+      .toBe("00D 00H 00M 59S");
   });
 
   it("stops cleanly when the promotion reaches its deadline", () => {

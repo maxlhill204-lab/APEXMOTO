@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [countdown, setCountdown] = useState("--H --M --S");
+  const [countdown, setCountdown] = useState("--D --H --M --S");
   const { quantity, openCart } = useCart();
   const saleEnded = countdown === "SALE ENDED";
 
