@@ -4,18 +4,18 @@ import { formatPickupDate, orderStatusLabel } from "@/lib/order-domain";
 import type { EmailKind, PublicOrder } from "@/types/order";
 
 const styles = {
-  body: { backgroundColor: "#0a0a0a", color: "#f4f4f4", fontFamily: "Arial, sans-serif", margin: 0, padding: "28px 12px" },
-  card: { backgroundColor: "#151515", border: "1px solid #303030", borderRadius: "12px", margin: "0 auto", maxWidth: "620px", padding: "32px" },
-  accent: { color: "#e7ff39", fontSize: "12px", fontWeight: "700", letterSpacing: "2px", margin: "0 0 12px" },
-  heading: { color: "#ffffff", fontSize: "30px", lineHeight: "1.15", margin: "0 0 18px" },
-  text: { color: "#d0d0d0", fontSize: "15px", lineHeight: "1.6" },
-  panel: { backgroundColor: "#202020", borderRadius: "8px", margin: "22px 0", padding: "18px" },
-  notice: { backgroundColor: "#e7ff39", borderRadius: "8px", color: "#050505", margin: "22px 0", padding: "18px" },
+  body: { backgroundColor: "#080808", color: "#f5f2e8", fontFamily: "Arial, sans-serif", margin: 0, padding: "28px 12px" },
+  card: { backgroundColor: "#121212", border: "1px solid #32302b", borderRadius: "12px", margin: "0 auto", maxWidth: "620px", padding: "32px" },
+  accent: { color: "#d9a827", fontSize: "12px", fontWeight: "700", letterSpacing: "2px", margin: "0 0 12px" },
+  heading: { color: "#f5f2e8", fontSize: "30px", lineHeight: "1.15", margin: "0 0 18px" },
+  text: { color: "#d8d3c7", fontSize: "15px", lineHeight: "1.6" },
+  panel: { backgroundColor: "#1c1c1a", borderRadius: "8px", margin: "22px 0", padding: "18px" },
+  notice: { backgroundColor: "#d9a827", borderRadius: "8px", color: "#050505", margin: "22px 0", padding: "18px" },
   noticeHeading: { color: "#050505", fontSize: "16px", fontWeight: "700", lineHeight: "1.4", margin: "0 0 8px" },
   noticeText: { color: "#171717", fontSize: "14px", lineHeight: "1.6", margin: 0 },
-  line: { color: "#f2f2f2", fontSize: "14px", lineHeight: "1.5", margin: "6px 0" },
-  button: { backgroundColor: "#e7ff39", borderRadius: "6px", color: "#050505", display: "inline-block", fontSize: "14px", fontWeight: "700", padding: "13px 20px", textDecoration: "none" },
-  fine: { color: "#888888", fontSize: "12px", lineHeight: "1.5", marginTop: "28px" },
+  line: { color: "#f5f2e8", fontSize: "14px", lineHeight: "1.5", margin: "6px 0" },
+  button: { backgroundColor: "#d9a827", borderRadius: "6px", color: "#050505", display: "inline-block", fontSize: "14px", fontWeight: "700", padding: "13px 20px", textDecoration: "none" },
+  fine: { color: "#979187", fontSize: "12px", lineHeight: "1.5", marginTop: "28px" },
 } as const;
 
 function copyFor(kind: EmailKind, order: PublicOrder) {
@@ -75,6 +75,7 @@ export function OrderEmail({ kind, order, accessToken, privatePickupAddress }: {
       </Section> : null}
       <Button href={`${getSiteUrl()}/order-status/${encodeURIComponent(order.orderNumber)}?token=${encodeURIComponent(accessToken)}`} style={styles.button}>View order status</Button>
       <Text style={styles.fine}>{awaitingPickupConfirmation ? `Pickup details should arrive within 24 hours. If they do not, reply to this email or contact ${siteConfig.email}.` : `Questions? Reply to this email or contact ${siteConfig.email}. Typical response time is ${siteConfig.supportResponseHoursMin}–${siteConfig.supportResponseHoursMax} hours.`}</Text>
+      <Text style={styles.fine}>Ride hard. Pay fair. — {siteConfig.businessName}</Text>
     </Container></Body></Html>
   );
 }
