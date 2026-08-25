@@ -1,5 +1,61 @@
 # Worldwide shipping runbook
 
+## Your part only — activation worksheet
+
+Everything else in the storefront, Stripe, Neon and Vercel is already prepared. Do not estimate these values: use the actual packaging and product labels.
+
+1. Submit the Australia Post **PAC and Postcode Search API** registration form at `https://developers.auspost.com.au/apis/pacpcs-registration`. Australia Post emails the key to the address on the form.
+2. Pack one helmet exactly as it will be shipped, including its box and protective packing. Weigh and measure the outside of the parcel.
+3. Pack one pair of goggles exactly as it will be shipped alone. Weigh and measure that parcel.
+4. Weigh one additional pair of goggles without another shipping box, then confirm how many pairs fit safely in the measured goggle parcel.
+5. Weigh the bare helmet, bare goggles and bare helmet bag separately for the customs declaration.
+6. Read the country-of-manufacture label on each product. Photograph the label if the wording is unclear.
+7. In MyPost Business, use the international customs item lookup for each product and record the verified HS tariff code it returns. Do not use an unverified code from a marketplace listing.
+8. Decide the honest standalone value of the included helmet bag in Australian dollars.
+
+Copy this block, fill it in and return it:
+
+```text
+HELMET PARCEL (packed and ready to post)
+Weight: ___ kg
+Length: ___ cm
+Width: ___ cm
+Height: ___ cm
+
+GOGGLES PARCEL (one pair, packed and ready to post)
+Weight: ___ kg
+Length: ___ cm
+Width: ___ cm
+Height: ___ cm
+
+PACKING RULES
+Extra weight for each additional pair of goggles: ___ kg
+Maximum goggles in the measured goggle parcel: ___ pairs
+
+BARE ITEM WEIGHTS (no shipping packaging)
+Helmet: ___ kg
+Goggles: ___ kg
+Helmet bag: ___ kg
+
+CUSTOMS — HELMET
+Specific description (40 characters maximum): ___
+Verified HS code (6–12 digits): ___
+Country of manufacture (written on product/packaging): ___
+
+CUSTOMS — GOGGLES
+Specific description (40 characters maximum): ___
+Verified HS code (6–12 digits): ___
+Country of manufacture (written on product/packaging): ___
+
+CUSTOMS — HELMET BAG
+Specific description (40 characters maximum): ___
+Verified HS code (6–12 digits): ___
+Country of manufacture (written on product/packaging): ___
+Honest standalone value: A$___
+```
+
+The PAC API key is a secret. Add it directly to the APEX MOTO Vercel project as `AUSPOST_PAC_API_KEY` for Production and Preview, or leave the Australia Post email available so it can be installed without placing the key in source control or a public message.
+
 ## What the storefront now supports
 
 The shipping migration is backwards compatible. Until every Australia Post setting below is valid, the live cart keeps the existing Australian pickup and delivery rules. When configuration is complete, the cart changes automatically to destination-based Australia Post quotes:

@@ -11,7 +11,7 @@ import { calculateShipping, cartHasHelmet } from "@/lib/shipping";
 import { formatPickupDate, settingsFallback } from "@/lib/order-domain";
 import type { StoreSettings } from "@/types/order";
 import type { ShippingPublicConfig, ShippingQuoteOption } from "@/types/shipping";
-import { ArrowRight, CalendarDays, Globe2, LoaderCircle, MailCheck, MapPin, PackageCheck, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, LoaderCircle, MailCheck, MapPin, PackageCheck, ShoppingBag, Trash2, Truck } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -140,10 +140,23 @@ export default function CartPage() {
           <h2>Order summary</h2>
           <div className="order-summary__row"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
           <div className="shipping-selector">
-            <span className="shipping-selector__label">How would you like your order?</span>
+            <div className="shipping-selector__heading">
+              <span className="shipping-selector__label">Pickup or delivery?</span>
+              <small>Select one to continue</small>
+            </div>
             <div className="fulfilment-options" role="radiogroup" aria-label="Pickup or delivery">
-              {storeSettings.pickupEnabled ? <label className={fulfilmentChoice === "pickup" ? "is-selected" : ""}><input type="radio" name="fulfilment" checked={fulfilmentChoice === "pickup"} onChange={() => { setFulfilmentChoice("pickup"); setPickupAcknowledged(false); }} /><MapPin size={18} aria-hidden="true" /><span><strong>Newport pickup</strong><small>Free · appointment required</small></span></label> : null}
-              <label className={fulfilmentChoice === "delivery" ? "is-selected" : ""}><input type="radio" name="fulfilment" checked={fulfilmentChoice === "delivery"} onChange={() => setFulfilmentChoice("delivery")} /><Globe2 size={18} aria-hidden="true" /><span><strong>Delivery</strong><small>{shippingConfig.internationalEnabled ? "Australia and worldwide" : "Australia-wide"}</small></span></label>
+              {storeSettings.pickupEnabled ? <label className={fulfilmentChoice === "pickup" ? "is-selected" : ""}>
+                <input className="sr-only" type="radio" name="fulfilment" checked={fulfilmentChoice === "pickup"} onChange={() => { setFulfilmentChoice("pickup"); setPickupAcknowledged(false); }} />
+                <span className="fulfilment-option__icon" aria-hidden="true"><MapPin size={20} /></span>
+                <span className="fulfilment-option__copy"><strong>Newport pickup</strong><small>Free · appointment required</small></span>
+                <span className="fulfilment-option__status" aria-hidden="true">{fulfilmentChoice === "pickup" ? <><Check size={14} /> Selected</> : "Select"}</span>
+              </label> : null}
+              <label className={fulfilmentChoice === "delivery" ? "is-selected" : ""}>
+                <input className="sr-only" type="radio" name="fulfilment" checked={fulfilmentChoice === "delivery"} onChange={() => setFulfilmentChoice("delivery")} />
+                <span className="fulfilment-option__icon" aria-hidden="true"><Truck size={20} /></span>
+                <span className="fulfilment-option__copy"><strong>Delivery</strong><small>{shippingConfig.internationalEnabled ? "Australia and worldwide" : "Australia-wide"}</small></span>
+                <span className="fulfilment-option__status" aria-hidden="true">{fulfilmentChoice === "delivery" ? <><Check size={14} /> Selected</> : "Select"}</span>
+              </label>
             </div>
 
             {fulfilmentChoice === "pickup" ? <div className="pickup-disclosure" role="note">
