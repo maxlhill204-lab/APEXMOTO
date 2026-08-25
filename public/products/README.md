@@ -1,6 +1,6 @@
 # Product image folders
 
-These production folders contain the owner-supplied ORZ helmet, goggles, specifications, and helmet-bag images.
+These production folders contain the owner-supplied APEX MOTO helmet, goggles, and helmet-bag images.
 
 When adding another owned image:
 

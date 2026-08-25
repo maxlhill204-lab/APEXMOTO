@@ -66,7 +66,7 @@ export default function CartPage() {
               </article>
             ))}
           </div>
-          {hasHelmet && !hasStandaloneGoggles && !resolvedItems.some((item) => item.product.category === "bundle") ? <Link href="/product/orz-helmet-goggles-bundle" className="cart-page-upsell"><span><small>Want the complete setup?</small><strong>{bundledGogglesPrice !== null ? `Add goggles for ${formatPrice(bundledGogglesPrice)} and get the helmet bag free.` : "View the helmet, goggles and bag bundle."}</strong></span><span>View bundle <ArrowRight size={17} aria-hidden="true" /></span></Link> : null}
+          {hasHelmet && !hasStandaloneGoggles && !resolvedItems.some((item) => item.product.category === "bundle") ? <Link href="/product/apex-moto-helmet-goggles-bundle" className="cart-page-upsell"><span><small>Want the complete setup?</small><strong>{bundledGogglesPrice !== null ? `Add goggles for ${formatPrice(bundledGogglesPrice)} and get the helmet bag free.` : "View the helmet, goggles and bag bundle."}</strong></span><span>View bundle <ArrowRight size={17} aria-hidden="true" /></span></Link> : null}
         </div>
 
         <aside className="order-summary">

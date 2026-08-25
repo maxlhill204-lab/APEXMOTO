@@ -25,7 +25,7 @@ Do not accept real payment until every required item has real evidence.
 
 ## Product information and safety
 
-- [x] Transcribe the supplied ORZ size chart: S 53–54, M 55–56, L 57–58, XL 59–60, XXL 61–62 cm.
+- [x] Transcribe the supplied APEX MOTO size chart: S 53–54, M 55–56, L 57–58, XL 59–60, XXL 61–62 cm.
 - [x] Transcribe the supplied ABS material and approximate 1080 g weight.
 - [x] Record the visible rear DOT FMVSS No. 218 marking without claiming Australian road legality.
 - [ ] Obtain and retain separate certification documentation if the DOT statement will be used beyond the visible product marking.

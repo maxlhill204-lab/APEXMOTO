@@ -45,7 +45,7 @@ export function CartDrawer() {
             </div>
           )}
           {hasHelmet && !hasGoggles ? (
-            <Link className="cart-upsell" href="/product/orz-helmet-goggles-bundle" onClick={closeCart}>
+            <Link className="cart-upsell" href="/product/apex-moto-helmet-goggles-bundle" onClick={closeCart}>
               <span><strong>Complete your setup</strong><small>{bundledGogglesPrice !== null ? `Goggles are ${formatPrice(bundledGogglesPrice)} in the bundle + free bag` : "View the helmet, goggles and bag bundle"}</small></span>
               <ArrowRight size={18} aria-hidden="true" />
             </Link>

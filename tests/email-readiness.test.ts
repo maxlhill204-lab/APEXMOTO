@@ -45,7 +45,7 @@ const pickupOrder: PublicOrder = {
   items: [{
     productId: "goggles-orz",
     variantId: "goggles-black-silver",
-    productName: "ORZ MX Goggles",
+    productName: "APEX MOTO MX Goggles",
     variantLabel: "Black / Silver",
     unitAmount: 2500,
     quantity: 1,

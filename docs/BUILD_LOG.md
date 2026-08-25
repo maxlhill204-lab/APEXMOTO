@@ -61,10 +61,10 @@ Evidence is added only after a real command or browser check completes. Credenti
 ### Owner data and assets
 
 - Replaced the temporary RIDELINE identity with APEX MOTO across configuration, metadata, navigation, contact details, manifest, favicon, social presentation, documentation, and customer-facing copy.
-- Inspected and used the supplied APEX MOTO logo, black and white ORZ helmet photos, three ORZ goggle photos, helmet specification sheet, and helmet-bag photo.
+- Inspected and used the supplied APEX MOTO logo, black and white APEX MOTO helmet photos, three APEX MOTO goggle photos, helmet specification sheet, and helmet-bag photo.
 - Transcribed the owner-supplied prices: helmets $124.95, goggles $25 alone, and goggles $20 in the $144.95 helmet bundle with the helmet bag included free.
 - Transcribed black helmet stock as one each in S, M, L, and XL. Set black XXL unavailable. Set the explicitly named white sold-out sizes S, L, and XL to zero; conservatively left white XXL unavailable and inferred one white Medium. Set a conservative minimum of one for each photographed goggle colour. The two inferred quantities are called out in the launch checklist and status file.
-- Transcribed the supplied ORZ size chart, ABS material, approximate 1080 g weight, and visible rear DOT FMVSS No. 218 marking. Customer copy states that the marking is visible but does not by itself establish Australian road legality; no separate approval number or document is claimed.
+- Transcribed the supplied APEX MOTO size chart, ABS material, approximate 1080 g weight, and visible rear DOT FMVSS No. 218 marking. Customer copy states that the marking is visible but does not by itself establish Australian road legality; no separate approval number or document is claimed.
 
 ### Design and commerce changes
 

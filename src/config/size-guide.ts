@@ -11,7 +11,7 @@ export type SizeChart = {
   rows: SizeChartRow[];
 };
 
-const orzRallyRows: SizeChartRow[] = [
+const apexMotoRallyRows: SizeChartRow[] = [
   { size: "S", minCm: 53, maxCm: 54 },
   { size: "M", minCm: 55, maxCm: 56 },
   { size: "L", minCm: 57, maxCm: 58 },
@@ -19,12 +19,12 @@ const orzRallyRows: SizeChartRow[] = [
   { size: "XXL", minCm: 61, maxCm: 62 },
 ];
 
-// Measurements are transcribed from the ORZ product sheet supplied by the owner.
+// Measurements are transcribed from the product sheet supplied by the owner.
 export const sizeCharts: SizeChart[] = [
   {
     productId: "helmet-matte-black",
-    manufacturer: "ORZ Rally Helmet",
+    manufacturer: "APEX MOTO Rally Helmet",
     verified: true,
-    rows: orzRallyRows,
+    rows: apexMotoRallyRows,
   },
 ];

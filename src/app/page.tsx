@@ -27,7 +27,7 @@ export default async function HomePage() {
             <p className="hero__lead">Straightforward helmets and goggles, published product details and local stock—without the inflated brand-name price.</p>
             <div className="button-row">
               <Link href="/shop" className="button button--primary">Shop the range <ArrowRight size={17} aria-hidden="true" /></Link>
-              <Link href="/product/orz-helmet-goggles-bundle" className="button button--secondary">Build a bundle</Link>
+              <Link href="/product/apex-moto-helmet-goggles-bundle" className="button button--secondary">Build a bundle</Link>
             </div>
             <div className="hero__price-row" aria-label="Starting prices">
               <span><small>Helmets</small><strong>{formatPrice(heroProduct.price)}</strong></span>
@@ -38,7 +38,7 @@ export default async function HomePage() {
           <div className="hero__visual">
             <ProductVisual product={heroProduct} priority sizes="(max-width: 800px) 100vw, 58vw" />
             <div className="hero__product-tag">
-              <span>ORZ RALLY HELMET</span>
+              <span>APEX MOTO RALLY HELMET</span>
               <strong>MATTE BLACK</strong>
               <b>{formatPrice(heroProduct.price)}</b>
             </div>
@@ -108,7 +108,7 @@ export default async function HomePage() {
           <div>
             <p className="eyebrow eyebrow--accent">FIT</p>
             <h2>Measure before you order.</h2>
-            <p>The supplied ORZ chart covers S through XXL, from 53 to 62 cm.</p>
+            <p>The supplied APEX MOTO chart covers S through XXL, from 53 to 62 cm.</p>
             <Link href="/size-guide" className="text-link">View size guide <Ruler size={16} aria-hidden="true" /></Link>
           </div>
           <div>

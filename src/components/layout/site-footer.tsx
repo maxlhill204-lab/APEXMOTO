@@ -7,7 +7,7 @@ const columns = [
     links: [
       { label: "Helmets", href: "/shop?category=helmet" },
       { label: "Goggles", href: "/shop?category=goggles" },
-      { label: "Helmet bundle", href: "/product/orz-helmet-goggles-bundle" },
+      { label: "Helmet bundle", href: "/product/apex-moto-helmet-goggles-bundle" },
     ],
   },
   {

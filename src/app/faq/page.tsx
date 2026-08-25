@@ -8,8 +8,8 @@ const faqs = [
   ["Do you claim these helmets match an $800 helmet?", "No. Price alone does not prove protection, and we do not invent comparison claims. We publish the supplied materials, approximate weight and visible marking, then clearly explain what has not been independently documented."],
   ["Where can I pick up?", `Pickup is available in ${siteConfig.pickupSuburb}, Melbourne. Exact details are arranged directly.`],
   ["How much is goggle shipping?", `${formatPrice(siteConfig.gogglesShippingPrice)} Australia-wide when ordered alone. Up to three standalone pairs add no cost when travelling with a helmet.`],
-  ["What comes in the bundle?", "One ORZ helmet, one pair of ORZ goggles in your selected colour, and a free helmet storage bag."],
-  ["How do I choose my size?", "Measure above your eyebrows and around the widest part at the back of your head, then use the ORZ size chart."],
+  ["What comes in the bundle?", "One APEX MOTO helmet, one pair of APEX MOTO goggles in your selected colour, and a free helmet storage bag."],
+  ["How do I choose my size?", "Measure above your eyebrows and around the widest part at the back of your head, then use the APEX MOTO size chart."],
   ["Which helmet sizes are available?", "Matte black currently has one each in S, M, L and XL. Gloss white is sold out in S, L and XL; check the product page for current selectable stock."],
   ["Is the helmet DOT marked?", "The supplied product image shows a rear DOT FMVSS No. 218 marking. That does not by itself confirm Australian road legality or event approval."],
 ] as const;

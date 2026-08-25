@@ -1,6 +1,6 @@
 # APEX MOTO
 
-APEX MOTO is a mobile-first Australian storefront for a small Melbourne seller of ORZ motocross helmets and goggles. It is designed for high-intent buyers arriving from Facebook Marketplace: recognise the product, check a size, see the real price and stock, add matching goggles, choose pickup or delivery, and order without creating an account.
+APEX MOTO is a mobile-first Australian storefront for a small Melbourne seller of APEX MOTO motocross helmets and goggles. It is designed for high-intent buyers arriving from Facebook Marketplace: recognise the product, check a size, see the real price and stock, add matching goggles, choose pickup or delivery, and order without creating an account.
 
 The production catalogue uses the supplied APEX MOTO logo and real product images. It does not include fake reviews, customer numbers, sales timers, road-legality claims, or demonstration businesses and orders.
 
@@ -58,10 +58,10 @@ This runs lint, TypeScript, tests, the production build, and the production-cont
 
 ## Current catalogue
 
-- ORZ Rally Helmet — Matte Black: $124.95
-- ORZ Rally Helmet — Gloss White: $124.95
-- ORZ MX Goggles: $25.00, in Black / Gold, Red / Gold, or Grey / Ice
-- ORZ Helmet + Goggles Bundle: $144.95, with goggles priced at $20 and the helmet bag included free
+- APEX MOTO Rally Helmet — Matte Black: $124.95
+- APEX MOTO Rally Helmet — Gloss White: $124.95
+- APEX MOTO MX Goggles: $25.00, in Black / Gold, Red / Gold, or Grey / Ice
+- APEX MOTO Helmet + Goggles Bundle: $144.95, with goggles priced at $20 and the helmet bag included free
 
 The catalogue currently interprets the supplied stock message as:
 

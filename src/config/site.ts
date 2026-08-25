@@ -36,7 +36,7 @@ export const siteConfig = {
   shortName: "APEX",
   tagline: "Ride hard. Pay fair.",
   description:
-    "Straightforward ORZ off-road helmets and goggles with published product details, fair pricing, Melbourne pickup and Australia-wide delivery.",
+    "Straightforward APEX MOTO off-road helmets and goggles with published product details, fair pricing, Melbourne pickup and Australia-wide delivery.",
   email: "max@apexmoto.com.au",
   phone: "",
   instagramUrl: "https://www.instagram.com/apexmotostore.au/",

@@ -14,7 +14,7 @@ Each image has a public source, factual alt text, real dimensions, and an option
 
 ## Certification
 
-Certification contains an optional standard, approval number, verification state, and documentation URL. A `verified: true` record without a standard fails catalogue validation. The ORZ record is based on the owner statement and visible rear product label; customer-facing wording explicitly avoids treating that marking as proof of Australian road legality.
+Certification contains an optional standard, approval number, verification state, and documentation URL. A `verified: true` record without a standard fails catalogue validation. The APEX MOTO record is based on the owner statement and visible rear product label; customer-facing wording explicitly avoids treating that marking as proof of Australian road legality.
 
 ## Cart item
 
@@ -26,7 +26,7 @@ Certification contains an optional standard, approval number, verification state
 
 ## Size chart
 
-Product-specific chart with manufacturer, verification flag, and centimetre rows. The ORZ Rally chart is transcribed from the owner-supplied product sheet and applies to the listed colour variants of that helmet.
+Product-specific chart with manufacturer, verification flag, and centimetre rows. The APEX MOTO Rally chart is transcribed from the owner-supplied product sheet and applies to the listed colour variants of that helmet.
 
 ## Operational tables
 

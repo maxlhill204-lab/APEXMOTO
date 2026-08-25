@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  async redirects() {
+    return [
+      { source: "/product/orz-rally-helmet-matte-black", destination: "/product/apex-moto-rally-helmet-matte-black", permanent: true },
+      { source: "/product/orz-rally-helmet-gloss-white", destination: "/product/apex-moto-rally-helmet-white-blue", permanent: true },
+      { source: "/product/orz-mx-goggles", destination: "/product/apex-moto-mx-goggles", permanent: true },
+      { source: "/product/orz-helmet-goggles-bundle", destination: "/product/apex-moto-helmet-goggles-bundle", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
