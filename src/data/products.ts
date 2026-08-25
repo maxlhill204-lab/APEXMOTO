@@ -36,9 +36,9 @@ export const products: Product[] = [
     shortName: "Matte Black Helmet",
     category: "helmet",
     description:
-      "A lightweight ORZ off-road helmet in matte black. The supplied product sheet lists an ABS shell, an approximate weight of 1080 g, and a rear DOT FMVSS No. 218 marking.",
+      "A stripped-back ORZ off-road helmet in matte black. The supplied product information lists an ABS shell, an approximate weight of 1080 g, an extended peak, rear ventilation and a rear DOT FMVSS No. 218 marking. We publish those details as supplied and explain the marking separately so you can make an informed choice.",
     shortDescription:
-      "Matte black ORZ helmet available in S, M, L and XL.",
+      "Straightforward off-road helmet with published details and a fair price.",
     price: 12000,
     images: [
       {
@@ -77,7 +77,7 @@ export const products: Product[] = [
       { label: "Material", value: "ABS" },
       { label: "Approx. weight", value: "1080 g" },
     ],
-    certification: { standard: "DOT FMVSS No. 218", verified: true },
+    certification: { standard: "DOT FMVSS No. 218 marking shown", verified: false },
     featured: true,
     bestSeller: true,
     relatedProductIds: ["goggles-orz", "bundle-helmet-goggles"],
@@ -90,8 +90,8 @@ export const products: Product[] = [
     shortName: "White / Blue Helmet",
     category: "helmet",
     description:
-      "The same ORZ off-road helmet in a white and blue finish. Current availability is limited to Medium and Large.",
-    shortDescription: "White and blue ORZ helmet available in M and L.",
+      "The same straightforward ORZ off-road helmet in a white and blue finish. The supplied product information lists an ABS shell, an approximate weight of 1080 g, an extended peak, rear ventilation and a rear DOT FMVSS No. 218 marking. Current availability is limited to Medium and Large.",
+    shortDescription: "White and blue off-road helmet with published details and limited local stock.",
     price: 12000,
     images: [
       {
@@ -124,7 +124,7 @@ export const products: Product[] = [
       { label: "Material", value: "ABS" },
       { label: "Approx. weight", value: "1080 g" },
     ],
-    certification: { standard: "DOT FMVSS No. 218", verified: true },
+    certification: { standard: "DOT FMVSS No. 218 marking shown", verified: false },
     featured: true,
     bestSeller: true,
     relatedProductIds: ["goggles-orz", "bundle-helmet-goggles"],
@@ -137,8 +137,8 @@ export const products: Product[] = [
     shortName: "ORZ Goggles",
     category: "goggles",
     description:
-      "Motocross goggles in five frame and lens combinations. Choose a standalone pair or add your preferred colour to the helmet bundle.",
-    shortDescription: "Five colours, mirrored lenses, and a one-size adjustable strap.",
+      "Straightforward motocross goggles in five frame and lens combinations, with a one-size adjustable strap. Choose a standalone pair or add your preferred colour to the helmet bundle—without paying extra for a prestige logo.",
+    shortDescription: "Five colourways, an adjustable strap and a fair everyday price.",
     price: 2500,
     images: [
       {
@@ -196,8 +196,8 @@ export const products: Product[] = [
     shortName: "Helmet + Goggles Bundle",
     category: "bundle",
     description:
-      "Choose an available helmet colour and size, add any ORZ goggle colour, and receive the helmet storage bag at no extra cost.",
-    shortDescription: "Helmet, your choice of goggles, and a free helmet bag.",
+      "Choose an available helmet colour and size, add any ORZ goggle colour, and receive the helmet storage bag at no extra cost. It is the full setup at one clear bundle price, with no filler and no prestige markup.",
+    shortDescription: "The complete setup at one clear price: helmet, goggles and a free helmet bag.",
     price: 14000,
     images: [
       {
@@ -294,7 +294,7 @@ export const products: Product[] = [
       ),
     ],
     inTheBox: ["ORZ rally helmet", "ORZ MX goggles", "Helmet storage bag — included free"],
-    certification: { standard: "DOT FMVSS No. 218 (helmet)", verified: true },
+    certification: { standard: "DOT FMVSS No. 218 marking shown on helmet", verified: false },
     featured: true,
     bestSeller: true,
     bundleComponentIds: ["helmet-matte-black", "goggles-orz"],

@@ -10,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  title: { default: `${siteConfig.businessName} | ORZ motocross gear`, template: `%s | ${siteConfig.businessName}` },
+  title: { default: `${siteConfig.businessName} | Fair-price off-road gear`, template: `%s | ${siteConfig.businessName}` },
   description: siteConfig.description,
   applicationName: siteConfig.businessName,
   alternates: { canonical: "/" },
@@ -18,10 +18,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_AU",
     siteName: siteConfig.businessName,
-    title: `${siteConfig.businessName} — Ready for the dirt.`,
+    title: `${siteConfig.businessName} — Ride hard. Pay fair.`,
     description: siteConfig.description,
     url: "/",
-    images: [{ url: "/og.png", width: 1672, height: 941, alt: `${siteConfig.businessName} — Ready for the dirt.` }],
+    images: [{ url: "/og.png", width: 1672, height: 941, alt: `${siteConfig.businessName} — Ride hard. Pay fair.` }],
   },
   twitter: { card: "summary_large_image", title: siteConfig.businessName, description: siteConfig.description, images: ["/og.png"] },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },

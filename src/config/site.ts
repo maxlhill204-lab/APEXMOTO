@@ -34,9 +34,9 @@ export const siteConfig = {
   businessId: "apex-moto-au",
   businessName: "APEX MOTO",
   shortName: "APEX",
-  tagline: "Ride at the apex.",
+  tagline: "Ride hard. Pay fair.",
   description:
-    "ORZ motocross helmets and goggles from APEX MOTO, with Melbourne pickup and Australia-wide delivery.",
+    "Straightforward ORZ off-road helmets and goggles with published product details, fair pricing, Melbourne pickup and Australia-wide delivery.",
   email: "max@apexmoto.com.au",
   phone: "",
   instagramUrl: "https://www.instagram.com/apexmotostore.au/",

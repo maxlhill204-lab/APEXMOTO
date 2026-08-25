@@ -3,7 +3,7 @@ import { ProductVisual } from "@/components/product/product-visual";
 import { formatPrice, siteConfig } from "@/config/site";
 import { bundleIndividualTotal } from "@/lib/products";
 import { getLiveCatalog } from "@/lib/live-catalog";
-import { ArrowRight, MapPin, PackageCheck, Ruler, Truck } from "lucide-react";
+import { ArrowRight, BadgeDollarSign, FileSearch, MapPin, Ruler, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -22,9 +22,9 @@ export default async function HomePage() {
       <section className="hero apex-hero">
         <div className="container hero__grid">
           <div className="hero__copy">
-            <p className="eyebrow eyebrow--accent">ORZ MOTOCROSS GEAR / MELBOURNE</p>
-            <h1><span>Ready for</span><br /><span>the dirt.</span></h1>
-            <p className="hero__lead">ORZ helmets and goggles. Local stock, clear prices, no clutter.</p>
+            <p className="eyebrow eyebrow--accent">OFF-ROAD GEAR / HONEST PRICES</p>
+            <h1><span>Ride hard.</span><br /><span>Pay fair.</span></h1>
+            <p className="hero__lead">Straightforward helmets and goggles, published product details and local stock—without the inflated brand-name price.</p>
             <div className="button-row">
               <Link href="/shop" className="button button--primary">Shop the range <ArrowRight size={17} aria-hidden="true" /></Link>
               <Link href="/product/orz-helmet-goggles-bundle" className="button button--secondary">Build a bundle</Link>
@@ -48,16 +48,34 @@ export default async function HomePage() {
 
       <section className="apex-service-strip" aria-label="Store information">
         <div className="container">
-          <span><MapPin aria-hidden="true" /> Newport pickup</span>
-          <span><Truck aria-hidden="true" /> Delivery Australia-wide</span>
-          <span><PackageCheck aria-hidden="true" /> Limited local stock</span>
+          <span><FileSearch aria-hidden="true" /> Product details published</span>
+          <span><BadgeDollarSign aria-hidden="true" /> Straightforward pricing</span>
+          <span><MapPin aria-hidden="true" /> Local Melbourne stock</span>
+        </div>
+      </section>
+
+      <section className="section trust-section apex-value-section">
+        <div className="container">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow eyebrow--accent">WHY APEX MOTO</p>
+              <h2>The dirt does not care what logo you paid for.</h2>
+            </div>
+            <p>We keep the range tight, the information visible and the price grounded. No borrowed prestige. No vague superlatives. Just the product, the facts we can support and local help when you need it.</p>
+          </div>
+          <div className="trust-grid">
+            <article><BadgeDollarSign aria-hidden="true" /><h3>Fair, visible pricing</h3><p>Our prices are shown up front. Promotions are temporary, dated and applied clearly at checkout.</p></article>
+            <article><FileSearch aria-hidden="true" /><h3>Specs, not hype</h3><p>Materials, approximate weight, fit information and supplied markings are published where you can check them.</p></article>
+            <article><ShieldCheck aria-hidden="true" /><h3>Claims kept honest</h3><p>We separate what is shown on the product from what has been independently documented, so you can choose with open eyes.</p></article>
+            <article><MapPin aria-hidden="true" /><h3>Local support</h3><p>Current stock is held in Melbourne, with Newport pickup and direct help from APEX MOTO.</p></article>
+          </div>
         </div>
       </section>
 
       <section className="section section--products">
         <div className="container">
           <div className="section-heading">
-            <div><p className="eyebrow eyebrow--accent">THE RANGE</p><h2>Pick your setup.</h2></div>
+            <div><p className="eyebrow eyebrow--accent">THE RANGE</p><h2>Gear that earns its price.</h2></div>
             <Link href="/shop" className="text-link">Shop all <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <div className="product-grid">{liveCatalog.map((product) => <ProductCard key={product.id} product={product} />)}</div>
@@ -73,7 +91,7 @@ export default async function HomePage() {
           <div className="bundle-feature__copy">
             <p className="eyebrow eyebrow--accent">THE COMPLETE SETUP</p>
             <h2>Helmet. Goggles. Bag.</h2>
-            <p>Choose your available helmet size and any of the five goggle colours. Goggles are {formatPrice(bundledGogglesPrice)} in the bundle during the sale, and the helmet bag is included free.</p>
+            <p>Choose an available helmet size and any of the five goggle colours. Goggles are {formatPrice(bundledGogglesPrice)} in the bundle during the sale, and the helmet bag is included free. One clear price for the setup you actually need.</p>
             <dl className="price-breakdown">
               <div><dt>Helmet</dt><dd>{formatPrice(heroProduct.price)}</dd></div>
               <div><dt>Goggles in bundle</dt><dd>{formatPrice(bundledGogglesPrice)}</dd></div>
@@ -104,7 +122,7 @@ export default async function HomePage() {
 
       <section className="final-cta">
         <div className="container">
-          <div><p className="eyebrow eyebrow--accent">{siteConfig.businessName}</p><h2>Find your line.</h2></div>
+          <div><p className="eyebrow eyebrow--accent">{siteConfig.businessName}</p><h2>Ride hard. Pay fair.</h2></div>
           <div className="button-row"><Link href="/shop" className="button button--primary">Shop now</Link><a href={siteConfig.instagramUrl} target="_blank" rel="noreferrer" className="button button--secondary">Instagram</a></div>
         </div>
       </section>
