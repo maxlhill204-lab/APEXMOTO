@@ -2,6 +2,7 @@ import { Body, Button, Container, Head, Heading, Html, Preview, Section, Text } 
 import { formatPrice, getSiteUrl, siteConfig } from "@/config/site";
 import { formatPickupDate, orderStatusLabel } from "@/lib/order-domain";
 import type { EmailKind, PublicOrder } from "@/types/order";
+import { formatShippingAddress } from "@/lib/shipping-display";
 
 const styles = {
   body: { backgroundColor: "#080808", color: "#f5f2e8", fontFamily: "Arial, sans-serif", margin: 0, padding: "28px 12px" },
@@ -66,12 +67,23 @@ export function OrderEmail({ kind, order, accessToken, privatePickupAddress }: {
           <Text style={styles.line}><strong>Earliest pickup:</strong> {formatPickupDate(order.pickupDate)}</Text>
           <Text style={styles.line}><strong>Collection:</strong> {order.pickupWindow ?? "By confirmed appointment"}</Text>
           <Text style={styles.line}><strong>Location:</strong> {disclosePrivatePickupAddress && privatePickupAddress ? privatePickupAddress : siteConfig.pickupLocationLabel}</Text>
-        </> : null}
+        </> : <>
+          <Text style={styles.line}><strong>Carrier:</strong> {order.shippingCarrier ?? "Delivery"}</Text>
+          {order.shippingServiceCode ? <Text style={styles.line}><strong>Service code:</strong> {order.shippingServiceCode}</Text> : null}
+          <Text style={styles.line}><strong>Ship to:</strong> {formatShippingAddress(order.shippingDetails) ?? `${order.shippingDestinationCountry} ${order.shippingDestinationPostalCode}`.trim()}</Text>
+          {order.shippingTrackingNumber ? <Text style={styles.line}><strong>Tracking:</strong> {order.shippingTrackingNumber}</Text> : null}
+          {isOwner ? <Text style={styles.line}><strong>Parcels:</strong> {order.shippingParcels.length || "Legacy shipping record"}</Text> : null}
+          {isOwner && order.customs ? order.customs.items.map((item) => <Text key={`${item.hsTariffCode}:${item.description}`} style={styles.line}><strong>Customs:</strong> {item.quantity} × {item.description} · HS {item.hsTariffCode} · origin {item.countryOfOrigin} · {item.totalWeightKg} kg · {formatPrice(item.totalValue)}</Text>) : null}
+        </>}
         {isOwner ? <><Text style={styles.line}><strong>Customer:</strong> {order.customerName}</Text><Text style={styles.line}><strong>Email:</strong> {order.customerEmail}</Text></> : null}
       </Section>
       {awaitingPickupConfirmation ? <Section style={styles.notice}>
         <Text style={styles.noticeHeading}>Your pickup details will be confirmed within 24 hours.</Text>
         <Text style={styles.noticeText}>We will email you to confirm the exact pickup address and available collection times. If you have not received those details within 24 hours, reply to this email or contact {siteConfig.email}.</Text>
+      </Section> : null}
+      {isOwner && order.shippingAddressReview ? <Section style={styles.notice}>
+        <Text style={styles.noticeHeading}>Review the shipping address before buying postage.</Text>
+        <Text style={styles.noticeText}>The country or Australian postcode collected by Stripe does not match the destination used for the quote. Confirm the address and postage price with the customer before creating a label.</Text>
       </Section> : null}
       <Button href={`${getSiteUrl()}/order-status/${encodeURIComponent(order.orderNumber)}?token=${encodeURIComponent(accessToken)}`} style={styles.button}>View order status</Button>
       <Text style={styles.fine}>{awaitingPickupConfirmation ? `Pickup details should arrive within 24 hours. If they do not, reply to this email or contact ${siteConfig.email}.` : `Questions? Reply to this email or contact ${siteConfig.email}. Typical response time is ${siteConfig.supportResponseHoursMin}–${siteConfig.supportResponseHoursMax} hours.`}</Text>

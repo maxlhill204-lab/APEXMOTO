@@ -1,5 +1,6 @@
 import { helmetShippingRegions, siteConfig } from "@/config/site";
 import type { ResolvedCartItem } from "@/types/product";
+import type { ShippingOrderSnapshot } from "@/types/shipping";
 
 export type ShippingQuote =
   | {
@@ -8,6 +9,7 @@ export type ShippingQuote =
       label: string;
       amount: number;
       pickup: boolean;
+      snapshot: ShippingOrderSnapshot;
     }
   | {
       available: false;
@@ -42,6 +44,7 @@ export function calculateShipping(
       label: `${siteConfig.pickupSuburb} pickup`,
       amount: 0,
       pickup: true,
+      snapshot: { carrier: null, serviceCode: null, destinationCountry: "AU", destinationPostalCode: "", quoteExpiresAt: null, parcels: [], customs: null },
     };
   }
 
@@ -62,6 +65,7 @@ export function calculateShipping(
       label: "Goggles delivery — Australia-wide",
       amount: siteConfig.gogglesShippingPrice,
       pickup: false,
+      snapshot: { carrier: null, serviceCode: null, destinationCountry: "AU", destinationPostalCode: "", quoteExpiresAt: null, parcels: [], customs: null },
     };
   }
 
@@ -95,5 +99,6 @@ export function calculateShipping(
     label: `${region.label} delivery`,
     amount: region.price,
     pickup: false,
+    snapshot: { carrier: null, serviceCode: null, destinationCountry: "AU", destinationPostalCode: "", quoteExpiresAt: null, parcels: [], customs: null },
   };
 }

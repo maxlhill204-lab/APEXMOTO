@@ -4,6 +4,7 @@ export type AnalyticsEventName =
   | "select_size"
   | "add_to_cart"
   | "view_cart"
+  | "shipping_quote"
   | "begin_checkout"
   | "purchase"
   | "click_contact"

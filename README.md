@@ -46,7 +46,8 @@ This runs lint, TypeScript, tests, the production build, and the production-cont
 - `src/config/size-guide.ts` — verified product-specific centimetre charts
 - `src/config/navigation.ts` — desktop and mobile navigation
 - `src/lib/products.ts` — catalogue validation and product calculations
-- `src/lib/shipping.ts` — deterministic pickup, goggle-only, helmet-region, and quote-required rules
+- `src/lib/shipping.ts` — backwards-compatible pickup and legacy Australian delivery rules
+- `src/lib/auspost.ts` and `src/lib/shipping-quote.ts` — server-only Australia Post rates and signed cart-bound quotes
 - `src/lib/checkout-policy.ts` — origin, business scope, item, stock, and delivery checks
 - `src/app/api/checkout/route.ts` — server-owned Stripe Checkout creation
 - `src/app/api/stripe/webhook/route.ts` — signed, idempotent payment/inventory/email/refund processing
@@ -128,7 +129,7 @@ Shipping configuration is in `src/config/site.ts`:
 - `gogglesShippingPrice` is the flat goggles-only price;
 - `maxIncludedGogglesWithHelmet` controls how many standalone goggles add no cost to a helmet shipment.
 
-The cart chooses one method before checkout. The server recalculates it from catalogue items and configuration; it does not trust a browser-supplied amount. `regional-qld`, `regional-wa`, and helmet orders over the included-goggle limit stop before payment and direct the customer to request an exact quote.
+The existing Australian rules remain the fail-safe until calculated shipping is fully configured. Follow `docs/WORLDWIDE_SHIPPING.md` to add the Australia Post PAC key, measured parcel profiles, verified customs facts, quote-signing secret and supported countries. Once every gate passes, the cart automatically uses Australia Post destination/weight/parcel quotes for Australia and enabled international destinations. Signed quotes are tied to the exact cart and expire after 15 minutes; the browser never supplies a trusted shipping amount.
 
 ## Configure orders, email and Stripe
 

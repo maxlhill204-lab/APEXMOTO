@@ -5,6 +5,7 @@ import { formatPickupDate, pickupAvailableDate } from "@/lib/order-domain";
 import { operationalLog } from "@/lib/operational-log";
 import { getVariantLabel } from "@/lib/products";
 import { checkoutReadiness, getStripe } from "@/lib/stripe";
+import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     return jsonError("Online checkout is temporarily unavailable while order notifications are being configured. Please contact APEX MOTO to order.", 503, "CHECKOUT_NOT_READY");
   }
 
-  const fingerprint = checkoutFingerprint({ customerName: policy.customerName, customerEmail: policy.customerEmail, shippingMethodId: policy.shipping.methodId, items: policy.items });
+  const fingerprint = checkoutFingerprint({ customerName: policy.customerName, customerEmail: policy.customerEmail, shipping: policy.shipping, items: policy.items });
   let reserved: Awaited<ReturnType<typeof reserveCheckoutOrder>> | null = null;
   let stripeRequestAttempted = false;
   try {
@@ -52,10 +53,10 @@ export async function POST(request: Request) {
     }
 
     const siteUrl = getSiteUrl();
+    const allowedCountry = shipping.snapshot.destinationCountry as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry;
     stripeRequestAttempted = true;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
       wallet_options: { link: { display: "never" } },
       allow_promotion_codes: true,
       client_reference_id: reserved.orderId,
@@ -67,13 +68,13 @@ export async function POST(request: Request) {
       customer_creation: "always",
       name_collection: { individual: { enabled: true, optional: false } },
       billing_address_collection: "required",
-      shipping_address_collection: { allowed_countries: ["AU"] as ["AU"] },
+      shipping_address_collection: { allowed_countries: [allowedCountry] },
       ...(policy.shipping.pickup ? {} : {
         shipping_options: [{ shipping_rate_data: { type: "fixed_amount" as const, fixed_amount: { amount: policy.shipping.amount, currency: "aud" }, display_name: policy.shipping.label } }],
       }),
       custom_text: { submit: { message: policy.shipping.pickup
         ? `Pickup is in ${settings.pickupLocationLabel}, no earlier than ${formatPickupDate(orderPickupDate)}, and only at a time confirmed by email. ${settings.pickupAddressDisclosure}`
-        : `Delivery method: ${shipping.label}. Dispatch begins no earlier than ${formatPickupDate(siteConfig.shippingNextAvailableDate)}. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
+        : `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. Dispatch begins no earlier than ${formatPickupDate(siteConfig.shippingNextAvailableDate)}. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
       payment_intent_data: {
         receipt_email: policy.customerEmail,
         metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber },
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
       expires_at: Math.floor(new Date(reserved.reservationExpiresAt).getTime() / 1000),
       success_url: `${siteUrl}/order-success?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(reserved.orderNumber)}&token=${encodeURIComponent(reserved.accessToken)}`,
       cancel_url: `${siteUrl}/cart?checkout=cancelled`,
-      metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber, fulfilmentMethod: policy.shipping.methodId, checkoutFlowVersion: "card-address-v2" },
+      metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber, fulfilmentMethod: policy.shipping.methodId, destinationCountry: shipping.snapshot.destinationCountry, shippingServiceCode: shipping.snapshot.serviceCode ?? "pickup", checkoutFlowVersion: "worldwide-shipping-v3" },
     }, { idempotencyKey: `${siteConfig.businessId}:${requestKey}` });
     if (!session.url) throw new Error("Stripe did not provide a checkout link.");
     await attachStripeSession(reserved.orderId, session.id).catch(() => undefined);

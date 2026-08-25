@@ -8,6 +8,7 @@ import { PENDING_CHECKOUT_KEY } from "./cart-provider";
 
 export function CheckoutButton({
   shippingMethodId,
+  shippingQuoteToken,
   customerName,
   customerEmail,
   pickupAcknowledged,
@@ -15,6 +16,7 @@ export function CheckoutButton({
   className = "button button--primary button--wide",
 }: {
   shippingMethodId: string;
+  shippingQuoteToken?: string;
   customerName: string;
   customerEmail: string;
   pickupAcknowledged: boolean;
@@ -78,7 +80,7 @@ export function CheckoutButton({
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Checkout-Idempotency-Key": checkoutKey },
-        body: JSON.stringify({ businessId: siteConfig.businessId, items, shippingMethodId, customerName, customerEmail, pickupAcknowledged }),
+        body: JSON.stringify({ businessId: siteConfig.businessId, items, shippingMethodId, shippingQuoteToken, customerName, customerEmail, pickupAcknowledged }),
       });
       const data = (await response.json()) as { url?: string; message?: string; orderNumber?: string; accessToken?: string; purchasedKeys?: string[] };
       if (!response.ok || !data.url) throw new Error(data.message || "Checkout is unavailable.");

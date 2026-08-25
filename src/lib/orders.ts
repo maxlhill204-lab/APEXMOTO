@@ -13,7 +13,9 @@ import {
 } from "@/lib/order-domain";
 import type { ShippingQuote } from "@/lib/shipping";
 import type { ResolvedCartItem } from "@/types/product";
-import type { AdminOrder, EmailKind, OrderItemSnapshot, OrderStatus, PaymentStatus, PublicOrder, StoreSettings } from "@/types/order";
+import type { AdminOrder, EmailKind, OrderItemSnapshot, OrderStatus, PaymentStatus, PublicOrder, ShippingAddress, StoreSettings } from "@/types/order";
+import type { CustomsSnapshot, ShippingParcel } from "@/types/shipping";
+import { applyCustomsDiscount } from "@/lib/shipping-parcels";
 import type { PoolClient } from "@neondatabase/serverless";
 
 type Row = Record<string, unknown>;
@@ -56,7 +58,7 @@ const isoDate = (value: unknown) => {
 
 const isoDateTime = (value: unknown) => value instanceof Date ? value.toISOString() : value ? String(value) : null;
 
-const toShippingDetails = (value: unknown): Record<string, string> | null => {
+const toShippingDetails = (value: unknown): ShippingAddress | null => {
   if (!value || typeof value !== "object") return null;
   const source = value as Record<string, unknown>;
   const address = source.address && typeof source.address === "object" ? source.address as Record<string, unknown> : {};
@@ -128,13 +130,19 @@ export async function getStoreSettings(): Promise<StoreSettings> {
 export function checkoutFingerprint(input: {
   customerName: string;
   customerEmail: string;
-  shippingMethodId: string;
+  shipping: Extract<ShippingQuote, { available: true }>;
   items: ResolvedCartItem[];
 }) {
   const canonical = JSON.stringify({
     customerName: input.customerName,
     customerEmail: input.customerEmail,
-    shippingMethodId: input.shippingMethodId,
+    shipping: {
+      methodId: input.shipping.methodId,
+      amount: input.shipping.amount,
+      destinationCountry: input.shipping.snapshot.destinationCountry,
+      destinationPostalCode: input.shipping.snapshot.destinationPostalCode,
+      quoteExpiresAt: input.shipping.snapshot.quoteExpiresAt,
+    },
     items: input.items.map((item) => ({ key: item.key, quantity: item.quantity })).sort((a, b) => a.key.localeCompare(b.key)),
   });
   return createHash("sha256").update(canonical).digest("hex");
@@ -200,8 +208,10 @@ export async function reserveCheckoutOrder(input: {
       `INSERT INTO orders (
         id,business_id,order_number,checkout_key,request_fingerprint,status,payment_status,currency,
         subtotal_amount,shipping_amount,total_amount,customer_name,customer_email,fulfilment_method_id,
-        fulfilment_label,pickup_date,pickup_window,reservation_expires_at
-      ) VALUES ($1,$2,$3,$4,$5,'PENDING_PAYMENT','UNPAID','aud',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+        fulfilment_label,pickup_date,pickup_window,reservation_expires_at,shipping_carrier,
+        shipping_service_code,shipping_destination_country,shipping_destination_postal_code,
+        shipping_quote_expires_at,shipping_parcels,customs_snapshot
+      ) VALUES ($1,$2,$3,$4,$5,'PENDING_PAYMENT','UNPAID','aud',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21::jsonb,$22::jsonb)`,
       [
         orderId, siteConfig.businessId, orderNumber, input.checkoutKey, input.requestFingerprint,
         subtotal, input.shipping.amount, subtotal + input.shipping.amount, input.customerName, input.customerEmail,
@@ -209,6 +219,13 @@ export async function reserveCheckoutOrder(input: {
         input.shipping.pickup ? (input.pickupAvailableDate ?? settings.pickupNextAvailableDate) : null,
         input.shipping.pickup ? settings.pickupWindow : null,
         expiresAt,
+        input.shipping.snapshot.carrier,
+        input.shipping.snapshot.serviceCode,
+        input.shipping.snapshot.destinationCountry,
+        input.shipping.snapshot.destinationPostalCode,
+        input.shipping.snapshot.quoteExpiresAt,
+        JSON.stringify(input.shipping.snapshot.parcels),
+        input.shipping.snapshot.customs ? JSON.stringify(input.shipping.snapshot.customs) : null,
       ],
     );
     for (const item of snapshotOrderItems(input.items)) {
@@ -271,6 +288,14 @@ function mapOrder(row: Row, items: OrderItemSnapshot[]): PublicOrder {
     pickupDate: isoDate(row.pickup_date),
     pickupWindow: row.pickup_window ? String(row.pickup_window) : null,
     shippingDetails: toShippingDetails(row.shipping_details),
+    shippingCarrier: row.shipping_carrier ? String(row.shipping_carrier) : null,
+    shippingServiceCode: row.shipping_service_code ? String(row.shipping_service_code) : null,
+    shippingDestinationCountry: row.shipping_destination_country ? String(row.shipping_destination_country) : "AU",
+    shippingDestinationPostalCode: row.shipping_destination_postal_code ? String(row.shipping_destination_postal_code) : "",
+    shippingAddressReview: Boolean(row.shipping_address_review),
+    shippingParcels: Array.isArray(row.shipping_parcels) ? row.shipping_parcels as ShippingParcel[] : [],
+    customs: row.customs_snapshot && typeof row.customs_snapshot === "object" ? row.customs_snapshot as CustomsSnapshot : null,
+    shippingTrackingNumber: row.shipping_tracking_number ? String(row.shipping_tracking_number) : null,
     createdAt: String(isoDateTime(row.created_at)),
     paidAt: isoDateTime(row.paid_at),
     refundedAt: isoDateTime(row.refunded_at),
@@ -380,12 +405,26 @@ export async function processPaidCheckout(input: PaidCheckout): Promise<{ order:
         await client.query("INSERT INTO inventory_events (id,business_id,sku,event_type,quantity_before,quantity_after,order_id,actor) VALUES ($1,$2,$3,'ORDER_PAID',$4,$5,$6,'stripe')", [randomUUID(), siteConfig.businessId, String(reservation.sku), before, before - Number(reservation.quantity), orderId]);
       }
       await client.query("UPDATE inventory_reservations SET status='CONSUMED',updated_at=now() WHERE business_id=$1 AND order_id=$2 AND status='ACTIVE'", [siteConfig.businessId, orderId]);
+      const shippingDetails = toShippingDetails(input.shippingDetails);
+      const expectedCountry = order.shipping_destination_country ? String(order.shipping_destination_country).toUpperCase() : "";
+      const expectedPostalCode = order.shipping_destination_postal_code ? String(order.shipping_destination_postal_code).replace(/[^A-Z0-9]/gi, "").toUpperCase() : "";
+      const actualPostalCode = shippingDetails?.postalCode.replace(/[^A-Z0-9]/gi, "").toUpperCase() ?? "";
+      const deliveryOrder = String(order.fulfilment_method_id) !== "pickup";
+      const shippingAddressReview = deliveryOrder && (
+        !shippingDetails
+        || (expectedCountry && shippingDetails.country.toUpperCase() !== expectedCountry)
+        || (expectedCountry === "AU" && expectedPostalCode && actualPostalCode !== expectedPostalCode)
+      );
+      const storedCustoms = order.customs_snapshot && typeof order.customs_snapshot === "object" ? order.customs_snapshot as CustomsSnapshot : null;
+      const finalCustoms = applyCustomsDiscount(storedCustoms, reconciled.discountAmount);
       await client.query(
         `UPDATE orders SET status='PAID',payment_status='PAID',paid_at=now(),updated_at=now(),stripe_session_id=$3,
          stripe_payment_intent_id=$4,stripe_customer_id=$5,shipping_details=$6::jsonb,discount_amount=$7,total_amount=$8,
-         promotion_code=$9,stripe_promotion_code_id=$10,payment_method_label=$11 WHERE business_id=$1 AND id=$2`,
+         promotion_code=$9,stripe_promotion_code_id=$10,payment_method_label=$11,shipping_address_review=$12,
+         customs_snapshot=$13::jsonb WHERE business_id=$1 AND id=$2`,
         [siteConfig.businessId, orderId, input.sessionId, input.paymentIntentId, input.customerId, JSON.stringify(input.shippingDetails),
-          reconciled.discountAmount, reconciled.totalAmount, input.promotionCode, input.stripePromotionCodeId, input.paymentMethodLabel],
+          reconciled.discountAmount, reconciled.totalAmount, input.promotionCode, input.stripePromotionCodeId, input.paymentMethodLabel,
+          shippingAddressReview, finalCustoms ? JSON.stringify(finalCustoms) : null],
       );
       await client.query(
         "INSERT INTO order_events (id,business_id,order_id,event_type,provider_event_id,actor,details) VALUES ($1,$2,$3,'PAYMENT_CONFIRMED',$4,'stripe',$5::jsonb)",

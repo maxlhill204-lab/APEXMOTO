@@ -34,6 +34,16 @@ export type StoreSettings = {
   supportResponseMaxHours: number;
 };
 
+export type ShippingAddress = {
+  name: string;
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+};
+
 export type OrderItemSnapshot = {
   productId: string;
   variantId: string;
@@ -63,7 +73,15 @@ export type PublicOrder = {
   fulfilmentLabel: string;
   pickupDate: string | null;
   pickupWindow: string | null;
-  shippingDetails: Record<string, string> | null;
+  shippingDetails: ShippingAddress | null;
+  shippingCarrier: string | null;
+  shippingServiceCode: string | null;
+  shippingDestinationCountry: string;
+  shippingDestinationPostalCode: string;
+  shippingAddressReview: boolean;
+  shippingParcels: import("@/types/shipping").ShippingParcel[];
+  customs: import("@/types/shipping").CustomsSnapshot | null;
+  shippingTrackingNumber: string | null;
   createdAt: string;
   paidAt: string | null;
   refundedAt: string | null;

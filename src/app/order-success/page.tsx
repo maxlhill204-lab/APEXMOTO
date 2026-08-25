@@ -8,6 +8,7 @@ import type { PublicOrder } from "@/types/order";
 import { CheckCircle2, CircleAlert, MailCheck, MapPin, PackageCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { formatShippingAddress } from "@/lib/shipping-display";
 
 export const metadata: Metadata = { title: "Order confirmed", description: "Your APEX MOTO order confirmation and fulfilment details.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -63,7 +64,7 @@ export default async function OrderSuccessPage({ searchParams }: { searchParams:
       </section>
       <aside className="next-steps-panel"><h2>What happens next</h2>
         <div><MailCheck aria-hidden="true" /><span><strong>Confirmation email</strong><small>Sent automatically after payment confirmation. Check spam or promotions, then contact us if it has not arrived.</small></span></div>
-        {order.fulfilmentMethodId === "pickup" ? <div><MapPin aria-hidden="true" /><span><strong>Pickup: {formatPickupDate(order.pickupDate)}</strong><small>{order.pickupWindow}. Pickup is in {siteConfig.pickupLocationLabel}. Wait for the confirmed time and private address before travelling.</small></span></div> : <div><PackageCheck aria-hidden="true" /><span><strong>{order.fulfilmentLabel}</strong><small>{order.shippingDetails ? [order.shippingDetails.line1, order.shippingDetails.line2, order.shippingDetails.city, order.shippingDetails.state, order.shippingDetails.postalCode].filter(Boolean).join(", ") : "Your delivery address is recorded securely with the order."}</small></span></div>}
+        {order.fulfilmentMethodId === "pickup" ? <div><MapPin aria-hidden="true" /><span><strong>Pickup: {formatPickupDate(order.pickupDate)}</strong><small>{order.pickupWindow}. Pickup is in {siteConfig.pickupLocationLabel}. Wait for the confirmed time and private address before travelling.</small></span></div> : <div><PackageCheck aria-hidden="true" /><span><strong>{order.fulfilmentLabel}</strong><small>{formatShippingAddress(order.shippingDetails) ?? "Your delivery address is recorded securely with the order."}{order.shippingTrackingNumber ? ` · Tracking ${order.shippingTrackingNumber}` : ""}</small></span></div>}
         <p>Need to change or cancel something? Use order help as soon as possible. Replies are normally within {siteConfig.supportResponseHoursMin}–{siteConfig.supportResponseHoursMax} hours.</p>
         <div className="button-row"><Link className="button button--primary" href={`/order-status/${encodeURIComponent(order.orderNumber)}?token=${encodeURIComponent(params.token ?? "")}`}>View order status</Link><Link className="button button--secondary" href={`/order-help?order=${encodeURIComponent(order.orderNumber)}&token=${encodeURIComponent(params.token ?? "")}`}>Order help</Link></div>
       </aside>

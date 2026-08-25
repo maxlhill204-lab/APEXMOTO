@@ -1,6 +1,7 @@
 import { getSiteUrl, siteConfig } from "@/config/site";
 import { resolveCartItems, sanitiseCartItems } from "@/lib/cart";
 import { calculateShipping, type ShippingQuote } from "@/lib/shipping";
+import { ShippingQuoteError, verifyShippingQuoteToken } from "@/lib/shipping-quote";
 import type { CartItemInput } from "@/types/product";
 import { NORMALISED_EMAIL, normaliseCustomerEmail, normaliseCustomerName } from "@/lib/order-domain";
 
@@ -33,7 +34,7 @@ export function validateCheckoutRequest(
   if (!payload || typeof payload !== "object") {
     return { allowed: false, code: "INVALID_BODY", message: "Your cart could not be read." };
   }
-  const body = payload as { businessId?: unknown; items?: unknown; shippingMethodId?: unknown; customerName?: unknown; customerEmail?: unknown; pickupAcknowledged?: unknown };
+  const body = payload as { businessId?: unknown; items?: unknown; shippingMethodId?: unknown; shippingQuoteToken?: unknown; customerName?: unknown; customerEmail?: unknown; pickupAcknowledged?: unknown };
   if (body.businessId !== siteConfig.businessId) {
     return { allowed: false, code: "BUSINESS_SCOPE_DENIED", message: "Your cart could not be verified." };
   }
@@ -55,7 +56,15 @@ export function validateCheckoutRequest(
   const customerEmail = normaliseCustomerEmail(body.customerEmail);
   if (!NORMALISED_EMAIL.test(customerEmail)) return { allowed: false, code: "EMAIL_REQUIRED", message: "Enter a valid email for the order confirmation." };
 
-  const shipping = calculateShipping(resolved, body.shippingMethodId);
+  let shipping: ShippingQuote | ReturnType<typeof verifyShippingQuoteToken>;
+  try {
+    shipping = body.shippingQuoteToken
+      ? verifyShippingQuoteToken(body.shippingQuoteToken, resolved)
+      : calculateShipping(resolved, body.shippingMethodId);
+  } catch (error) {
+    if (error instanceof ShippingQuoteError) return { allowed: false, code: error.code, message: error.message };
+    return { allowed: false, code: "SHIPPING_QUOTE_INVALID", message: "The delivery quote could not be verified. Calculate it again." };
+  }
   if (!shipping.available) {
     return { allowed: false, code: shipping.code, message: shipping.message };
   }
