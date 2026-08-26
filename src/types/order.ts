@@ -89,6 +89,7 @@ export type PublicOrder = {
 };
 
 export type AdminOrder = PublicOrder & {
+  stripeSessionId: string | null;
   stripePaymentIntentId: string | null;
   cancellationRequested: boolean;
   emails: { kind: EmailKind; recipient: string; status: string; attempts: number; lastError: string | null }[];

@@ -5,7 +5,7 @@ import { getStoreSettings, initialiseOrderSystemData, listAdminOrders, listInven
 import type { OrderStatus } from "@/types/order";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { inventoryAction, logoutAction, refundAction, retryEmailAction, settingsAction, statusAction } from "./actions";
+import { inventoryAction, logoutAction, reconcilePaidOrderAction, refundAction, retryEmailAction, settingsAction, statusAction } from "./actions";
 
 export const metadata: Metadata = { title: "Order desk", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -32,6 +32,7 @@ export default async function AdminPage() {
             {order.shippingAddressReview ? <div className="admin-alert"><strong>Shipping address needs review</strong><span>The country or Australian postcode entered in Stripe does not match the calculated quote. Do not create a label until the address and postage price are checked.</span></div> : null}
             {order.cancellationRequested ? <div className="admin-alert"><strong>Cancellation requested</strong><span>Review before preparing or shipping. A refund is not complete until Stripe confirms it.</span></div> : null}
             <div className="admin-actions"><form action={statusAction}><input type="hidden" name="orderId" value={order.id} /><label>Status<select name="nextStatus" defaultValue="" required><option value="" disabled>Choose next status</option>{statusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><button className="button button--secondary" type="submit">Update status</button></form>
+              {order.status === "PENDING_PAYMENT" && order.stripeSessionId ? <form action={reconcilePaidOrderAction}><input type="hidden" name="orderId" value={order.id} /><button className="button button--primary" type="submit">Verify Stripe payment + send confirmation</button></form> : null}
               <form action={retryEmailAction}><input type="hidden" name="orderId" value={order.id} /><button className="button button--secondary" type="submit">Retry failed emails</button></form>
               <form action={refundAction} className="admin-refund"><input type="hidden" name="orderId" value={order.id} /><label>Type {order.orderNumber} to issue a full Stripe refund<input name="confirmation" required autoComplete="off" /></label><button className="button button--danger" type="submit">Full refund</button></form></div>
             <div className="admin-email-status"><strong>Email delivery</strong>{order.emails.length ? order.emails.map((email) => <p key={`${email.kind}:${email.recipient}`}><span>{email.kind.replaceAll("_", " ").toLowerCase()} → {email.recipient}</span><b data-state={email.status}>{email.status} · {email.attempts} attempt{email.attempts === 1 ? "" : "s"}</b>{email.lastError ? <small>{email.lastError}</small> : null}</p>) : <p>No email jobs yet.</p>}</div>

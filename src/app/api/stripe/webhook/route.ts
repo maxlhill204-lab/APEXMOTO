@@ -1,6 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { deliverPendingEmails } from "@/lib/email";
-import { operationalLog } from "@/lib/operational-log";
+import { operationalErrorEvidence, operationalLog } from "@/lib/operational-log";
 import { processPaidCheckout, processRefundEvent, processTerminalCheckout, recordIgnoredWebhook } from "@/lib/orders";
 import { checkoutDiscountDetails, checkoutPaymentMethodLabel, getStripe, retrieveCheckoutSessionForFulfilment, stripeObjectId } from "@/lib/stripe";
 import type Stripe from "stripe";
@@ -91,7 +91,12 @@ export async function POST(request: Request) {
     await recordIgnoredWebhook(event.id, event.type);
     return Response.json({ state: "VERIFIED_IGNORED" });
   } catch (error) {
-    operationalLog("error", "stripe.webhook_processing_failed", { businessId: siteConfig.businessId, eventId: event.id, eventType: event.type, errorType: error instanceof Error ? error.name : "UnknownError" });
+    operationalLog("error", "stripe.webhook_processing_failed", {
+      businessId: siteConfig.businessId,
+      eventId: event.id,
+      eventType: event.type,
+      ...operationalErrorEvidence(error),
+    });
     return Response.json({ state: "RETRY_REQUIRED" }, { status: 500 });
   }
 }

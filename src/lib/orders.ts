@@ -325,6 +325,23 @@ export async function getAccessibleOrder(orderNumber: string, token: string) {
   return getOrderById(orderId);
 }
 
+export async function getAdminOrderCheckoutContext(orderId: string) {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, order_number, status, payment_status, stripe_session_id
+    FROM orders
+    WHERE business_id=${siteConfig.businessId} AND id=${orderId}
+  `;
+  if (!rows[0]) return null;
+  return {
+    orderId: String(rows[0].id),
+    orderNumber: String(rows[0].order_number),
+    status: String(rows[0].status) as OrderStatus,
+    paymentStatus: String(rows[0].payment_status) as PaymentStatus,
+    stripeSessionId: rows[0].stripe_session_id ? String(rows[0].stripe_session_id) : null,
+  };
+}
+
 export async function getResumableCheckout(orderNumber: string, token: string): Promise<{
   orderId: string;
   status: OrderStatus;
@@ -542,6 +559,7 @@ export async function listAdminOrders(limit = 100): Promise<AdminOrder[]> {
     const cancellations = await sql`SELECT id FROM cancellation_requests WHERE business_id=${siteConfig.businessId} AND order_id=${order.id} AND status='OPEN' LIMIT 1`;
     orders.push({
       ...order,
+      stripeSessionId: row.stripe_session_id ? String(row.stripe_session_id) : null,
       stripePaymentIntentId: row.stripe_payment_intent_id ? String(row.stripe_payment_intent_id) : null,
       cancellationRequested: cancellations.length > 0,
       emails: emailRows.map((email) => ({ kind: String(email.email_kind) as EmailKind, recipient: String(email.recipient), status: String(email.status), attempts: Number(email.attempts), lastError: email.last_error ? String(email.last_error) : null })),
