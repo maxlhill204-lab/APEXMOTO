@@ -437,11 +437,11 @@ export async function processPaidCheckout(input: PaidCheckout): Promise<{ order:
       await client.query(
         `UPDATE orders SET status='PAID',payment_status='PAID',paid_at=now(),updated_at=now(),stripe_session_id=$3,
          stripe_payment_intent_id=$4,stripe_customer_id=$5,shipping_details=$6::jsonb,discount_amount=$7,total_amount=$8,
-         promotion_code=$9,stripe_promotion_code_id=$10,payment_method_label=$11,shipping_address_review=$12,
+         promotion_code=$9,stripe_promotion_code_id=$10,payment_method_label=$11,shipping_address_review=$12::boolean,
          customs_snapshot=$13::jsonb WHERE business_id=$1 AND id=$2`,
         [siteConfig.businessId, orderId, input.sessionId, input.paymentIntentId, input.customerId, JSON.stringify(input.shippingDetails),
           reconciled.discountAmount, reconciled.totalAmount, input.promotionCode, input.stripePromotionCodeId, input.paymentMethodLabel,
-          shippingAddressReview, finalCustoms ? JSON.stringify(finalCustoms) : null],
+          shippingAddressReview ? "true" : "false", finalCustoms ? JSON.stringify(finalCustoms) : null],
       );
       await client.query(
         "INSERT INTO order_events (id,business_id,order_id,event_type,provider_event_id,actor,details) VALUES ($1,$2,$3,'PAYMENT_CONFIRMED',$4,'stripe',$5::jsonb)",
