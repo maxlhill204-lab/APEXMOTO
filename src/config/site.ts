@@ -62,7 +62,7 @@ export const siteConfig = {
   promotionEndsLabel: "this Sunday night, 30 August 2026, Melbourne time",
   promotionShortLabel: "20% off · ends this Sunday night",
   announcementBarText: "20% OFF SITEWIDE · ENDS THIS SUNDAY NIGHT ·",
-  announcementBarEndedText: "SALE ENDED · REGULAR PRICES RESTORED",
+  announcementBarEndedText: "RIDE HARD. PAY FAIR. · AUSTRALIA-WIDE SHIPPING ·",
   supportHours: "Customer support replies within 12–48 hours",
   supportResponseHoursMin: 12,
   supportResponseHoursMax: 48,
