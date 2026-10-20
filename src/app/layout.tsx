@@ -7,6 +7,7 @@ import { getSiteUrl, siteConfig } from "@/config/site";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import "./redesign.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),

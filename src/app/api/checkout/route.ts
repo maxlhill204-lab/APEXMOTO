@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       }),
       custom_text: { submit: { message: policy.shipping.pickup
         ? `Pickup is in ${settings.pickupLocationLabel}, no earlier than ${formatPickupDate(orderPickupDate)}, and only at a time confirmed by email. ${settings.pickupAddressDisclosure}`
-        : `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. Dispatch begins no earlier than ${formatPickupDate(siteConfig.shippingNextAvailableDate)}. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
+        : `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. Dispatch timing is confirmed with your order. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
       payment_intent_data: {
         receipt_email: policy.customerEmail,
         metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber },
