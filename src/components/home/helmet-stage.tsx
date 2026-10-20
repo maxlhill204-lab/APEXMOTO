@@ -30,7 +30,7 @@ export function HelmetStage() {
       <div className="lux-stage__axis lux-stage__axis--two" aria-hidden="true" />
       <span className="lux-stage__index">01 / 02 — RALLY HELMET</span>
       <div className="lux-stage__object" style={{ transform: `rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)` }}>
-        <Image key={finishes[finish].image} src={finishes[finish].image} alt={finishes[finish].alt} fill priority sizes="(max-width: 900px) 100vw, 54vw" />
+        <Image key={finishes[finish].image} src={finishes[finish].image} alt={finishes[finish].alt} fill priority loading="eager" sizes="(max-width: 900px) 100vw, 54vw" />
       </div>
       <div className="lux-stage__bottom">
         <div className="lux-stage__finish" aria-label="Choose helmet finish">
