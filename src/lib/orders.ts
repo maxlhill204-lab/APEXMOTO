@@ -37,8 +37,8 @@ type PaidCheckout = {
 };
 
 export class StockUnavailableError extends Error {
-  constructor() {
-    super("One or more selected items have just sold out. Please review your cart.");
+  constructor(message = "One or more selected items have just sold out. Please review your cart.") {
+    super(message);
     this.name = "StockUnavailableError";
   }
 }
@@ -635,7 +635,7 @@ export async function setInventoryStock(sku: string, stockOnHand: number) {
     if (!row) throw new Error("Inventory SKU not found.");
     const before = Number(row.stock_on_hand);
     const reservations = await client.query("SELECT COALESCE(SUM(quantity),0)::integer AS reserved FROM inventory_reservations WHERE business_id=$1 AND sku=$2 AND status='ACTIVE'", [siteConfig.businessId, sku]);
-    if (stockOnHand < Number((reservations.rows[0] as Row).reserved)) throw new Error("Stock on hand cannot be lower than units currently reserved in open Stripe checkouts.");
+    if (stockOnHand < Number((reservations.rows[0] as Row).reserved)) throw new StockUnavailableError("On-hand stock must cover the units reserved in open checkouts.");
     await client.query("UPDATE inventory SET stock_on_hand=$3,updated_at=now() WHERE business_id=$1 AND sku=$2", [siteConfig.businessId, sku, stockOnHand]);
     await client.query("INSERT INTO inventory_events (id,business_id,sku,event_type,quantity_before,quantity_after,actor) VALUES ($1,$2,$3,'ADMIN_ADJUSTMENT',$4,$5,'admin')", [randomUUID(), siteConfig.businessId, sku, before, stockOnHand]);
   });

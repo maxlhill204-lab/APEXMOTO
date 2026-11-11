@@ -3,7 +3,7 @@
 import { authenticateAdmin, endAdminSession, requireAdmin } from "@/lib/admin-auth";
 import { deliverPendingEmails } from "@/lib/email";
 import { operationalLog } from "@/lib/operational-log";
-import { getAdminOrderCheckoutContext, issueAdminRefund, processPaidCheckout, resetFailedEmails, setAdminOrderStatus, setInventoryStock, updateStoreSettings } from "@/lib/orders";
+import { getAdminOrderCheckoutContext, issueAdminRefund, processPaidCheckout, resetFailedEmails, setAdminOrderStatus, setInventoryStock, StockUnavailableError, updateStoreSettings } from "@/lib/orders";
 import { checkoutDiscountDetails, checkoutPaymentMethodLabel, retrieveCheckoutSessionForFulfilment, stripeObjectId } from "@/lib/stripe";
 import { siteConfig } from "@/config/site";
 import type { OrderStatus } from "@/types/order";
@@ -99,8 +99,26 @@ export async function settingsAction(formData: FormData) {
   revalidatePath("/cart");
 }
 
-export async function inventoryAction(formData: FormData) {
+export async function inventoryAction(
+  _previous: { error: boolean; message: string } | null,
+  formData: FormData,
+) {
   await requireAdmin();
-  await setInventoryStock(String(formData.get("sku") ?? ""), Number(formData.get("stockOnHand")));
+  const sku = String(formData.get("sku") ?? "");
+  const quantity = String(formData.get("stockOnHand") ?? "").trim();
+  if (!/^\d{1,5}$/.test(quantity) || Number(quantity) > 10000) {
+    return { error: true, message: "Enter a whole number from 0 to 10,000." };
+  }
+
+  try {
+    await setInventoryStock(sku, Number(quantity));
+  } catch (error) {
+    if (error instanceof StockUnavailableError) {
+      return { error: true, message: error.message };
+    }
+    operationalLog("error", "admin.inventory_save_failed", { sku });
+    return { error: true, message: "Stock could not be saved. Try again or reload the Order Desk." };
+  }
   revalidatePath("/admin");
+  return { error: false, message: "Stock saved." };
 }

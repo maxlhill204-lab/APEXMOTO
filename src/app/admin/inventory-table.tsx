@@ -1,6 +1,6 @@
 import { catalog, getOptionLabel } from "@/lib/products";
 import type { listInventory } from "@/lib/orders";
-import { inventoryAction } from "./actions";
+import { InventoryForm } from "./inventory-form";
 
 type InventoryItem = Awaited<ReturnType<typeof listInventory>>[number];
 
@@ -36,24 +36,20 @@ export function InventoryTable({ inventory }: { inventory: InventoryItem[] }) {
             <h3>{type}</h3>
             <div className="admin-stock-scroll">
               <table className="admin-stock-table">
-                <thead><tr><th scope="col">Colour / size</th><th scope="col">Available</th><th scope="col">Reserved</th><th scope="col">On hand</th><th scope="col"><span className="sr-only">Save stock</span></th></tr></thead>
+                <thead><tr><th scope="col">Colour / size</th><th scope="col">Available</th><th scope="col">Reserved</th><th scope="col">On hand</th></tr></thead>
                 {colours.map((colour) => (
                   <tbody key={colour}>
-                    <tr className="admin-stock-colour"><th scope="rowgroup" colSpan={5}>{colour}</th></tr>
+                    <tr className="admin-stock-colour"><th scope="rowgroup" colSpan={4}>{colour}</th></tr>
                     {items.filter((item) => (skuDetails.get(item.sku)?.colour ?? "Other") === colour)
                       .sort((a, b) => a.available - b.available || a.stockOnHand - b.stockOnHand || a.sku.localeCompare(b.sku))
-                      .map((item) => {
-                        const formId = `stock-${item.sku}`;
-                        return (
+                      .map((item) => (
                           <tr key={item.sku}>
                             <th scope="row"><strong>{skuDetails.get(item.sku)?.size || colour}</strong><small>{item.sku}</small></th>
                             <td><strong className="admin-stock-quantity" data-empty={item.available === 0}>{item.available}</strong></td>
                             <td>{item.reserved}</td>
-                            <td><input form={formId} type="number" name="stockOnHand" min={item.reserved} max={10000} defaultValue={item.stockOnHand} required aria-label={`Stock on hand for ${item.sku}`} /></td>
-                            <td><form id={formId} action={inventoryAction}><input type="hidden" name="sku" value={item.sku} /><button className="button button--secondary" type="submit">Save</button></form></td>
+                            <td><InventoryForm sku={item.sku} stockOnHand={item.stockOnHand} /></td>
                           </tr>
-                        );
-                      })}
+                      ))}
                   </tbody>
                 ))}
               </table>

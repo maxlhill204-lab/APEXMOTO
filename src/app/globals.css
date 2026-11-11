@@ -1027,3 +1027,9 @@ body::selection { color: #fff; }
 .admin-stock-table .button { min-height: 40px; }
 .admin-stock-quantity { display: inline-block; min-width: 2.2rem; padding: .2rem .4rem; background: #254d34; color: #e1fae8; text-align: center; font-variant-numeric: tabular-nums; }
 .admin-stock-quantity[data-empty="true"] { background: #552828; color: #ffdfdf; }
+
+.admin-stock-form { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .6rem; }
+.admin-stock-form .button { background: #fff; color: #171717; min-width: 4.5rem; }
+.admin-stock-form .button:hover:not(:disabled) { background: #e8e8e8; }
+.admin-stock-feedback { color: #b9ebc9; font-size: .75rem; }
+.admin-stock-feedback[data-error="true"] { color: #ffb9b9; }
