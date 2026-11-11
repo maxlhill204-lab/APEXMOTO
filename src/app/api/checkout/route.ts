@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["AU"] },
       shipping_options: [{ shipping_rate_data: { type: "fixed_amount" as const, fixed_amount: { amount: policy.shipping.amount, currency: "aud" }, display_name: policy.shipping.label } }],
-      custom_text: { submit: { message: `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. Dispatch timing is confirmed with your order. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
+      custom_text: { submit: { message: `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. ${policy.items.some((item) => item.variant.preorder) ? "Preorder: expected dispatch in 7–14 days, with delivery estimated at 3–5 business days after dispatch." : "Dispatch timing is confirmed with your order."} Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
       payment_intent_data: {
         receipt_email: policy.customerEmail,
         metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber },

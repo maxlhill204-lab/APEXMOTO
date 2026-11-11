@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import type { Product } from "@/types/product";
+import { goggleProducts } from "./goggles";
 
 const helmetSizes = ["S", "M", "L", "XL", "XXL"].map((size) => ({
   value: size,
@@ -13,6 +14,8 @@ const goggleColours = [
   { value: "blue-black", label: "Blue / Black", swatch: "#2159a8" },
   { value: "black-silver", label: "Black / Silver", swatch: "#34383d" },
 ];
+
+const bundleGoggleColours = goggleProducts.slice(0, 4).flatMap((product) => product.options[0].values);
 
 const blackHelmetStock: Record<string, number> = { S: 1, M: 2, L: 2, XL: 2, XXL: 0 };
 const whiteHelmetStock: Record<string, number> = { S: 0, M: 1, L: 1, XL: 0, XXL: 0 };
@@ -125,6 +128,7 @@ export const products: Product[] = [
   {
     businessId: siteConfig.businessId,
     id: "goggles-orz",
+    archived: true,
     slug: "apex-moto-mx-goggles",
     name: "APEX MOTO MX Goggles",
     shortName: "APEX MOTO Goggles",
@@ -189,7 +193,7 @@ export const products: Product[] = [
     shortName: "Helmet + Goggles Bundle",
     category: "bundle",
     description:
-      "Choose an available helmet colour and size, add any APEX MOTO goggle colour, and receive the helmet storage bag at no extra cost. It is the full setup at one clear bundle price, with no filler and no prestige markup.",
+      "Choose an available helmet colour and size, add an in-stock goggle colour, and receive the helmet storage bag at no extra cost. It is the full setup at one clear bundle price, with no filler and no prestige markup.",
     shortDescription: "The complete setup at one clear price: helmet, goggles and a free helmet bag.",
     price: 14000,
     images: [
@@ -207,41 +211,7 @@ export const products: Product[] = [
         height: 806,
         colour: "White / Blue",
       },
-      {
-        src: "/products/apex-moto-mx-goggles/black-gold.png",
-        alt: "Black and yellow-gold APEX MOTO goggles available in the bundle",
-        width: 951,
-        height: 672,
-        colour: "Black / Yellow-Gold",
-      },
-      {
-        src: "/products/apex-moto-mx-goggles/red-gold.png",
-        alt: "Pink and red APEX MOTO goggles available in the bundle",
-        width: 951,
-        height: 677,
-        colour: "Pink / Red",
-      },
-      {
-        src: "/products/apex-moto-mx-goggles/grey-ice.png",
-        alt: "Grey and teal APEX MOTO goggles available in the bundle",
-        width: 953,
-        height: 675,
-        colour: "Grey / Teal",
-      },
-      {
-        src: "/products/apex-moto-mx-goggles/blue-black.png",
-        alt: "Blue and black APEX MOTO goggles available in the bundle",
-        width: 951,
-        height: 677,
-        colour: "Blue / Black",
-      },
-      {
-        src: "/products/apex-moto-mx-goggles/black-silver.png",
-        alt: "Black and silver mirrored goggles available in the bundle",
-        width: 1402,
-        height: 1122,
-        colour: "Black / Silver",
-      },
+      ...goggleProducts.slice(0, 4).map((goggles) => ({ ...goggles.images[0], colour: goggles.name })),
       {
         src: "/products/apex-moto-helmet-goggles-bundle/helmet-bag.png",
         alt: "Black drawstring helmet storage bag included free with the bundle",
@@ -259,11 +229,11 @@ export const products: Product[] = [
         ],
       },
       { id: "helmet-size", label: "Helmet size", values: helmetSizes },
-      { id: "goggles", label: "Goggles colour", values: goggleColours },
+      { id: "goggles", label: "Goggles colour", values: bundleGoggleColours },
     ],
     variants: [
       ...helmetSizes.flatMap(({ value: size }) =>
-        goggleColours.map(({ value: goggles }) => ({
+        bundleGoggleColours.map(({ value: goggles }) => ({
           id: `bundle-black-${size.toLowerCase()}-${goggles}`,
           options: { "helmet-colour": "matte-black", "helmet-size": size, goggles },
           stock: Math.min(blackHelmetStock[size], 1),
@@ -274,7 +244,7 @@ export const products: Product[] = [
         })),
       ),
       ...helmetSizes.flatMap(({ value: size }) =>
-        goggleColours.map(({ value: goggles }) => ({
+        bundleGoggleColours.map(({ value: goggles }) => ({
           id: `bundle-white-${size.toLowerCase()}-${goggles}`,
           options: { "helmet-colour": "gloss-white", "helmet-size": size, goggles },
           stock: Math.min(whiteHelmetStock[size], 1),
@@ -293,4 +263,5 @@ export const products: Product[] = [
     bundleComponentIds: ["helmet-matte-black", "goggles-orz"],
     relatedProductIds: ["helmet-matte-black", "goggles-orz"],
   },
+  ...goggleProducts,
 ];

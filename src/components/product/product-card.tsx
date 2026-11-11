@@ -1,5 +1,5 @@
 import { formatPrice, siteConfig } from "@/config/site";
-import { getStockLabel, totalStock } from "@/lib/products";
+import { getStockLabel, hasPreorder, totalStock } from "@/lib/products";
 import type { Product } from "@/types/product";
 import Link from "next/link";
 import { ProductVisual } from "./product-visual";
@@ -12,7 +12,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link href={`/product/${product.slug}`} className="product-card__visual" aria-label={`View ${product.name}`}>
         <ProductVisual product={product} sizes="(max-width: 640px) 82vw, (max-width: 1100px) 42vw, 25vw" />
         <span className={`product-card__stock product-card__stock--${stock === 0 ? "out" : stock <= 3 ? "low" : "in"}`}>
-          {getStockLabel(stock)}
+          {stock === 0 && hasPreorder(product) ? "Preorder" : getStockLabel(stock)}
         </span>
       </Link>
       <div className="product-card__body">
@@ -23,7 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
           {formatPrice(product.price)}
           {product.compareAtPrice ? <del>{formatPrice(product.compareAtPrice)}</del> : null}
         </p>
-        {product.compareAtPrice ? <p className="sale-note">{siteConfig.promotionShortLabel}</p> : null}
+        {product.compareAtPrice ? <p className="sale-note">{product.clearance ? "Clearance" : siteConfig.promotionShortLabel}</p> : null}
         {sizes ? (
           <div className="product-card__sizes" aria-label={`Available sizes for ${product.name}`}>
             {sizes.values.map((size) => {
@@ -35,7 +35,7 @@ export function ProductCard({ product }: { product: Product }) {
             })}
           </div>
         ) : null}
-        <Link href={`/product/${product.slug}`} className="button button--secondary">Choose options
+        <Link href={`/product/${product.slug}`} className="button button--secondary">{product.category === "goggles" ? "View goggles" : "Choose options"}
         </Link>
       </div>
     </article>

@@ -5,6 +5,7 @@ import { QuantityControl } from "@/components/commerce/quantity-control";
 import { useCart } from "@/components/commerce/cart-provider";
 import { ProductVisual } from "@/components/product/product-visual";
 import { formatPrice, helmetShippingRegions, siteConfig } from "@/config/site";
+import { cartQuantityLimit } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
 import { getProductById, getVariantLabel } from "@/lib/products";
 import { calculateShipping, cartHasHelmet } from "@/lib/shipping";
@@ -113,7 +114,7 @@ export default function CartPage() {
               <article className="cart-line" key={item.key}>
                 <Link href={`/product/${item.product.slug}`} className="cart-line__visual"><ProductVisual product={item.product} /></Link>
                 <div className="cart-line__details"><p className="eyebrow">{item.product.category}</p><h2><Link href={`/product/${item.product.slug}`}>{item.product.name}</Link></h2><p>{getVariantLabel(item.product, item.variant)}</p><strong>{formatPrice(item.product.price)}</strong></div>
-                <div className="cart-line__actions"><QuantityControl value={item.quantity} max={Math.min(item.variant.stock, 10)} onChange={(quantity) => updateQuantity(item.key, quantity)} label={`Quantity for ${item.product.name}`} /><button type="button" className="remove-button" onClick={() => removeItem(item.key)}><Trash2 size={16} aria-hidden="true" /> Remove</button></div>
+                <div className="cart-line__actions"><QuantityControl value={item.quantity} max={cartQuantityLimit(item.product, item.variant)} onChange={(quantity) => updateQuantity(item.key, quantity)} label={`Quantity for ${item.product.name}`} /><button type="button" className="remove-button" onClick={() => removeItem(item.key)}><Trash2 size={16} aria-hidden="true" /> Remove</button></div>
                 <strong className="cart-line__total">{formatPrice(item.lineTotal)}</strong>
               </article>
             ))}
@@ -123,6 +124,7 @@ export default function CartPage() {
 
         <aside className="order-summary">
           <h2>Order summary</h2>
+          {resolvedItems.some((item) => item.variant.preorder) ? <p>Orders with preorder items are expected to dispatch in 7–14 days. Allow an estimated 3–5 business days for delivery after dispatch.</p> : null}
           <div className="order-summary__row"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
           <div className="shipping-selector">
             <h3 className="shipping-selector__label">Australia-wide postage</h3>

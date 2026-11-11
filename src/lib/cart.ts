@@ -1,9 +1,12 @@
 import { siteConfig } from "@/config/site";
 import { getProductById, getVariantById } from "@/lib/products";
-import type { CartItemInput, ResolvedCartItem } from "@/types/product";
+import type { CartItemInput, Product, ProductVariant, ResolvedCartItem } from "@/types/product";
 
 export const cartItemKey = (item: Pick<CartItemInput, "productId" | "variantId">) =>
   `${item.productId}:${item.variantId}`;
+
+export const cartQuantityLimit = (product: Product, variant: ProductVariant) =>
+  product.category === "goggles" && !product.archived ? 10 : Math.min(variant.stock, 10);
 
 export function sanitiseCartItems(value: unknown): CartItemInput[] {
   if (!Array.isArray(value)) return [];
@@ -23,7 +26,7 @@ export function sanitiseCartItems(value: unknown): CartItemInput[] {
     }
     const product = getProductById(item.productId);
     const variant = product && getVariantById(product, item.variantId);
-    if (!product || !variant || product.businessId !== item.businessId || variant.stock < 1) continue;
+    if (!product || !variant || product.businessId !== item.businessId || cartQuantityLimit(product, variant) < 1) continue;
     const key = cartItemKey({ productId: product.id, variantId: variant.id });
     const existing = merged.get(key);
     const requested = (existing?.quantity ?? 0) + (item.quantity ?? 0);
@@ -31,7 +34,7 @@ export function sanitiseCartItems(value: unknown): CartItemInput[] {
       businessId: siteConfig.businessId,
       productId: product.id,
       variantId: variant.id,
-      quantity: Math.min(requested, variant.stock, 10),
+      quantity: Math.min(requested, cartQuantityLimit(product, variant)),
     });
   }
 

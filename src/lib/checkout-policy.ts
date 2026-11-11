@@ -1,5 +1,5 @@
 import { getSiteUrl, siteConfig } from "@/config/site";
-import { resolveCartItems, sanitiseCartItems } from "@/lib/cart";
+import { cartQuantityLimit, resolveCartItems, sanitiseCartItems } from "@/lib/cart";
 import { calculateShipping, type ShippingQuote } from "@/lib/shipping";
 import { ShippingQuoteError, verifyShippingQuoteToken } from "@/lib/shipping-quote";
 import type { CartItemInput } from "@/types/product";
@@ -47,7 +47,7 @@ export function validateCheckoutRequest(
     return { allowed: false, code: "ITEM_REJECTED", message: "One or more cart items are no longer available." };
   }
   const resolved = resolveCartItems(safeItems);
-  if (resolved.some((item) => item.quantity > item.variant.stock)) {
+  if (resolved.some((item) => item.quantity > cartQuantityLimit(item.product, item.variant))) {
     return { allowed: false, code: "STOCK_EXCEEDED", message: "Requested quantity exceeds current stock." };
   }
 

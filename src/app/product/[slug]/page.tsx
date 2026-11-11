@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { getSiteUrl, siteConfig } from "@/config/site";
-import { catalog, getProductBySlug, totalStock } from "@/lib/products";
+import { catalog, getProductBySlug, hasPreorder, totalStock } from "@/lib/products";
 import { getLiveCatalog } from "@/lib/live-catalog";
+import Image from "next/image";
 import Link from "next/link";
 
 export const dynamicParams = false;
@@ -35,9 +36,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (getProductBySlug(slug)?.archived) permanentRedirect("/shop?category=goggles");
   const liveCatalog = await getLiveCatalog();
   const product = liveCatalog.find((item) => item.slug === slug);
   if (!product) notFound();
+  const goggles = product.category === "goggles" ? liveCatalog.filter((item) => item.category === "goggles") : [];
   const related = (product.relatedProductIds ?? []).map((id) => liveCatalog.find((item) => item.id === id)).filter((item) => item !== undefined).slice(0, 3);
   const productSchema = {
     "@context": "https://schema.org",
@@ -46,20 +49,28 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     description: product.shortDescription,
     sku: product.id,
     image: product.images.filter((image) => !image.placeholder).map((image) => new URL(image.src, getSiteUrl()).href),
-    brand: { "@type": "Brand", name: siteConfig.businessName },
+    ...(!goggles.length ? { brand: { "@type": "Brand", name: siteConfig.businessName } } : {}),
     offers: {
       "@type": "Offer",
       url: `${getSiteUrl()}/product/${product.slug}`,
       priceCurrency: "AUD",
       price: (product.price / 100).toFixed(2),
-      availability: totalStock(product) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      availability: totalStock(product) > 0 ? "https://schema.org/InStock" : hasPreorder(product) ? "https://schema.org/PreOrder" : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
     },
   };
   return (
     <div className="product-page">
       <div className="container product-breadcrumbs"><Link href="/shop">Shop</Link><span>/</span><Link href={`/shop?category=${product.category}`}>{product.category}</Link><span>/</span><span>{product.name}</span></div>
-      <section className="container product-layout"><ProductGallery product={product} /><PurchasePanel product={product} /></section>
+      <section className="container product-layout"><ProductGallery product={product} /><div>
+        {goggles.length ? <nav className="goggle-picker" aria-label="Goggle colours">
+          <h2>Choose a colour</h2>
+          <div className="goggle-picker__options">
+            {goggles.map((item) => <Link key={item.id} href={"/product/" + item.slug} aria-current={item.id === product.id ? "page" : undefined}><Image src={item.images[0].src} alt="" width={72} height={54} />{item.name}</Link>)}
+          </div>
+        </nav> : null}
+        <PurchasePanel product={product} />
+      </div></section>
       <section className="container product-information">
         <div><h2>Description</h2><p>{product.description}</p></div>
         <div className="product-information__panels">

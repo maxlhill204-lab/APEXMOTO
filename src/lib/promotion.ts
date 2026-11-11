@@ -25,6 +25,7 @@ export const promotionPrice = (regularPrice: number) =>
   Math.round(regularPrice * (100 - siteConfig.promotionPercent) / 100);
 
 export function applyPromotion(product: Product, now = Date.now()): Product {
+  if (product.clearance) return product;
   if (!isPromotionActive(now)) return { ...product, compareAtPrice: undefined };
   return {
     ...product,

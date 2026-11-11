@@ -1033,3 +1033,9 @@ body::selection { color: #fff; }
 .admin-stock-form .button:hover:not(:disabled) { background: #e8e8e8; }
 .admin-stock-feedback { color: #b9ebc9; font-size: .75rem; }
 .admin-stock-feedback[data-error="true"] { color: #ffb9b9; }
+
+.goggle-picker { margin-bottom: 1.25rem; }
+.goggle-picker h2 { margin-bottom: .5rem; font-size: .9rem; font-weight: 700; }
+.goggle-picker__options { display: flex; gap: .5rem; overflow-x: auto; padding: .25rem .25rem .65rem; }
+.goggle-picker__options a { display: grid; justify-items: center; align-content: start; gap: .35rem; text-align: center; width: 110px; flex: 0 0 auto; padding: .55rem .7rem; border: 1px solid var(--line); font-size: .8rem; }
+.goggle-picker__options a[aria-current="page"] { border-color: var(--ink); background: var(--ink); color: #fff; }

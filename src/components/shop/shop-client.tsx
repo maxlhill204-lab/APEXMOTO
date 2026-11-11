@@ -54,7 +54,7 @@ export function ShopClient({ products, initialCategory, initialSearch }: ShopCli
     const normalized = normaliseSearch(query);
     const next = products.filter((product) => {
       if (category !== "all" && product.category !== category) return false;
-      if (availability === "available" && !product.variants.some((variant) => variant.stock > 0)) return false;
+      if (availability === "available" && !product.variants.some((variant) => !variant.preorder && variant.stock > 0)) return false;
       if (
         colour !== "all" &&
         !product.options.some((option) => option.values.some((value) => value.value === colour))

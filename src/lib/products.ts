@@ -38,7 +38,7 @@ export function validateProducts(catalogue: Product[]): Product[] {
       if (!Number.isInteger(variant.stock) || variant.stock < 0) {
         throw new Error(`Invalid stock on ${product.id}/${variant.id}.`);
       }
-      if (!variant.inventory.length || variant.inventory.some((requirement) => !requirement.sku.trim() || !Number.isInteger(requirement.quantity) || requirement.quantity < 1)) {
+      if (Boolean(variant.preorder) !== variant.id.startsWith("preorder-") || (variant.preorder ? variant.inventory.length !== 0 || !variant.id.startsWith("preorder-") : !variant.inventory.length) || variant.inventory.some((requirement) => !requirement.sku.trim() || !Number.isInteger(requirement.quantity) || requirement.quantity < 1)) {
         throw new Error(`Invalid physical inventory mapping on ${product.id}/${variant.id}.`);
       }
       const suppliedIds = Object.keys(variant.options);
@@ -47,7 +47,7 @@ export function validateProducts(catalogue: Product[]): Product[] {
       }
       const combination = product.options
         .map((option) => `${option.id}:${variant.options[option.id]}`)
-        .join("|");
+        .join("|") + (variant.preorder ? "|preorder" : "");
       if (combinations.has(combination)) {
         throw new Error(`Duplicate variant combination on ${product.id}: ${combination}`);
       }
@@ -60,7 +60,7 @@ export function validateProducts(catalogue: Product[]): Product[] {
 
 export const catalog = validateProducts(products);
 
-export const getCatalog = (now = Date.now()) => catalog.map((product) => applyPromotion(product, now));
+export const getCatalog = (now = Date.now()) => catalog.filter((product) => !product.archived).map((product) => applyPromotion(product, now));
 export const getProductById = (id: string, now = Date.now()) => {
   const product = catalog.find((item) => item.id === id);
   return product ? applyPromotion(product, now) : undefined;
@@ -72,8 +72,10 @@ export const getProductBySlug = (slug: string, now = Date.now()) => {
 export const getVariantById = (product: Product, variantId: string) =>
   product.variants.find((variant) => variant.id === variantId);
 
+export const hasPreorder = (product: Product) => product.variants.some((variant) => variant.preorder);
+
 export const totalStock = (product: Product) =>
-  product.variants.reduce((total, variant) => total + variant.stock, 0);
+  product.variants.reduce((total, variant) => total + (variant.preorder ? 0 : variant.stock), 0);
 
 export const getStockStatus = (product: Product): StockStatus => {
   const stock = totalStock(product);
@@ -93,9 +95,11 @@ export function findMatchingVariant(
   product: Product,
   selection: Record<string, string>,
 ): ProductVariant | undefined {
-  return product.variants.find((variant) =>
+  const matches = product.variants.filter((variant) =>
     product.options.every((option) => variant.options[option.id] === selection[option.id]),
   );
+  return matches.find((variant) => !variant.preorder && variant.stock > 0)
+    ?? matches.find((variant) => variant.preorder) ?? matches[0];
 }
 
 export const getOptionLabel = (product: Product, optionId: string, value: string) =>
@@ -104,9 +108,9 @@ export const getOptionLabel = (product: Product, optionId: string, value: string
     ?.values.find((optionValue) => optionValue.value === value)?.label ?? value;
 
 export const getVariantLabel = (product: Product, variant: ProductVariant) =>
-  product.options
+  variant.preorder ? "Preorder · expected dispatch in 7–14 days, then estimated delivery in 3–5 business days" : product.options
     .map((option) => getOptionLabel(product, option.id, variant.options[option.id]))
-    .join(" / ");
+    .join(" / ") || "Ready to ship";
 
 export const bundleIndividualTotal = (bundle: Product) => {
   if (!bundle.bundleComponentIds?.length) return null;

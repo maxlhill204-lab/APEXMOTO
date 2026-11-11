@@ -18,13 +18,23 @@ describe("order and inventory rules", () => {
     ]);
   });
 
+  it("marks preorder lines without reserving physical stock", () => {
+    const items = resolveCartItems([{ businessId: siteConfig.businessId, productId: "mx-goggles-grey-black", variantId: "preorder-grey-black", quantity: 2 }]);
+    expect(items).toHaveLength(1);
+    expect(items[0].lineTotal).toBe(5000);
+    expect(inventoryRequirements(items)).toEqual([]);
+    expect(inventoryRequirements([...items, ...resolveCartItems([{ businessId: siteConfig.businessId, productId: "mx-goggles-black-blue", variantId: "goggles-black-blue", quantity: 2 }])])).toEqual([
+      { sku: "orz-goggles-black-blue", quantity: 2 },
+    ]);
+  });
+
   it("seeds physical inventory from standalone products without double-counting bundles", () => {
     const seed = catalogueInventorySeed();
     expect(seed.find((item) => item.sku === "orz-helmet-black-m")).toEqual({ sku: "orz-helmet-black-m", stockOnHand: 2 });
     expect(seed.find((item) => item.sku === "orz-helmet-white-s")).toEqual({ sku: "orz-helmet-white-s", stockOnHand: 0 });
     expect(seed.find((item) => item.sku === "orz-helmet-white-l")).toEqual({ sku: "orz-helmet-white-l", stockOnHand: 1 });
     expect(seed.find((item) => item.sku === "orz-goggles-blue-black")).toEqual({ sku: "orz-goggles-blue-black", stockOnHand: 1 });
-    expect(seed.find((item) => item.sku === "orz-goggles-black-silver")).toEqual({ sku: "orz-goggles-black-silver", stockOnHand: 1 });
+    expect(seed.find((item) => item.sku === "orz-goggles-black-silver")).toEqual({ sku: "orz-goggles-black-silver", stockOnHand: 8 });
   });
 
   it("uses the later variant pickup date for White / Blue Large", () => {

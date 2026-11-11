@@ -88,6 +88,18 @@ function mapSettings(row: Row): StoreSettings {
   };
 }
 
+const goggleStockCounts = [
+  { eventId: "582218e2-adc1-4b4e-a7fc-67e3f34a9693", sku: "orz-goggles-black-gold", count: 1 },
+  { eventId: "25e8466a-ad8b-4b2b-8f26-c524725b4817", sku: "orz-goggles-black-silver", count: 8 },
+];
+
+export async function ensureGoggleStockCounts() {
+  const sql = getSql();
+  const ids = goggleStockCounts.map(({ eventId }) => eventId);
+  const rows = await sql`SELECT id FROM inventory_events WHERE id = ANY(${ids}::uuid[])`;
+  if (rows.length !== ids.length) await initialiseOrderSystemData();
+}
+
 async function ensureStoreData(client: PoolClient) {
   await client.query(
     `INSERT INTO store_settings (
@@ -112,6 +124,27 @@ async function ensureStoreData(client: PoolClient) {
       "INSERT INTO inventory (business_id, sku, stock_on_hand) VALUES ($1,$2,$3) ON CONFLICT (business_id, sku) DO NOTHING",
       [siteConfig.businessId, item.sku, item.stockOnHand],
     );
+  }
+  // Reconcile the two existing SKUs once so later Order Desk edits stay authoritative.
+  for (const { eventId, sku, count } of goggleStockCounts) {
+    const recorded = await client.query("SELECT id FROM inventory_events WHERE id=$1", [eventId]);
+    if (recorded.rowCount) continue;
+    const current = await client.query(
+      "SELECT stock_on_hand FROM inventory WHERE business_id=$1 AND sku=$2 FOR UPDATE",
+      [siteConfig.businessId, sku],
+    );
+    const reservations = await client.query(
+      "SELECT COALESCE(SUM(quantity),0)::integer AS reserved FROM inventory_reservations WHERE business_id=$1 AND sku=$2 AND status='ACTIVE'",
+      [siteConfig.businessId, sku],
+    );
+    const stockOnHand = Math.max(count, Number(reservations.rows[0].reserved));
+    const event = await client.query(
+      "INSERT INTO inventory_events (id,business_id,sku,event_type,quantity_before,quantity_after,actor) VALUES ($1,$2,$3,'ADMIN_ADJUSTMENT',$4,$5,'admin') ON CONFLICT (id) DO NOTHING",
+      [eventId, siteConfig.businessId, sku, current.rows[0].stock_on_hand, stockOnHand],
+    );
+    if (event.rowCount) {
+      await client.query("UPDATE inventory SET stock_on_hand=$3,updated_at=now() WHERE business_id=$1 AND sku=$2", [siteConfig.businessId, sku, stockOnHand]);
+    }
   }
 }
 
@@ -410,7 +443,15 @@ export async function processPaidCheckout(input: PaidCheckout): Promise<{ order:
         "SELECT sku,quantity FROM inventory_reservations WHERE business_id=$1 AND order_id=$2 AND status='ACTIVE' ORDER BY sku FOR UPDATE",
         [siteConfig.businessId, orderId],
       );
-      if (!reservations.rowCount) throw new Error("Paid order has no active stock reservation.");
+      if (!reservations.rowCount) {
+        const lines = await client.query(
+          "SELECT variant_id FROM order_items WHERE business_id=$1 AND order_id=$2",
+          [siteConfig.businessId, orderId],
+        );
+        if (!lines.rowCount || lines.rows.some((line) => !String(line.variant_id).startsWith("preorder-"))) {
+          throw new Error("Paid order has no active stock reservation.");
+        }
+      }
       for (const reservation of reservations.rows as Row[]) {
         const beforeResult = await client.query("SELECT stock_on_hand FROM inventory WHERE business_id=$1 AND sku=$2", [siteConfig.businessId, String(reservation.sku)]);
         const before = Number((beforeResult.rows[0] as Row).stock_on_hand);

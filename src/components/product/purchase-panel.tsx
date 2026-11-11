@@ -93,15 +93,15 @@ export function PurchasePanel({ product }: { product: Product }) {
         <p className="eyebrow">{product.category}</p>
         <h1>{product.name}</h1>
         <div className="purchase-panel__price"><strong>{formatPrice(product.price)}</strong>{product.compareAtPrice ? <del>{formatPrice(product.compareAtPrice)}</del> : null}</div>
-        {product.compareAtPrice ? <p className="sale-note">{siteConfig.promotionShortLabel}</p> : null}
+        {product.compareAtPrice ? <p className="sale-note">{product.clearance ? "Clearance" : siteConfig.promotionShortLabel}</p> : null}
       </div>
       <p className="purchase-panel__description">{product.shortDescription}</p>
       <div className={`variant-stock variant-stock--${!variant ? "pending" : stock === 0 ? "out" : stock <= 3 ? "low" : "in"}`} aria-live="polite">
-        <span aria-hidden="true" />{variant ? getStockLabel(stock) : "Choose options to check stock"}
+        <span aria-hidden="true" />{variant?.preorder ? "Available to preorder" : variant ? getStockLabel(stock) : "Choose options to check stock"}
       </div>
 
       <div className="option-groups" id="product-options">
-        {product.options.map((option) => {
+        {product.options.filter((option) => product.category !== "goggles" || option.values.length > 1).map((option) => {
           const needsAttention = invalidOptionId === option.id;
           return (
           <fieldset
@@ -133,19 +133,19 @@ export function PurchasePanel({ product }: { product: Product }) {
       <div className="purchase-actions">
         <div className="purchase-actions__quantity"><span>Quantity</span><QuantityControl value={quantity} max={Math.min(stock, 10)} onChange={setQuantity} label={`Quantity for ${product.name}`} /></div>
         <button type="button" className="button button--primary button--wide purchase-actions__add" onClick={addToCart} disabled={Boolean(variant && stock < 1)}>
-          {variant && stock < 1 ? "Sold out" : `Add to cart — ${formatPrice(product.price * quantity)}`}
+          {variant && stock < 1 ? "Sold out" : `${variant?.preorder ? "Preorder" : "Add to cart"} — ${formatPrice(product.price * quantity)}`}
         </button>
       </div>
 
       <div className="purchase-fulfilment">
-        <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>Postage is shown in your cart. Dispatch timing is confirmed with your order.</small></span></div>
+        <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>{variant?.preorder ? "Expected to dispatch in 7–14 days. Allow an estimated 3–5 business days for delivery after dispatch." : "Postage is shown in your cart. Dispatch timing is confirmed with your order."}</small></span></div>
       </div>
 
       <div className="mobile-purchase-bar">
         <div><span>{product.shortName ?? product.name}</span><strong>{formatPrice(product.price)}</strong></div>
         <button type="button" className="button button--primary" onClick={() => {
           addToCart();
-        }} disabled={Boolean(variant && stock < 1)}>{variant && stock < 1 ? "Sold out" : "Add to cart"}</button>
+        }} disabled={Boolean(variant && stock < 1)}>{variant && stock < 1 ? "Sold out" : variant?.preorder ? "Preorder" : "Add to cart"}</button>
       </div>
     </div>
   );

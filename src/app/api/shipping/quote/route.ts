@@ -1,5 +1,5 @@
 import { calculatedShippingReadiness } from "@/config/shipping";
-import { resolveCartItems, sanitiseCartItems } from "@/lib/cart";
+import { cartQuantityLimit, resolveCartItems, sanitiseCartItems } from "@/lib/cart";
 import { AustraliaPostApiError, quoteAustraliaPost } from "@/lib/auspost";
 import { buildShippingParcels } from "@/lib/shipping-parcels";
 import { createShippingQuoteOption } from "@/lib/shipping-quote";
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const safeItems = sanitiseCartItems(body.items as CartItemInput[]);
   if (safeItems.length !== body.items.length) return jsonError("One or more cart items are no longer available.", 400, "ITEM_REJECTED");
   const items = resolveCartItems(safeItems);
-  if (items.some((item) => item.quantity > item.variant.stock)) return jsonError("Requested quantity exceeds current stock.", 409, "STOCK_EXCEEDED");
+  if (items.some((item) => item.quantity > cartQuantityLimit(item.product, item.variant))) return jsonError("Requested quantity exceeds current stock.", 409, "STOCK_EXCEEDED");
 
   const country = typeof body.destination?.country === "string" ? body.destination.country.trim().toUpperCase() : "";
   const postalCode = typeof body.destination?.postalCode === "string" ? body.destination.postalCode.trim().toUpperCase().replace(/\s+/g, " ") : "";

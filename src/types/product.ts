@@ -27,6 +27,7 @@ export type ProductVariant = {
   stock: number;
   /** Earliest local pickup date when this variant is later than the store default. */
   pickupAvailableFrom?: string;
+  preorder?: true;
   /**
    * Physical stock consumed by this sellable variant. Bundles can consume more
    * than one SKU so the same helmet or goggles cannot be sold twice through
@@ -51,6 +52,8 @@ export type Product = {
   shortDescription: string;
   price: number;
   compareAtPrice?: number;
+  clearance?: boolean;
+  archived?: boolean;
   images: ProductImage[];
   options: ProductOption[];
   variants: ProductVariant[];
