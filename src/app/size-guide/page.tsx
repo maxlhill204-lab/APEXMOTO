@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { publicContactEmail } from "@/config/site";
 import { sizeCharts } from "@/config/size-guide";
 import { ArrowRight, Ruler } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function SizeGuidePage() {
             <li><span>04</span><div><h3>Use the exact chart</h3><p>Compare with the manufacturer chart shown for the product you are buying. Do not assume sizes match across models.</p></div></li>
           </ol>
         </article>
-        <aside className="head-measure-card"><div className="head-diagram" role="img" aria-label="Diagram showing a tape around the widest part of a head"><span className="head-diagram__head" /><span className="head-diagram__tape" /><Ruler aria-hidden="true" /></div><p>Place the tape above the eyebrows and level around the back of the head.</p></aside>
+        <aside className="head-measure-card"><Image src="/brand/head-measurement.webp" alt="Side profile showing a tape measure around the widest part of the head, above the eyebrows and ears" width={257} height={300} /><p>Place the tape above the eyebrows and level around the back of the head.</p></aside>
       </div>
       <section className="container chart-section">
         <p className="eyebrow">Verified product charts</p>

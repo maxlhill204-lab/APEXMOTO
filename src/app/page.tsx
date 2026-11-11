@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const categories = [
   { title: "Helmets", href: "/shop?category=helmet", image: "/products/apex-moto-rally-helmet-black/side.png" },
   { title: "Goggles", href: "/shop?category=goggles", image: "/products/goggle-range/black-silver.webp" },
-  { title: "Bundles", href: "/shop?category=bundle", image: "/products/apex-moto-helmet-goggles-bundle/helmet-bag.png" },
+  { title: "Bundles", href: "/shop?category=bundle", image: "/products/apex-moto-helmet-goggles-bundle/new-helmet-bag.webp" },
 ];
 
 export default async function HomePage() {

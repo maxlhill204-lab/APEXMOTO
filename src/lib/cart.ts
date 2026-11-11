@@ -6,7 +6,7 @@ export const cartItemKey = (item: Pick<CartItemInput, "productId" | "variantId">
   `${item.productId}:${item.variantId}`;
 
 export const cartQuantityLimit = (product: Product, variant: ProductVariant) =>
-  product.category === "goggles" && !product.archived ? 10 : Math.min(variant.stock, 10);
+  (product.category === "goggles" && !product.archived) || product.category === "bundle" ? 10 : Math.min(variant.stock, 10);
 
 export function sanitiseCartItems(value: unknown): CartItemInput[] {
   if (!Array.isArray(value)) return [];

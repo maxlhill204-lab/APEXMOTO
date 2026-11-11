@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ProductCard } from "@/components/product/product-card";
+import { StockBadge } from "@/components/product/stock-badge";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { getSiteUrl, siteConfig } from "@/config/site";
@@ -62,15 +63,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="product-page">
       <div className="container product-breadcrumbs"><Link href="/shop">Shop</Link><span>/</span><Link href={`/shop?category=${product.category}`}>{product.category}</Link><span>/</span><span>{product.name}</span></div>
-      <section className="container product-layout"><ProductGallery product={product} /><div>
+      <section className="container product-layout"><div><ProductGallery product={product} />
         {goggles.length ? <nav className="goggle-picker" aria-label="Goggle colours">
           <h2>Choose a colour</h2>
           <div className="goggle-picker__options">
-            {goggles.map((item) => <Link key={item.id} href={"/product/" + item.slug} aria-current={item.id === product.id ? "page" : undefined}><Image src={item.images[0].src} alt="" width={72} height={54} />{item.name}</Link>)}
+            {goggles.map((item) => <Link key={item.id} href={"/product/" + item.slug} aria-current={item.id === product.id ? "page" : undefined}><Image src={item.images[0].src} alt="" width={72} height={54} />{item.name}<StockBadge product={item} /></Link>)}
           </div>
         </nav> : null}
-        <PurchasePanel product={product} />
-      </div></section>
+      </div><PurchasePanel key={product.id} product={product} /></section>
       <section className="container product-information">
         <div><h2>Description</h2><p>{product.description}</p></div>
         <div className="product-information__panels">

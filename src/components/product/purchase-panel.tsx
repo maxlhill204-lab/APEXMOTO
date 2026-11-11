@@ -4,8 +4,9 @@ import { QuantityControl } from "@/components/commerce/quantity-control";
 import { useCart } from "@/components/commerce/cart-provider";
 import { formatPrice, siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
-import { findMatchingVariant, getOptionLabel, getStockLabel } from "@/lib/products";
+import { findMatchingVariant, getOptionLabel } from "@/lib/products";
 import type { Product } from "@/types/product";
+import { StockBadge, StockIndicator } from "./stock-badge";
 import { Check, Package, Ruler } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -31,12 +32,11 @@ export function PurchasePanel({ product }: { product: Product }) {
   const stock = variant?.stock ?? 0;
   const missingOption = product.options.find((option) => !selection[option.id]);
 
-  const valueAvailable = (optionId: string, value: string) => {
+  const matchingOptions = (optionId: string, value: string) => {
     const optionIndex = product.options.findIndex((option) => option.id === optionId);
     const earlierOptions = product.options.slice(0, optionIndex);
-    return product.variants.some(
+    return product.variants.filter(
       (candidate) =>
-        candidate.stock > 0 &&
         candidate.options[optionId] === value &&
         earlierOptions.every(
           (option) => !selection[option.id] || candidate.options[option.id] === selection[option.id],
@@ -97,7 +97,7 @@ export function PurchasePanel({ product }: { product: Product }) {
       </div>
       <p className="purchase-panel__description">{product.shortDescription}</p>
       <div className={`variant-stock variant-stock--${!variant ? "pending" : stock === 0 ? "out" : stock <= 3 ? "low" : "in"}`} aria-live="polite">
-        <span aria-hidden="true" />{variant?.preorder ? "Available to preorder" : variant ? getStockLabel(stock) : "Choose options to check stock"}
+        {variant ? <StockIndicator stock={stock} preorder={variant.preorder && stock > 0} /> : <StockBadge product={product} />}
       </div>
 
       <div className="option-groups" id="product-options">
@@ -113,12 +113,15 @@ export function PurchasePanel({ product }: { product: Product }) {
             <legend>{option.label}: <strong>{selection[option.id] ? getOptionLabel(product, option.id, selection[option.id]) : "Choose one"}</strong></legend>
             <div className={option.id.includes("size") ? "size-options" : "swatch-options"}>
               {option.values.map((value) => {
-                const available = valueAvailable(option.id, value.value);
+                const matches = matchingOptions(option.id, value.value);
+                const ready = Math.max(0, ...matches.filter((candidate) => !candidate.preorder).map((candidate) => candidate.stock));
+                const preorder = ready === 0 && matches.some((candidate) => candidate.preorder && candidate.stock > 0);
+                const available = ready > 0 || preorder;
                 const selected = selection[option.id] === value.value;
                 return (
                   <button type="button" key={value.value} className={selected ? "is-selected" : ""} disabled={!available} onClick={() => selectOption(option.id, value.value)} aria-pressed={selected}>
                     {value.swatch ? <i style={{ backgroundColor: value.swatch }} aria-hidden="true" /> : null}
-                    <span>{value.label}</span>{selected ? <Check size={14} aria-hidden="true" /> : null}
+                    <span>{value.label}{option.id === "goggles" || option.id.includes("size") ? <StockIndicator stock={ready} preorder={preorder} /> : null}</span>{selected ? <Check size={14} aria-hidden="true" /> : null}
                   </button>
                 );
               })}
@@ -138,7 +141,7 @@ export function PurchasePanel({ product }: { product: Product }) {
       </div>
 
       <div className="purchase-fulfilment">
-        <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>{variant?.preorder ? "Expected to dispatch in 7–14 days. Allow an estimated 3–5 business days for delivery after dispatch." : "Postage is shown in your cart. Dispatch timing is confirmed with your order."}</small></span></div>
+        <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>{variant?.preorder ? "The entire order is expected to dispatch together in 7–14 days. Allow an estimated 3–5 business days for delivery after dispatch." : "Postage is shown in your cart. Dispatch timing is confirmed with your order."}</small></span></div>
       </div>
 
       <div className="mobile-purchase-bar">

@@ -38,7 +38,7 @@ export function validateProducts(catalogue: Product[]): Product[] {
       if (!Number.isInteger(variant.stock) || variant.stock < 0) {
         throw new Error(`Invalid stock on ${product.id}/${variant.id}.`);
       }
-      if (Boolean(variant.preorder) !== variant.id.startsWith("preorder-") || (variant.preorder ? variant.inventory.length !== 0 || !variant.id.startsWith("preorder-") : !variant.inventory.length) || variant.inventory.some((requirement) => !requirement.sku.trim() || !Number.isInteger(requirement.quantity) || requirement.quantity < 1)) {
+      if (Boolean(variant.preorder) !== variant.id.startsWith("preorder-") || (variant.preorder && product.category === "goggles" ? variant.inventory.length !== 0 : !variant.inventory.length) || variant.inventory.some((requirement) => !requirement.sku.trim() || !Number.isInteger(requirement.quantity) || requirement.quantity < 1)) {
         throw new Error(`Invalid physical inventory mapping on ${product.id}/${variant.id}.`);
       }
       const suppliedIds = Object.keys(variant.options);
@@ -72,7 +72,7 @@ export const getProductBySlug = (slug: string, now = Date.now()) => {
 export const getVariantById = (product: Product, variantId: string) =>
   product.variants.find((variant) => variant.id === variantId);
 
-export const hasPreorder = (product: Product) => product.variants.some((variant) => variant.preorder);
+export const hasPreorder = (product: Product) => product.variants.some((variant) => variant.preorder && variant.stock > 0);
 
 export const totalStock = (product: Product) =>
   product.variants.reduce((total, variant) => total + (variant.preorder ? 0 : variant.stock), 0);
@@ -99,7 +99,7 @@ export function findMatchingVariant(
     product.options.every((option) => variant.options[option.id] === selection[option.id]),
   );
   return matches.find((variant) => !variant.preorder && variant.stock > 0)
-    ?? matches.find((variant) => variant.preorder) ?? matches[0];
+    ?? matches.find((variant) => variant.preorder && variant.stock > 0) ?? matches[0];
 }
 
 export const getOptionLabel = (product: Product, optionId: string, value: string) =>
@@ -108,9 +108,9 @@ export const getOptionLabel = (product: Product, optionId: string, value: string
     ?.values.find((optionValue) => optionValue.value === value)?.label ?? value;
 
 export const getVariantLabel = (product: Product, variant: ProductVariant) =>
-  variant.preorder ? "Preorder · expected dispatch in 7–14 days, then estimated delivery in 3–5 business days" : product.options
+  product.options
     .map((option) => getOptionLabel(product, option.id, variant.options[option.id]))
-    .join(" / ") || "Ready to ship";
+    .join(" / ") + (variant.preorder ? " · Preorder, expected dispatch in 7–14 days" : "");
 
 export const bundleIndividualTotal = (bundle: Product) => {
   if (!bundle.bundleComponentIds?.length) return null;

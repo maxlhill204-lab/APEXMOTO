@@ -1,5 +1,5 @@
 import { siteConfig } from "@/config/site";
-import type { Product } from "@/types/product";
+import type { Product, ProductVariant } from "@/types/product";
 import { goggleProducts } from "./goggles";
 
 const helmetSizes = ["S", "M", "L", "XL", "XXL"].map((size) => ({
@@ -15,7 +15,7 @@ const goggleColours = [
   { value: "black-silver", label: "Black / Silver", swatch: "#34383d" },
 ];
 
-const bundleGoggleColours = goggleProducts.slice(0, 4).flatMap((product) => product.options[0].values);
+const bundleGoggleColours = goggleProducts.flatMap((product) => product.options[0].values);
 
 const blackHelmetStock: Record<string, number> = { S: 1, M: 2, L: 2, XL: 2, XXL: 0 };
 const whiteHelmetStock: Record<string, number> = { S: 0, M: 1, L: 1, XL: 0, XXL: 0 };
@@ -30,6 +30,20 @@ const gogglesSku = (colour: string) => `orz-goggles-${colour}`;
  * Prices use cents. Stock is set on the exact colour/size combination.
  * Checkout prices are derived from this server-owned catalogue.
  */
+function bundleVariants(finish: "black" | "white", sizes: Record<string, number>): ProductVariant[] {
+  return helmetSizes.flatMap(({ value: size }) => goggleProducts.flatMap((product) => {
+    const goggles = product.options[0].values[0].value;
+    const ready = product.variants[0];
+    const id = "bundle-" + finish + "-" + size.toLowerCase() + "-" + goggles;
+    const options = { "helmet-colour": finish === "black" ? "matte-black" : "gloss-white", "helmet-size": size, goggles };
+    const helmet = { sku: helmetSku(finish, size), quantity: 1 };
+    return [
+      { id, options, stock: Math.min(sizes[size], ready.stock), inventory: [helmet, ...ready.inventory] },
+      { id: "preorder-" + id, options, stock: sizes[size], inventory: [helmet], preorder: true },
+    ];
+  }));
+}
+
 export const products: Product[] = [
   {
     businessId: siteConfig.businessId,
@@ -193,7 +207,7 @@ export const products: Product[] = [
     shortName: "Helmet + Goggles Bundle",
     category: "bundle",
     description:
-      "Choose an available helmet colour and size, add an in-stock goggle colour, and receive the helmet storage bag at no extra cost. It is the full setup at one clear bundle price, with no filler and no prestige markup.",
+      "Choose an available helmet colour and size, pick any goggle colour, and receive the helmet storage bag at no extra cost. It is the full setup at one clear bundle price, with no filler and no prestige markup.",
     shortDescription: "The complete setup at one clear price: helmet, goggles and a free helmet bag.",
     price: 14000,
     images: [
@@ -211,12 +225,12 @@ export const products: Product[] = [
         height: 806,
         colour: "White / Blue",
       },
-      ...goggleProducts.slice(0, 4).map((goggles) => ({ ...goggles.images[0], colour: goggles.name })),
+      ...goggleProducts.map((goggles) => ({ ...goggles.images[0], colour: goggles.name })),
       {
-        src: "/products/apex-moto-helmet-goggles-bundle/helmet-bag.png",
+        src: "/products/apex-moto-helmet-goggles-bundle/new-helmet-bag.webp",
         alt: "Black drawstring helmet storage bag included free with the bundle",
-        width: 436,
-        height: 437,
+        width: 1100,
+        height: 1100,
       },
     ],
     options: [
@@ -231,31 +245,7 @@ export const products: Product[] = [
       { id: "helmet-size", label: "Helmet size", values: helmetSizes },
       { id: "goggles", label: "Goggles colour", values: bundleGoggleColours },
     ],
-    variants: [
-      ...helmetSizes.flatMap(({ value: size }) =>
-        bundleGoggleColours.map(({ value: goggles }) => ({
-          id: `bundle-black-${size.toLowerCase()}-${goggles}`,
-          options: { "helmet-colour": "matte-black", "helmet-size": size, goggles },
-          stock: Math.min(blackHelmetStock[size], 1),
-          inventory: [
-            { sku: helmetSku("black", size), quantity: 1 },
-            { sku: gogglesSku(goggles), quantity: 1 },
-          ],
-        })),
-      ),
-      ...helmetSizes.flatMap(({ value: size }) =>
-        bundleGoggleColours.map(({ value: goggles }) => ({
-          id: `bundle-white-${size.toLowerCase()}-${goggles}`,
-          options: { "helmet-colour": "gloss-white", "helmet-size": size, goggles },
-          stock: Math.min(whiteHelmetStock[size], 1),
-          ...(size === "L" ? { pickupAvailableFrom: "2026-09-07" } : {}),
-          inventory: [
-            { sku: helmetSku("white", size), quantity: 1 },
-            { sku: gogglesSku(goggles), quantity: 1 },
-          ],
-        })),
-      ),
-    ],
+    variants: [...bundleVariants("black", blackHelmetStock), ...bundleVariants("white", whiteHelmetStock)],
     inTheBox: ["APEX MOTO rally helmet", "APEX MOTO MX goggles", "Helmet storage bag — included free"],
     certification: { standard: "DOT FMVSS No. 218 marking shown on helmet", verified: false },
     featured: true,

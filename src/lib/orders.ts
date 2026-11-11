@@ -448,7 +448,7 @@ export async function processPaidCheckout(input: PaidCheckout): Promise<{ order:
           "SELECT variant_id FROM order_items WHERE business_id=$1 AND order_id=$2",
           [siteConfig.businessId, orderId],
         );
-        if (!lines.rowCount || lines.rows.some((line) => !String(line.variant_id).startsWith("preorder-"))) {
+        if (!lines.rowCount || lines.rows.some((line) => !String(line.variant_id).startsWith("preorder-") || String(line.variant_id).startsWith("preorder-bundle-"))) {
           throw new Error("Paid order has no active stock reservation.");
         }
       }

@@ -23,11 +23,11 @@ export function ProductVisual({
       <div
         className={`product-visual product-visual--bundle-composite ${className}`}
         role="img"
-        aria-label="APEX MOTO matte black helmet, black and yellow-gold goggles, and included helmet bag"
+        aria-label="APEX MOTO matte black helmet, black and silver goggles, and included helmet bag"
       >
         <Image className="bundle-composite__helmet" src="/products/apex-moto-rally-helmet-black/side.png" alt="" width={939} height={831} priority={priority} />
-        <Image className="bundle-composite__goggles" src="/products/apex-moto-mx-goggles/black-gold.png" alt="" width={951} height={672} />
-        <Image className="bundle-composite__bag" src="/products/apex-moto-helmet-goggles-bundle/helmet-bag.png" alt="" width={436} height={437} />
+        <Image className="bundle-composite__goggles" src="/products/goggle-range/black-silver.webp" alt="" width={1440} height={1080} />
+        <Image className="bundle-composite__bag" src="/products/apex-moto-helmet-goggles-bundle/new-helmet-bag.webp" alt="" width={1100} height={1100} />
       </div>
     );
   }

@@ -124,7 +124,7 @@ export default function CartPage() {
 
         <aside className="order-summary">
           <h2>Order summary</h2>
-          {resolvedItems.some((item) => item.variant.preorder) ? <p>Orders with preorder items are expected to dispatch in 7–14 days. Allow an estimated 3–5 business days for delivery after dispatch.</p> : null}
+          {resolvedItems.some((item) => item.variant.preorder) ? <p>Your entire order is expected to dispatch together in 7–14 days. Allow an estimated 3–5 business days for delivery after dispatch.</p> : null}
           <div className="order-summary__row"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
           <div className="shipping-selector">
             <h3 className="shipping-selector__label">Australia-wide postage</h3>

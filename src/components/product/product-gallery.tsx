@@ -5,7 +5,7 @@ import type { Product } from "@/types/product";
 import { useEffect, useState } from "react";
 
 export function ProductGallery({ product }: { product: Product }) {
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(product.category === "bundle" ? -1 : 0);
   useEffect(() => {
     const updateForOption = (event: Event) => {
       const detail = (event as CustomEvent<{ productId?: string; valueLabel?: string }>).detail;
@@ -21,6 +21,11 @@ export function ProductGallery({ product }: { product: Product }) {
       <div className="product-gallery__main"><ProductVisual product={product} image={product.images[selected]} priority sizes="(max-width: 900px) 100vw, 58vw" /></div>
       {product.images.length > 1 ? (
         <div className="product-gallery__thumbs" role="tablist" aria-label={`${product.name} images`}>
+          {product.category === "bundle" ? (
+            <button type="button" role="tab" aria-selected={selected === -1} aria-label="Show complete bundle" onClick={() => setSelected(-1)}>
+              <ProductVisual product={product} />
+            </button>
+          ) : null}
           {product.images.map((image, index) => (
             <button type="button" role="tab" aria-selected={selected === index} aria-label={`Show image ${index + 1}: ${image.alt}`} key={`${image.src}-${index}`} onClick={() => setSelected(index)}>
               <ProductVisual product={product} image={image} />

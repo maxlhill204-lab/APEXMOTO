@@ -22,7 +22,7 @@ export async function getLiveCatalog(): Promise<Product[]> {
       ...product,
       variants: product.variants.map((variant) => ({
         ...variant,
-        stock: variant.preorder ? variant.stock : Math.min(...variant.inventory.map((requirement) => {
+        stock: variant.inventory.length === 0 ? variant.stock : Math.min(...variant.inventory.map((requirement) => {
           const physical = available.get(requirement.sku);
           return physical === undefined ? variant.stock : Math.floor(physical / requirement.quantity);
         })),

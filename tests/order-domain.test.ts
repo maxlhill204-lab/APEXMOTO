@@ -28,6 +28,13 @@ describe("order and inventory rules", () => {
     ]);
   });
 
+  it("reserves the helmet for a bundle with preorder goggles", () => {
+    const items = resolveCartItems([{ businessId: siteConfig.businessId, productId: "bundle-helmet-goggles", variantId: "preorder-bundle-black-m-grey-black", quantity: 1 }]);
+    expect(items).toHaveLength(1);
+    expect(items[0].variant.preorder).toBe(true);
+    expect(inventoryRequirements(items)).toEqual([{ sku: "orz-helmet-black-m", quantity: 1 }]);
+  });
+
   it("seeds physical inventory from standalone products without double-counting bundles", () => {
     const seed = catalogueInventorySeed();
     expect(seed.find((item) => item.sku === "orz-helmet-black-m")).toEqual({ sku: "orz-helmet-black-m", stockOnHand: 2 });
