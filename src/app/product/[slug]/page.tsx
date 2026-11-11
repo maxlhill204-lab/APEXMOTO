@@ -45,6 +45,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     name: product.name,
     description: product.shortDescription,
     sku: product.id,
+    image: product.images.filter((image) => !image.placeholder).map((image) => new URL(image.src, getSiteUrl()).href),
     brand: { "@type": "Brand", name: siteConfig.businessName },
     offers: {
       "@type": "Offer",
