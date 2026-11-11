@@ -112,6 +112,29 @@ describe("signed shipping quotes", () => {
   it("lets checkout policy accept the signed server amount without trusting a browser price", () => {
     const items = helmetCart();
     const option = createShippingQuoteOption({
+      methodId: "auspost:AU:AUS_PARCEL_REGULAR", carrier: "Australia Post",
+      serviceCode: "AUS_PARCEL_REGULAR", label: "Australia Post Standard", amount: 3470,
+      destinationCountry: "AU", destinationPostalCode: "3000", deliveryEstimate: null,
+      parcels: buildShippingParcels(items), customs: null,
+    }, items);
+    const result = validateCheckoutRequest({
+      businessId: siteConfig.businessId,
+      items: [{ businessId: siteConfig.businessId, productId: "helmet-matte-black", variantId: "black-m", quantity: 1 }],
+      shippingQuoteToken: option.token,
+      shippingMethodId: "browser-fake-method",
+      shippingAmount: 1,
+      customerName: "Test Rider",
+      customerEmail: "rider@example.invalid",
+    }, "https://store.example", "https://store.example");
+    expect(result).toMatchObject({
+      allowed: true,
+      shipping: { amount: 3470, methodId: "auspost:AU:AUS_PARCEL_REGULAR", snapshot: { destinationCountry: "AU" } },
+    });
+  });
+
+  it("rejects an otherwise valid international quote at checkout", () => {
+    const items = helmetCart();
+    const option = createShippingQuoteOption({
       methodId: "auspost:DE:INT_PARCEL_STD_OWN_PACKAGING", carrier: "Australia Post",
       serviceCode: "INT_PARCEL_STD_OWN_PACKAGING", label: "Australia Post Standard", amount: 3470,
       destinationCountry: "DE", destinationPostalCode: "10115", deliveryEstimate: null,
@@ -126,10 +149,7 @@ describe("signed shipping quotes", () => {
       customerName: "Test Rider",
       customerEmail: "rider@example.invalid",
     }, "https://store.example", "https://store.example");
-    expect(result).toMatchObject({
-      allowed: true,
-      shipping: { amount: 3470, methodId: "auspost:DE:INT_PARCEL_STD_OWN_PACKAGING", snapshot: { destinationCountry: "DE" } },
-    });
+    expect(result).toMatchObject({ allowed: false, code: "COUNTRY_UNSUPPORTED" });
   });
 });
 

@@ -582,6 +582,7 @@ export async function setAdminOrderStatus(orderId: string, nextStatus: OrderStat
     const row = rows.rows[0] as Row | undefined;
     if (!row) throw new Error("Order not found.");
     const current = String(row.status) as OrderStatus;
+    if (nextStatus === "READY_FOR_PICKUP" && row.fulfilment_method_id !== "pickup") throw new Error("This order is for postage.");
     if (!ADMIN_TRANSITIONS[current]?.includes(nextStatus)) throw new Error(`Order cannot move from ${current} to ${nextStatus}.`);
     await client.query("UPDATE orders SET status=$3,updated_at=now() WHERE business_id=$1 AND id=$2", [siteConfig.businessId, orderId, nextStatus]);
     await client.query("INSERT INTO order_events (id,business_id,order_id,event_type,actor,details) VALUES ($1,$2,$3,'STATUS_CHANGED','admin',$4::jsonb)", [randomUUID(), siteConfig.businessId, orderId, JSON.stringify({ from: current, to: nextStatus })]);
@@ -592,12 +593,10 @@ export async function setAdminOrderStatus(orderId: string, nextStatus: OrderStat
   return getOrderById(result);
 }
 
-export async function updateStoreSettings(input: Pick<StoreSettings, "pickupEnabled" | "pickupLocationLabel" | "pickupAddressDisclosure" | "pickupNextAvailableDate" | "pickupWindow" | "pickupSameDayAvailable" | "pickupAppointmentRequired" | "supportResponseMinHours" | "supportResponseMaxHours">) {
-  if (!input.pickupLocationLabel.trim() || !input.pickupAddressDisclosure.trim() || !input.pickupWindow.trim()) throw new Error("Pickup fields cannot be blank.");
-  if (input.pickupNextAvailableDate && !/^\d{4}-\d{2}-\d{2}$/.test(input.pickupNextAvailableDate)) throw new Error("Pickup date must use YYYY-MM-DD.");
+export async function updateStoreSettings(input: Pick<StoreSettings, "supportResponseMinHours" | "supportResponseMaxHours">) {
   if (!Number.isInteger(input.supportResponseMinHours) || !Number.isInteger(input.supportResponseMaxHours) || input.supportResponseMinHours < 0 || input.supportResponseMaxHours < input.supportResponseMinHours) throw new Error("Support response hours are invalid.");
   const sql = getSql();
-  await sql`UPDATE store_settings SET pickup_enabled=${input.pickupEnabled},pickup_location_label=${input.pickupLocationLabel.trim()},pickup_address_disclosure=${input.pickupAddressDisclosure.trim()},pickup_next_available_date=${input.pickupNextAvailableDate},pickup_window=${input.pickupWindow.trim()},pickup_same_day_available=${input.pickupSameDayAvailable},pickup_appointment_required=${input.pickupAppointmentRequired},support_response_min_hours=${input.supportResponseMinHours},support_response_max_hours=${input.supportResponseMaxHours},updated_at=now() WHERE business_id=${siteConfig.businessId}`;
+  await sql`UPDATE store_settings SET pickup_enabled=false,support_response_min_hours=${input.supportResponseMinHours},support_response_max_hours=${input.supportResponseMaxHours},updated_at=now() WHERE business_id=${siteConfig.businessId}`;
   return getStoreSettings();
 }
 

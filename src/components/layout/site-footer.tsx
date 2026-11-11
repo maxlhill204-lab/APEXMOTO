@@ -46,7 +46,6 @@ export function SiteFooter() {
       </div>
       <div className="container site-footer__bottom">
         <span>© {new Date().getFullYear()} {siteConfig.businessName}</span>
-        <span>{siteConfig.pickupSuburb}, {siteConfig.state}</span>
         <span><Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link></span>
       </div>
     </footer>

@@ -54,7 +54,7 @@ export function CartDrawer() {
             <span>Subtotal</span>
             <strong>{formatPrice(subtotal)}</strong>
           </div>
-          <p className="fine-print">Choose pickup or your delivery area on the cart page.</p>
+          <p className="fine-print">Check Australia-wide postage in your cart.</p>
           <Link className="button button--primary button--wide" href="/cart" onClick={closeCart}>Checkout</Link>
         </div>
       ) : (

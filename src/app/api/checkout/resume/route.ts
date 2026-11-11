@@ -39,9 +39,9 @@ export async function POST(request: Request) {
     }
 
     const session = await getStripe().checkout.sessions.retrieve(order.stripeSessionId);
-    if (session.status === "open" && session.metadata?.checkoutFlowVersion !== "worldwide-shipping-v3") {
+    if (session.status === "open" && (session.metadata?.checkoutFlowVersion !== "worldwide-shipping-v3" || session.metadata.fulfilmentMethod === "pickup" || session.metadata.destinationCountry !== "AU")) {
       await getStripe().checkout.sessions.expire(session.id);
-      await releaseCheckoutOrder(order.orderId, "CHECKOUT_REPLACED_FOR_PRIVACY_UPDATE");
+      await releaseCheckoutOrder(order.orderId, "CHECKOUT_REPLACED_FOR_DELIVERY_UPDATE");
       return json({ terminal: true, message: "Your previous checkout was safely closed. A fresh card form is being prepared." }, 410);
     }
     if (session.status === "open" && session.url) return json({ url: session.url, resumed: true });

@@ -17,7 +17,7 @@ export function SiteHeader() {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-header">
         <div className="store-utility">
-          <div className="container"><Link href="/shipping">Delivery and Newport pickup</Link><Link href="/order-help">Order help</Link></div>
+          <div className="container"><Link href="/shipping">Australia-wide postage</Link><Link href="/order-help">Order help</Link></div>
         </div>
         <div className="site-header__inner container">
           <button className="icon-button site-header__menu" onClick={() => setMenuOpen(true)} aria-label="Open menu">

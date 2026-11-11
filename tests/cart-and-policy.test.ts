@@ -117,20 +117,20 @@ describe("checkout policy", () => {
 
   it("ignores browser prices and resolves the server-owned catalogue price", () => {
     const result = validateCheckoutRequest(
-      { businessId: siteConfig.businessId, items: [{ ...TEST_CART_ITEM, price: 1 }], shippingMethodId: "pickup", customerName: "TEST CUSTOMER", customerEmail: "customer@TEST.invalid", pickupAcknowledged: true },
+      { businessId: siteConfig.businessId, items: [{ ...TEST_CART_ITEM, price: 1 }], shippingMethodId: "melbourne", customerName: "TEST CUSTOMER", customerEmail: "customer@TEST.invalid" },
       "https://store.example",
       "https://store.example",
     );
     expect(result).toMatchObject({
       allowed: true,
       items: [{ productId: "helmet-matte-black", lineTotal: 9600 }],
-      shipping: { amount: 0, pickup: true },
+      shipping: { amount: 2520, pickup: false },
     });
   });
 
-  it("requires a confirmation email and explicit pickup acknowledgement", () => {
+  it("requires a confirmation email and rejects legacy pickup requests", () => {
     const base = { businessId: siteConfig.businessId, items: [TEST_CART_ITEM], shippingMethodId: "pickup", customerName: "TEST CUSTOMER" };
-    expect(validateCheckoutRequest({ ...base, customerEmail: "invalid", pickupAcknowledged: true }, "https://store.example", "https://store.example")).toMatchObject({ allowed: false, code: "EMAIL_REQUIRED" });
-    expect(validateCheckoutRequest({ ...base, customerEmail: "customer@TEST.invalid", pickupAcknowledged: false }, "https://store.example", "https://store.example")).toMatchObject({ allowed: false, code: "PICKUP_ACK_REQUIRED" });
+    expect(validateCheckoutRequest({ ...base, customerEmail: "invalid" }, "https://store.example", "https://store.example")).toMatchObject({ allowed: false, code: "EMAIL_REQUIRED" });
+    expect(validateCheckoutRequest({ ...base, customerEmail: "customer@TEST.invalid", pickupAcknowledged: true }, "https://store.example", "https://store.example")).toMatchObject({ allowed: false, code: "SHIPPING_METHOD_INVALID" });
   });
 });

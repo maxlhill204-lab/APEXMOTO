@@ -92,13 +92,6 @@ export async function refundAction(formData: FormData) {
 export async function settingsAction(formData: FormData) {
   await requireAdmin();
   await updateStoreSettings({
-    pickupEnabled: formData.get("pickupEnabled") === "on",
-    pickupLocationLabel: String(formData.get("pickupLocationLabel") ?? "").slice(0, 200),
-    pickupAddressDisclosure: String(formData.get("pickupAddressDisclosure") ?? "").slice(0, 500),
-    pickupNextAvailableDate: String(formData.get("pickupNextAvailableDate") ?? "") || null,
-    pickupWindow: String(formData.get("pickupWindow") ?? "").slice(0, 300),
-    pickupSameDayAvailable: formData.get("pickupSameDayAvailable") === "on",
-    pickupAppointmentRequired: formData.get("pickupAppointmentRequired") === "on",
     supportResponseMinHours: Number(formData.get("supportResponseMinHours")),
     supportResponseMaxHours: Number(formData.get("supportResponseMaxHours")),
   });

@@ -6,7 +6,7 @@ import { formatPrice, siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 import { findMatchingVariant, getOptionLabel, getStockLabel } from "@/lib/products";
 import type { Product } from "@/types/product";
-import { Check, MapPin, Package, Ruler } from "lucide-react";
+import { Check, Package, Ruler } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -138,8 +138,7 @@ export function PurchasePanel({ product }: { product: Product }) {
       </div>
 
       <div className="purchase-fulfilment">
-        <div><MapPin aria-hidden="true" /><span><strong>{siteConfig.pickupLocationLabel} pickup by appointment</strong><small>Available collection dates are confirmed before you travel.</small></span></div>
-        <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>{product.category === "goggles" ? "$8 for goggles ordered on their own." : "Helmet delivery is calculated by destination."} Dispatch timing is confirmed with your order.</small></span></div>
+        <div><Package aria-hidden="true" /><span><strong>Australia-wide delivery</strong><small>Postage is shown in your cart. Dispatch timing is confirmed with your order.</small></span></div>
       </div>
 
       <div className="mobile-purchase-bar">

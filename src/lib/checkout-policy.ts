@@ -34,7 +34,7 @@ export function validateCheckoutRequest(
   if (!payload || typeof payload !== "object") {
     return { allowed: false, code: "INVALID_BODY", message: "Your cart could not be read." };
   }
-  const body = payload as { businessId?: unknown; items?: unknown; shippingMethodId?: unknown; shippingQuoteToken?: unknown; customerName?: unknown; customerEmail?: unknown; pickupAcknowledged?: unknown };
+  const body = payload as { businessId?: unknown; items?: unknown; shippingMethodId?: unknown; shippingQuoteToken?: unknown; customerName?: unknown; customerEmail?: unknown };
   if (body.businessId !== siteConfig.businessId) {
     return { allowed: false, code: "BUSINESS_SCOPE_DENIED", message: "Your cart could not be verified." };
   }
@@ -69,7 +69,7 @@ export function validateCheckoutRequest(
     return { allowed: false, code: shipping.code, message: shipping.message };
   }
 
-  if (shipping.pickup && body.pickupAcknowledged !== true) return { allowed: false, code: "PICKUP_ACK_REQUIRED", message: "Confirm the pickup date and appointment terms before checkout." };
+  if (shipping.snapshot.destinationCountry !== "AU") return { allowed: false, code: "COUNTRY_UNSUPPORTED", message: "We ship to Australian addresses only." };
 
   return { allowed: true, items: resolved, shipping, customerName, customerEmail };
 }

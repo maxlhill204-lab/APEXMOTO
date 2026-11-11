@@ -1,11 +1,9 @@
 import { getSiteUrl, siteConfig } from "@/config/site";
 import { validateCheckoutRequest } from "@/lib/checkout-policy";
-import { attachStripeSession, checkoutFingerprint, CheckoutConflictError, getStoreSettings, releaseCheckoutOrder, reserveCheckoutOrder, StockUnavailableError } from "@/lib/orders";
-import { formatPickupDate, pickupAvailableDate } from "@/lib/order-domain";
+import { attachStripeSession, checkoutFingerprint, CheckoutConflictError, releaseCheckoutOrder, reserveCheckoutOrder, StockUnavailableError } from "@/lib/orders";
 import { operationalLog } from "@/lib/operational-log";
 import { getVariantLabel } from "@/lib/products";
 import { checkoutReadiness, getStripe } from "@/lib/stripe";
-import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
@@ -35,16 +33,8 @@ export async function POST(request: Request) {
   let reserved: Awaited<ReturnType<typeof reserveCheckoutOrder>> | null = null;
   let stripeRequestAttempted = false;
   try {
-    const settings = await getStoreSettings();
-    if (policy.shipping.pickup && !settings.pickupEnabled) return jsonError("Pickup is currently unavailable. Choose delivery instead.", 409, "PICKUP_UNAVAILABLE");
-    if (policy.shipping.pickup && !process.env.PICKUP_ADDRESS_PRIVATE?.trim()) return jsonError("Pickup checkout is temporarily unavailable until the collection address is configured. Choose delivery or contact APEX MOTO.", 503, "PICKUP_ADDRESS_NOT_CONFIGURED");
-    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-    if (policy.shipping.pickup && (!settings.pickupNextAvailableDate || settings.pickupNextAvailableDate < today)) return jsonError("Pickup checkout is temporarily unavailable until the next collection date is confirmed. Choose delivery or contact APEX MOTO.", 503, "PICKUP_SCHEDULE_REQUIRED");
-    const shipping = policy.shipping.pickup ? { ...policy.shipping, label: `${settings.pickupLocationLabel} pickup` } : policy.shipping;
-    const orderPickupDate = policy.shipping.pickup
-      ? pickupAvailableDate(policy.items, settings.pickupNextAvailableDate ?? "")
-      : null;
-    reserved = await reserveCheckoutOrder({ checkoutKey: requestKey, requestFingerprint: fingerprint, customerName: policy.customerName, customerEmail: policy.customerEmail, items: policy.items, shipping, pickupAvailableDate: orderPickupDate });
+    const shipping = policy.shipping;
+    reserved = await reserveCheckoutOrder({ checkoutKey: requestKey, requestFingerprint: fingerprint, customerName: policy.customerName, customerEmail: policy.customerEmail, items: policy.items, shipping });
     const stripe = getStripe();
     if (reserved.existingSessionId) {
       stripeRequestAttempted = true;
@@ -53,7 +43,6 @@ export async function POST(request: Request) {
     }
 
     const siteUrl = getSiteUrl();
-    const allowedCountry = shipping.snapshot.destinationCountry as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry;
     stripeRequestAttempted = true;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -68,13 +57,9 @@ export async function POST(request: Request) {
       customer_creation: "always",
       name_collection: { individual: { enabled: true, optional: false } },
       billing_address_collection: "required",
-      shipping_address_collection: { allowed_countries: [allowedCountry] },
-      ...(policy.shipping.pickup ? {} : {
-        shipping_options: [{ shipping_rate_data: { type: "fixed_amount" as const, fixed_amount: { amount: policy.shipping.amount, currency: "aud" }, display_name: policy.shipping.label } }],
-      }),
-      custom_text: { submit: { message: policy.shipping.pickup
-        ? `Pickup is in ${settings.pickupLocationLabel}, no earlier than ${formatPickupDate(orderPickupDate)}, and only at a time confirmed by email. ${settings.pickupAddressDisclosure}`
-        : `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. Dispatch timing is confirmed with your order. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
+      shipping_address_collection: { allowed_countries: ["AU"] },
+      shipping_options: [{ shipping_rate_data: { type: "fixed_amount" as const, fixed_amount: { amount: policy.shipping.amount, currency: "aud" }, display_name: policy.shipping.label } }],
+      custom_text: { submit: { message: `Delivery method: ${shipping.label} to ${shipping.snapshot.destinationCountry}${shipping.snapshot.destinationPostalCode ? ` ${shipping.snapshot.destinationPostalCode}` : ""}. Dispatch timing is confirmed with your order. Order and dispatch confirmations are sent to ${policy.customerEmail}.` } },
       payment_intent_data: {
         receipt_email: policy.customerEmail,
         metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber },
@@ -83,7 +68,7 @@ export async function POST(request: Request) {
       expires_at: Math.floor(new Date(reserved.reservationExpiresAt).getTime() / 1000),
       success_url: `${siteUrl}/order-success?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(reserved.orderNumber)}&token=${encodeURIComponent(reserved.accessToken)}`,
       cancel_url: `${siteUrl}/cart?checkout=cancelled`,
-      metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber, fulfilmentMethod: policy.shipping.methodId, destinationCountry: shipping.snapshot.destinationCountry, shippingServiceCode: shipping.snapshot.serviceCode ?? "pickup", checkoutFlowVersion: "worldwide-shipping-v3" },
+      metadata: { businessId: siteConfig.businessId, orderId: reserved.orderId, orderNumber: reserved.orderNumber, fulfilmentMethod: policy.shipping.methodId, destinationCountry: shipping.snapshot.destinationCountry, shippingServiceCode: shipping.snapshot.serviceCode ?? "legacy", checkoutFlowVersion: "worldwide-shipping-v3" },
     }, { idempotencyKey: `${siteConfig.businessId}:${requestKey}` });
     if (!session.url) throw new Error("Stripe did not provide a checkout link.");
     await attachStripeSession(reserved.orderId, session.id).catch(() => undefined);

@@ -11,7 +11,6 @@ export function CheckoutButton({
   shippingQuoteToken,
   customerName,
   customerEmail,
-  pickupAcknowledged,
   disabled = false,
   className = "button button--primary button--wide",
 }: {
@@ -19,7 +18,6 @@ export function CheckoutButton({
   shippingQuoteToken?: string;
   customerName: string;
   customerEmail: string;
-  pickupAcknowledged: boolean;
   disabled?: boolean;
   className?: string;
 }) {
@@ -39,11 +37,6 @@ export function CheckoutButton({
       setStatus("error");
       setMessage("Enter a valid email so we can send your confirmation.");
       document.getElementById("customer-email")?.focus();
-      return;
-    }
-    if (!pickupAcknowledged) {
-      setStatus("error");
-      setMessage("Confirm the pickup date and appointment terms above.");
       return;
     }
     setStatus("loading");
@@ -80,7 +73,7 @@ export function CheckoutButton({
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Checkout-Idempotency-Key": checkoutKey },
-        body: JSON.stringify({ businessId: siteConfig.businessId, items, shippingMethodId, shippingQuoteToken, customerName, customerEmail, pickupAcknowledged }),
+        body: JSON.stringify({ businessId: siteConfig.businessId, items, shippingMethodId, shippingQuoteToken, customerName, customerEmail }),
       });
       const data = (await response.json()) as { url?: string; message?: string; orderNumber?: string; accessToken?: string; purchasedKeys?: string[] };
       if (!response.ok || !data.url) throw new Error(data.message || "Checkout is unavailable.");

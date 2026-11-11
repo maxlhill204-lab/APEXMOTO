@@ -33,18 +33,7 @@ export function calculateShipping(
     return {
       available: false,
       code: "SHIPPING_REQUIRED",
-      message: "Choose pickup or a delivery area before checkout.",
-    };
-  }
-
-  if (methodId === "pickup") {
-    return {
-      available: true,
-      methodId,
-      label: `${siteConfig.pickupSuburb} pickup`,
-      amount: 0,
-      pickup: true,
-      snapshot: { carrier: null, serviceCode: null, destinationCountry: "AU", destinationPostalCode: "", quoteExpiresAt: null, parcels: [], customs: null },
+      message: "Choose a delivery area before checkout.",
     };
   }
 

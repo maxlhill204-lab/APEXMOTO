@@ -4,7 +4,7 @@ import { siteConfig } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
-const topics = ["Sizing", "Stock", "Order", "Pickup", "General question"];
+const topics = ["Sizing", "Stock", "Order", "Delivery", "General question"];
 
 export function ContactForm() {
   const startedAt = useRef(0);

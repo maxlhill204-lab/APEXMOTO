@@ -1,6 +1,6 @@
 import { siteConfig } from "@/config/site";
 
-const topics = new Set(["Sizing", "Stock", "Order", "Pickup", "General question"]);
+const topics = new Set(["Sizing", "Stock", "Order", "Delivery", "General question"]);
 const clean = (value: unknown, max: number) =>
   typeof value === "string"
     ? [...value]
