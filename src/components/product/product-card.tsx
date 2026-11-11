@@ -1,7 +1,6 @@
 import { formatPrice, siteConfig } from "@/config/site";
 import { getStockLabel, totalStock } from "@/lib/products";
 import type { Product } from "@/types/product";
-import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { ProductVisual } from "./product-visual";
 
@@ -18,7 +17,6 @@ export function ProductCard({ product }: { product: Product }) {
       </Link>
       <div className="product-card__body">
         <div>
-          <p className="eyebrow">{product.category}</p>
           <h3><Link href={`/product/${product.slug}`}>{product.name}</Link></h3>
         </div>
         <p className="product-card__price">
@@ -37,9 +35,7 @@ export function ProductCard({ product }: { product: Product }) {
             })}
           </div>
         ) : null}
-        <Link href={`/product/${product.slug}`} className="text-link">
-          View {product.category === "helmet" ? "helmet" : product.category === "bundle" ? "bundle" : "goggles"}
-          <ArrowUpRight size={16} aria-hidden="true" />
+        <Link href={`/product/${product.slug}`} className="button button--secondary">Choose options
         </Link>
       </div>
     </article>

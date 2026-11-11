@@ -4,7 +4,7 @@ import { useCart } from "@/components/commerce/cart-provider";
 import { Drawer } from "@/components/ui/drawer";
 import { mainNavigation, mobileNavigation } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
-import { Menu, ShoppingBag } from "lucide-react";
+import { Menu, Search, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -15,27 +15,32 @@ export function SiteHeader() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <div className="announcement-bar">
-        <span>OFF-ROAD GEAR. STRAIGHT PRICES.</span><span>NEWPORT PICKUP · AUSTRALIA-WIDE SHIPPING</span>
-      </div>
       <header className="site-header">
+        <div className="store-utility">
+          <div className="container"><Link href="/shipping">Delivery and Newport pickup</Link><Link href="/order-help">Order help</Link></div>
+        </div>
         <div className="site-header__inner container">
           <button className="icon-button site-header__menu" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <Menu aria-hidden="true" size={22} />
           </button>
           <Link href="/" className="site-logo-link" aria-label={`${siteConfig.businessName} home`}>
-            <span className="site-logo-wordmark">APEX<span>MOTO</span></span>
+            {siteConfig.businessName}
           </Link>
-          <nav className="site-header__nav" aria-label="Main navigation">
-            {mainNavigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-          </nav>
+          <form action="/shop" className="site-search" role="search">
+            <label className="sr-only" htmlFor="site-search">Search products</label>
+            <input id="site-search" name="search" type="search" placeholder="Search products" required />
+            <button type="submit" aria-label="Search"><Search size={21} aria-hidden="true" /></button>
+          </form>
           <div className="site-header__actions">
             <button className="icon-button icon-button--label cart-button" onClick={openCart} aria-label={`Open cart with ${quantity} items`}>
-              <ShoppingBag aria-hidden="true" size={20} /><span>Cart</span>
+              <ShoppingCart aria-hidden="true" size={20} /><span>Cart</span>
               <b aria-hidden="true">{quantity}</b>
             </button>
           </div>
         </div>
+        <nav className="site-header__nav" aria-label="Main navigation">
+          {mainNavigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+        </nav>
       </header>
 
       <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu" side="left">

@@ -60,15 +60,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="container product-breadcrumbs"><Link href="/shop">Shop</Link><span>/</span><Link href={`/shop?category=${product.category}`}>{product.category}</Link><span>/</span><span>{product.name}</span></div>
       <section className="container product-layout"><ProductGallery product={product} /><PurchasePanel product={product} /></section>
       <section className="container product-information">
-        <div><p className="eyebrow eyebrow--accent">About this product</p><h2>Details, clearly.</h2><p>{product.description}</p></div>
+        <div><h2>Description</h2><p>{product.description}</p></div>
         <div className="product-information__panels">
           {product.features?.length ? <article><h3>Features</h3><ul>{product.features.map((feature) => <li key={feature}>{feature}</li>)}</ul></article> : null}
-          {product.specifications?.length ? <article><h3>Published product details</h3><dl>{product.specifications.map((specification) => <div key={specification.label}><dt>{specification.label}</dt><dd>{specification.value}</dd></div>)}</dl></article> : null}
+          {product.specifications?.length ? <article><h3>Specifications</h3><dl>{product.specifications.map((specification) => <div key={specification.label}><dt>{specification.label}</dt><dd>{specification.value}</dd></div>)}</dl></article> : null}
           {product.inTheBox?.length ? <article><h3>In the box</h3><ul>{product.inTheBox.map((item) => <li key={item}>{item}</li>)}</ul></article> : null}
           {product.category !== "goggles" ? <article><h3>Helmet marking</h3>{product.certification?.standard ? <p><strong>{product.certification.standard}</strong>{product.certification.approvalNumber ? ` — ${product.certification.approvalNumber}` : ""}. This records what is visible on the supplied product image; no separate independent test report or Australian approval has been provided.</p> : <p>Check applicable helmet requirements for your intended use before riding.</p>}<Link href="/safety" className="text-link">Read the full helmet information</Link></article> : null}
         </div>
       </section>
-      {related.length ? <section className="section related-products"><div className="container"><div className="section-heading"><div><p className="eyebrow">Complete the setup</p><h2>You may also need</h2></div></div><div className="product-grid product-grid--related">{related.map((item) => <ProductCard product={item} key={item.id} />)}</div></div></section> : null}
+      {related.length ? <section className="section related-products"><div className="container"><div className="section-heading"><div><h2>Related products</h2></div></div><div className="product-grid product-grid--related">{related.map((item) => <ProductCard product={item} key={item.id} />)}</div></div></section> : null}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema).replace(/</g, "\\u003c") }} />
     </div>
   );

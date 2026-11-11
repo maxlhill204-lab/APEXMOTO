@@ -19,6 +19,7 @@ const columns = [
       { label: "Helmet information", href: "/safety" },
       { label: "Contact", href: "/contact" },
       { label: "Order help", href: "/order-help" },
+      { label: "FAQ", href: "/faq" },
     ],
   },
 ] as const;
@@ -28,8 +29,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container site-footer__grid">
         <div className="site-footer__brand">
-          <Link href="/" className="wordmark"><span aria-hidden="true">A</span><strong>APEX</strong> MOTO</Link>
-          <p>{siteConfig.tagline}</p>
+          <Link href="/" className="wordmark">{siteConfig.businessName}</Link>
           <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
         </div>
         {columns.map((column) => (
