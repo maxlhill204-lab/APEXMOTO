@@ -1,5 +1,6 @@
 import { catalog, getOptionLabel } from "@/lib/products";
 import type { listInventory } from "@/lib/orders";
+import { ProductVisual } from "@/components/product/product-visual";
 import { InventoryForm } from "./inventory-form";
 
 type InventoryItem = Awaited<ReturnType<typeof listInventory>>[number];
@@ -8,6 +9,7 @@ const skuDetails = new Map(
   catalog.filter((product) => product.category !== "bundle").flatMap((product) =>
     product.variants.flatMap((variant) =>
       variant.inventory.map(({ sku }) => [sku, {
+        product,
         type: product.category === "helmet" ? "Helmets" : "Goggles",
         colour: getOptionLabel(product, "colour", variant.options.colour),
         size: variant.options.size ? getOptionLabel(product, "size", variant.options.size) : "",
@@ -37,10 +39,14 @@ export function InventoryTable({ inventory }: { inventory: InventoryItem[] }) {
             <div className="admin-stock-scroll">
               <table className="admin-stock-table">
                 <thead><tr><th scope="col">Colour / size</th><th scope="col">Available</th><th scope="col">Reserved</th><th scope="col">On hand</th></tr></thead>
-                {colours.map((colour) => (
+                {colours.map((colour) => {
+                  const colourItems = items.filter((item) => (skuDetails.get(item.sku)?.colour ?? "Other") === colour);
+                  const details = skuDetails.get(colourItems[0].sku);
+                  const image = details?.product.images.find((photo) => photo.colour === colour);
+                  return (
                   <tbody key={colour}>
-                    <tr className="admin-stock-colour"><th scope="rowgroup" colSpan={4}>{colour}</th></tr>
-                    {items.filter((item) => (skuDetails.get(item.sku)?.colour ?? "Other") === colour)
+                    <tr className="admin-stock-colour"><th scope="rowgroup" colSpan={4}><div className="admin-stock-colour__label">{details ? <div className="admin-product-photo"><ProductVisual product={details.product} image={image} sizes="64px" /></div> : null}{colour}</div></th></tr>
+                    {colourItems
                       .sort((a, b) => a.available - b.available || a.stockOnHand - b.stockOnHand || a.sku.localeCompare(b.sku))
                       .map((item) => (
                           <tr key={item.sku}>
@@ -51,7 +57,8 @@ export function InventoryTable({ inventory }: { inventory: InventoryItem[] }) {
                           </tr>
                       ))}
                   </tbody>
-                ))}
+                  );
+                })}
               </table>
             </div>
           </section>

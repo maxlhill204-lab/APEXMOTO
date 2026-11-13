@@ -1,4 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth";
+import { ProductVisual } from "@/components/product/product-visual";
+import { getOptionLabel, getProductById, getVariantById } from "@/lib/products";
 import { formatPrice } from "@/config/site";
 import { formatPickupDate, orderStatusLabel } from "@/lib/order-domain";
 import { getStoreSettings, initialiseOrderSystemData, listAdminOrders, listInventory } from "@/lib/orders";
@@ -30,7 +32,34 @@ export default async function AdminPage() {
       <section className="admin-section" id="orders"><div className="admin-section__heading"><div><h2>Orders</h2><p>{orders.length} most recent orders. Stripe-confirmed payment is the fulfilment authority.</p></div></div>
         <div className="admin-orders">{orders.length ? orders.map((order) => <details className={`admin-order${order.cancellationRequested ? " admin-order--urgent" : ""}`} key={order.id} open={order.cancellationRequested}><summary><span><strong>{order.orderNumber}</strong><small>{order.customerName} · {order.customerEmail}</small></span><span><strong>{formatPrice(order.totalAmount)}</strong><small>{orderStatusLabel(order.status)}</small></span></summary>
           <div className="admin-order__body"><div className="admin-order__facts"><p><strong>Created</strong>{new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeStyle: "short", timeZone: "Australia/Melbourne" }).format(new Date(order.createdAt))}</p><p><strong>Fulfilment</strong>{order.fulfilmentLabel}</p>{order.discountAmount > 0 ? <p><strong>Discount</strong>−{formatPrice(order.discountAmount)}{order.promotionCode ? ` · ${order.promotionCode}` : ""}</p> : null}{order.fulfilmentMethodId === "pickup" ? <p><strong>Pickup</strong>{formatPickupDate(order.pickupDate)} · {order.pickupWindow}</p> : <p><strong>Ship to</strong>{order.shippingDetails ? [order.shippingDetails.name, order.shippingDetails.line1, order.shippingDetails.line2, order.shippingDetails.city, order.shippingDetails.state, order.shippingDetails.postalCode, order.shippingDetails.country].filter(Boolean).join(", ") : "Address pending from Stripe"}</p>}</div>
-            <div className="admin-order__items">{order.items.map((item) => <p key={item.cartItemKey}><span><strong>{item.quantity} × {item.productName}</strong><small>{item.variantLabel}</small></span><strong>{formatPrice(item.lineTotal)}</strong></p>)}</div>
+            <div className="admin-order__items">
+              {order.items.map((item) => {
+                const product = getProductById(item.productId);
+                const variant = product && getVariantById(product, item.variantId);
+                const colour = product && variant?.options.colour
+                  ? getOptionLabel(product, "colour", variant.options.colour)
+                  : undefined;
+                const image = colour ? product?.images.find((photo) => photo.colour === colour) : undefined;
+                const bundlePhotos = product?.category === "bundle" && variant
+                  ? ["helmet-colour", "goggles"].flatMap((option) => {
+                    const label = getOptionLabel(product, option, variant.options[option]);
+                    return product.images.filter((photo) => photo.colour === label).slice(0, 1);
+                  })
+                  : [];
+
+                return (
+                  <div className="admin-order-item" key={item.cartItemKey}>
+                    <div className="admin-order-item__product">
+                      {product ? (bundlePhotos.length ? bundlePhotos : [image]).map((photo) => (
+                        <div className="admin-product-photo" key={photo?.src ?? product.id}><ProductVisual product={product} image={photo} sizes="64px" /></div>
+                      )) : null}
+                      <span><strong>{item.quantity} × {item.productName}</strong><small>{item.variantLabel}</small></span>
+                    </div>
+                    <strong>{formatPrice(item.lineTotal)}</strong>
+                  </div>
+                );
+              })}
+            </div>
             {order.fulfilmentMethodId !== "pickup" ? <div className="admin-email-status"><strong>Shipping record</strong><p><span>{order.shippingCarrier ?? "Legacy delivery"} · {order.shippingServiceCode ?? order.fulfilmentMethodId}</span><b>{order.shippingDestinationCountry} {order.shippingDestinationPostalCode}</b></p><p><span>Quoted parcels</span><b>{order.shippingParcels.length || "Legacy rate"}</b></p>{order.shippingTrackingNumber ? <p><span>Tracking</span><b>{order.shippingTrackingNumber}</b></p> : null}{order.customs ? <>{order.customs.items.map((item) => <p key={`${item.hsTariffCode}:${item.description}`}><span>{item.quantity} × {item.description}<small>HS {item.hsTariffCode} · origin {item.countryOfOrigin} · {item.totalWeightKg} kg</small></span><b>{formatPrice(item.totalValue)}</b></p>)}</> : null}</div> : null}
             {order.shippingAddressReview ? <div className="admin-alert"><strong>Shipping address needs review</strong><span>The country or Australian postcode entered in Stripe does not match the calculated quote. Do not create a label until the address and postage price are checked.</span></div> : null}
             {order.cancellationRequested ? <div className="admin-alert"><strong>Cancellation requested</strong><span>Review before preparing or shipping. A refund is not complete until Stripe confirms it.</span></div> : null}
