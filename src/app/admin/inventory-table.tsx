@@ -1,6 +1,6 @@
 import { catalog, getOptionLabel } from "@/lib/products";
 import type { listInventory } from "@/lib/orders";
-import { ProductVisual } from "@/components/product/product-visual";
+import Image from "next/image";
 import { InventoryForm } from "./inventory-form";
 
 type InventoryItem = Awaited<ReturnType<typeof listInventory>>[number];
@@ -42,15 +42,22 @@ export function InventoryTable({ inventory }: { inventory: InventoryItem[] }) {
                 {colours.map((colour) => {
                   const colourItems = items.filter((item) => (skuDetails.get(item.sku)?.colour ?? "Other") === colour);
                   const details = skuDetails.get(colourItems[0].sku);
-                  const image = details?.product.images.find((photo) => photo.colour === colour);
+                  const image = details?.product.images.find((photo) => photo.colour === colour) ?? details?.product.images[0];
                   return (
                   <tbody key={colour}>
-                    <tr className="admin-stock-colour"><th scope="rowgroup" colSpan={4}><div className="admin-stock-colour__label">{details ? <div className="admin-product-photo"><ProductVisual product={details.product} image={image} sizes="64px" /></div> : null}{colour}</div></th></tr>
+                    <tr className="admin-stock-colour">
+                      <th scope="rowgroup" colSpan={4}>
+                        <div className="admin-stock-colour__label">
+                          {image && !image.placeholder ? <Image className="admin-product-photo" src={image.src} alt="" width={20} height={20} /> : null}
+                          {details?.product.name ?? colour}
+                        </div>
+                      </th>
+                    </tr>
                     {colourItems
                       .sort((a, b) => a.available - b.available || a.stockOnHand - b.stockOnHand || a.sku.localeCompare(b.sku))
                       .map((item) => (
                           <tr key={item.sku}>
-                            <th scope="row"><strong>{skuDetails.get(item.sku)?.size || colour}</strong><small>{item.sku}</small></th>
+                            <th scope="row"><strong>{skuDetails.get(item.sku)?.size || (colour === "Other" ? item.sku : "One size")}</strong><small>{item.sku}</small></th>
                             <td><strong className="admin-stock-quantity" data-empty={item.available === 0}>{item.available}</strong></td>
                             <td>{item.reserved}</td>
                             <td><InventoryForm sku={item.sku} stockOnHand={item.stockOnHand} /></td>

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth";
-import { ProductVisual } from "@/components/product/product-visual";
+import Image from "next/image";
 import { getOptionLabel, getProductById, getVariantById } from "@/lib/products";
 import { formatPrice } from "@/config/site";
 import { formatPickupDate, orderStatusLabel } from "@/lib/order-domain";
@@ -39,7 +39,7 @@ export default async function AdminPage() {
                 const colour = product && variant?.options.colour
                   ? getOptionLabel(product, "colour", variant.options.colour)
                   : undefined;
-                const image = colour ? product?.images.find((photo) => photo.colour === colour) : undefined;
+                const image = product?.images.find((photo) => photo.colour === colour) ?? product?.images[0];
                 const bundlePhotos = product?.category === "bundle" && variant
                   ? ["helmet-colour", "goggles"].flatMap((option) => {
                     const label = getOptionLabel(product, option, variant.options[option]);
@@ -50,10 +50,13 @@ export default async function AdminPage() {
                 return (
                   <div className="admin-order-item" key={item.cartItemKey}>
                     <div className="admin-order-item__product">
-                      {product ? (bundlePhotos.length ? bundlePhotos : [image]).map((photo) => (
-                        <div className="admin-product-photo" key={photo?.src ?? product.id}><ProductVisual product={product} image={photo} sizes="64px" /></div>
-                      )) : null}
-                      <span><strong>{item.quantity} × {item.productName}</strong><small>{item.variantLabel}</small></span>
+                      {(bundlePhotos.length ? bundlePhotos : [image]).map((photo) => (
+                        photo && !photo.placeholder ? <Image className="admin-product-photo" key={photo.src} src={photo.src} alt="" width={20} height={20} /> : null
+                      ))}
+                      <span>
+                        <strong>{item.quantity} × {product?.name ?? item.productName}</strong>
+                        {item.variantLabel && item.variantLabel !== product?.name ? <small>{item.variantLabel.startsWith(product?.name + " · ") ? item.variantLabel.slice((product?.name.length ?? 0) + 3) : item.variantLabel}</small> : null}
+                      </span>
                     </div>
                     <strong>{formatPrice(item.lineTotal)}</strong>
                   </div>
